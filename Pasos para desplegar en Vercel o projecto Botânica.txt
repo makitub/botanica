@@ -1,0 +1,28 @@
+📋 Guia de Deploy
+Passo 1 — GitHub
+
+Acesse github.com e crie uma conta (se não tiver)
+Clique em "New repository" → chame de botanica
+Extraia o ZIP e faça upload de todos os ficheiros para o repositório
+
+Passo 2 — Vercel
+
+Acesse vercel.com e entre com a conta do GitHub
+Clique em "New Project" → selecione o repositório botanica
+Clique em "Deploy" — em 1 minuto o site estará no ar!
+
+Passo 3 — API Key (obrigatório!)
+
+Obtenha sua chave em 👉 console.anthropic.com
+No Vercel vá em Settings → Environment Variables
+Adicione: ANTHROPIC_API_KEY = sk-ant-...sua-chave...
+Clique em Redeploy
+
+
+O projecto tem 3 ficheiros principais:
+
+index.html — o frontend bonito da app
+api/analyze.js — a função serverless que chama a API com segurança
+vercel.json — configuração do Vercel
+
+Qualquer dúvida em algum passo, diga-me amigo! 💪
