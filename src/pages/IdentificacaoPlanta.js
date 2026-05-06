@@ -23,38 +23,34 @@ const IdentificacaoPlanta = () => {
     reader.readAsDataURL(file);
   };
 
- const handleAnalyze = async () => {
-  if (!imageBase64) return;
-  setLoading(true);
-  setError('');
-  try {
-    // Attempt real API call
-    const res = await fetch('/api/gemini-plant', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64, imageMime })
-    });
-    
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    setResult(data);
-  } catch (err) {
-    // Mock fallback for demonstration (remove when deployed)
-    console.warn('API not available, using mock data');
-    setResult({
-      nome_popular: "Planta medicinal (demonstração)",
-      nome_cientifico: "Plantae demonstratio",
-      caracteristicas: "Esta é uma resposta simulada porque a API Gemini não está disponível no ambiente de desenvolvimento local sem o Vercel CLI.",
-      usos_medicinais: "Use Vercel CLI (vercel dev) ou faça deploy para testar a integração real.",
-      preparacao: "Infusão de 5g por xícara",
-      dose_recomendada: "1 xícara, 2x ao dia",
-      quem_pode_usar: ["Adultos", "Idosos"],
-      contraindicacoes: ["Alergias conhecidas"]
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleAnalyze = async () => {
+    if (!imageBase64) return;
+    setLoading(true);
+    setError('');
+    setResult(null);
+    try {
+      const res = await fetch('/api/gemini-plant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64, imageMime })
+      });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
+      
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setResult(data);
+    } catch (err) {
+      console.error('Erro na API Gemini:', err);
+      setError(`Falha na identificação: ${err.message}. Verifique se a API key está configurada na Vercel (GEMINI_API_KEY).`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearImage = () => {
     setImageBase64(null);
     setPreviewUrl(null);
@@ -69,7 +65,6 @@ const IdentificacaoPlanta = () => {
         Envie uma foto da planta (folhas, flores ou frutos). O sistema usará IA para identificar e descrever usos medicinais.
       </p>
 
-      {/* Upload area */}
       {!previewUrl && (
         <div
           style={{
@@ -99,7 +94,6 @@ const IdentificacaoPlanta = () => {
         </div>
       )}
 
-      {/* Preview */}
       {previewUrl && (
         <div style={{ position: 'relative', marginBottom: '1rem', textAlign: 'center' }}>
           <img
@@ -121,7 +115,6 @@ const IdentificacaoPlanta = () => {
         </div>
       )}
 
-      {/* Analyze button */}
       {previewUrl && !result && (
         <button
           onClick={handleAnalyze}
@@ -137,22 +130,19 @@ const IdentificacaoPlanta = () => {
         </button>
       )}
 
-      {/* Loading */}
       {loading && (
         <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ width: '40px', height: '40px', margin: '0 auto 1rem', border: '3px solid var(--green-pale)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+          <div style={{ width: '40px', height: '40px', margin: '0 auto 1rem', border: '3px solid #d8f3dc', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
           <p>Processando imagem com IA...</p>
         </div>
       )}
 
-      {/* Error */}
       {error && (
         <div style={{ background: '#fee', border: '1px solid #fca5a5', borderRadius: 'var(--radius)', padding: '1rem', color: '#b91c1c', marginTop: '1rem' }}>
-          {error}
+          ❌ {error}
         </div>
       )}
 
-      {/* Result */}
       {result && !result.erro && (
         <div style={{ marginTop: '1.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'var(--surface)', overflow: 'hidden' }}>
           <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1.5rem' }}>
@@ -173,6 +163,7 @@ const IdentificacaoPlanta = () => {
           </div>
         </div>
       )}
+
       {result && result.erro && (
         <div style={{ background: '#fff3cd', padding: '1rem', borderRadius: 'var(--radius)', marginTop: '1rem' }}>
           ⚠️ {result.erro}
@@ -190,7 +181,6 @@ const IdentificacaoPlanta = () => {
   );
 };
 
-// Helper component for consistent sections
 const Section = ({ label, text, tags, type }) => {
   if (tags && tags.length) {
     return (
