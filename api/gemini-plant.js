@@ -1,13 +1,16 @@
 export default async function handler(req, res) {
+  // Apenas permitimos o método POST para o envio de imagens
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Verifica se a imagem foi enviada no corpo da requisição
   const { imageBase64, imageMime } = req.body;
   if (!imageBase64) {
-    return res.status(400). json({ error: 'Imagem não fornecida' });
+    return res.status(400).json({ error: 'Imagem não fornecida' });
   }
 
+  // Verifica se a chave da API está configurada no ambiente da Vercel
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error('GEMINI_API_KEY não definida');
@@ -15,8 +18,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Use gemini-1.5-pro (compatible with vision)
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+    // CORREÇÃO PRINCIPAL: Substituir 'gemini-1.5-pro' por 'gemini-2.5-flash'
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
     const payload = {
       contents: [{
@@ -30,14 +33,14 @@ export default async function handler(req, res) {
           {
             text: `Identifique esta planta medicinal (Angola). Retorne UM JSON válido SEM texto extra. Use este formato:
 {
-  "nome_popular": "string",
-  "nome_cientifico": "string",
-  "caracteristicas": "string curta",
-  "usos_medicinais": "string",
-  "preparacao": "string (chá, maceração, etc.)",
-  "dose_recomendada": "string",
-  "quem_pode_usar": ["crianças", "adultos", "grávidas?"],
-  "contraindicacoes": ["condição1", "condição2"]
+ "nome_popular": "string",
+ "nome_cientifico": "string",
+ "caracteristicas": "string curta",
+ "usos_medicinais": "string",
+ "preparacao": "string (chá, maceração, etc.)",
+ "dose_recomendada": "string",
+ "quem_pode_usar": ["crianças", "adultos", "grávidas?"],
+ "contraindicacoes": ["condição1", "condição2"]
 }
 Se não for possível identificar, retorne {"erro": "Planta não reconhecida"}.`
           }
