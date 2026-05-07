@@ -1,95 +1,70 @@
-export default async function handler(req, res) {
-  // Apenas permitimos o método POST para o envio de imagens
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // Verifica se a imagem foi enviada no corpo da requisição
-  const { imageBase64, imageMime } = req.body;
-  if (!imageBase64) {
-    return res.status(400).json({ error: 'Imagem não fornecida' });
-  }
-
-  // Verifica se a chave da API está configurada no ambiente da Vercel
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error('GEMINI_API_KEY não definida');
-    return res.status(500).json({ error: 'API key do Gemini não configurada' });
-  }
+async function callGeminiVision(prompt, imagePart) {
+  if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY não configurada.");
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   try {
-    // CORREÇÃO PRINCIPAL: Substituir 'gemini-1.5-pro' por 'gemini-2.5-flash'
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    
-    const payload = {
-      contents: [{
-        parts: [
-          {
-            inline_data: {
-              mime_type: imageMime,
-              data: imageBase64
-            }
-          },
-          {
-            text: `Identifique esta planta medicinal (Angola). Retorne UM JSON válido SEM texto extra. Use este formato:
-{
- "nome_popular": "string",
- "nome_cientifico": "string",
- "caracteristicas": "string curta",
- "usos_medicinais": "string",
- "preparacao": "string (chá, maceração, etc.)",
- "dose_recomendada": "string",
- "quem_pode_usar": ["crianças", "adultos", "grávidas?"],
- "contraindicacoes": ["condição1", "condição2"]
+    const result = await model.generateContent([prompt, imagePart]);
+    return result.response.text();
+  } catch (err) {
+    if (err?.status === 429 || err?.message?.includes("429")) {
+      console.warn("Rate limit vision. Retrying...");
+      await sleep(2000);
+      const retry = await model.generateContent([prompt, imagePart]);
+      return retry.response.text();
+    }
+    throw err;
+  }
 }
-Se não for possível identificar, retorne {"erro": "Planta não reconhecida"}.`
-          }
-        ]
-      }]
+
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido" });
+
+  try {
+    const { imageBase64, imageMime } = req.body;
+    if (!imageBase64) return res.status(400).json({ error: "Imagem obrigatória." });
+
+    const imagePart = {
+      inlineData: {
+        data: imageBase64,
+        mimeType: imageMime || "image/jpeg",
+      },
     };
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    const prompt = `Identifica esta planta medicinal angolana. Responde só em JSON:
+{
+  "nome_popular": "...",
+  "nome_cientifico": "...",
+  "caracteristicas": "...",
+  "usos_medicinais": "...",
+  "preparacao": "...",
+  "dose_recomendada": "...",
+  "quem_pode_usar": [...],
+  "contraindicacoes": [...]
+}`;
+
+    const text = await callGeminiVision(prompt, imagePart);
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}") + 1;
+    if (jsonStart === -1 || jsonEnd <= jsonStart) throw new Error("JSON inválido");
+    const data = JSON.parse(text.slice(jsonStart, jsonEnd));
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error("Erro identificação:", error);
+    const statusCode = error?.status === 429 ? 429 : 500;
+    return res.status(statusCode).json({
+      error: statusCode === 429
+        ? "Muitas solicitações. Aguarda um minuto."
+        : "Falha na identificação.",
+      details: error.message,
     });
-
-    const data = await response.json();
-    console.log('Gemini response status:', response.status);
-    console.log('Full response:', JSON.stringify(data, null, 2));
-
-    if (!response.ok) {
-      const errorMsg = data.error?.message || `HTTP ${response.status}`;
-      return res.status(response.status).json({ error: `Gemini API: ${errorMsg}` });
-    }
-
-    const candidate = data.candidates?.[0];
-    if (!candidate) {
-      const finishReason = data.candidates?.[0]?.finishReason;
-      return res.status(500).json({ 
-        error: `Gemini recusou responder. Motivo: ${finishReason || 'desconhecido'}.` 
-      });
-    }
-
-    const text = candidate.content?.parts?.[0]?.text;
-    if (!text) {
-      console.error('Texto vazio. Candidate:', candidate);
-      return res.status(500).json({ error: 'Resposta vazia da Gemini.' });
-    }
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('JSON não encontrado:', text);
-      return res.status(500).json({ error: 'Formato de resposta inválido.' });
-    }
-
-    const plantData = JSON.parse(jsonMatch[0]);
-    if (plantData.erro) {
-      return res.status(404).json({ error: plantData.erro });
-    }
-    return res.status(200).json(plantData);
-  } catch (err) {
-    console.error('Erro no handler:', err);
-    return res.status(500).json({ error: 'Erro interno: ' + err.message });
   }
 }
