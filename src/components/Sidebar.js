@@ -1,135 +1,66 @@
+// src/components/Sidebar.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { getMenuByRole } from '../utils/permissions';
+import { getPrivateMenuByRole } from '../utils/permissions';
+import { theme } from '../theme/theme';
 
-const Sidebar = ({ onLogout }) => {   // ← aceita a prop onLogout
+const Sidebar = () => {
   const { currentRole } = useAuth();
-  const { language, toggleLanguage } = useLanguage();
-  const menuItems = getMenuByRole(currentRole);
+  const menuItems = getPrivateMenuByRole(currentRole);
 
   return (
-    <aside style={styles.sidebar}>
-      <div style={styles.logo}>
-        🌿 Botânica Jornada Científica
+    <aside style={{
+      width: '260px',
+      backgroundColor: '#1E293B',
+      color: '#E2E8F0',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      position: 'fixed',
+      left: 0,
+      top: '64px', // below public header
+      overflowY: 'auto',
+      borderRight: '1px solid #334155'
+    }}>
+      <div style={{
+        padding: '1.5rem',
+        borderBottom: '1px solid #334155',
+        fontWeight: 600
+      }}>
+        Área de Trabalho
+        <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '0.25rem' }}>
+          {currentRole === 'admin' ? 'Administrador' : currentRole === 'tecnico' ? 'Técnico de campo' : 'Paciente'}
+        </div>
       </div>
-      <nav style={styles.nav}>
+
+      <nav style={{ flex: 1 }}>
         {menuItems.map(item => (
           <NavLink
             key={item.id}
             to={item.path}
             style={({ isActive }) => ({
-              ...styles.navLink,
-              ...(isActive ? styles.activeLink : {})
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1.5rem',
+              color: isActive ? 'white' : '#CBD5E1',
+              textDecoration: 'none',
+              backgroundColor: isActive ? '#334155' : 'transparent',
+              borderLeft: isActive ? `4px solid ${theme.colors.leafGreen}` : '4px solid transparent',
+              transition: theme.transitions.ease
             })}
           >
-            <span style={styles.icon}>{item.icon}</span>
+            <span>{item.icon}</span>
             <span>{item.label}</span>
-            <span style={styles.rfBadge}>{item.rf}</span>
+            <span style={{ marginLeft: 'auto', fontSize: '0.7rem', background: '#0F172A', padding: '2px 6px', borderRadius: '12px' }}>
+              {item.rf}
+            </span>
           </NavLink>
         ))}
       </nav>
-
-      {/* Botão de alternar idioma */}
-      <button
-        onClick={toggleLanguage}
-        style={{
-          background: 'transparent',
-          border: '1px solid #cbd5e1',
-          borderRadius: 30,
-          padding: '6px 12px',
-          margin: '0 1.5rem 1rem',
-          fontSize: 12,
-          cursor: 'pointer',
-          color: '#e2e8f0'
-        }}
-      >
-        {language === 'pt' ? 'Kimbundu' : 'Português'}
-      </button>
-
-      {/* Botão de logout */}
-      <button
-        onClick={onLogout}
-        style={{
-          background: 'transparent',
-          border: '1px solid #cbd5e1',
-          borderRadius: 30,
-          padding: '6px 12px',
-          margin: '0 1.5rem 0.5rem',
-          fontSize: 12,
-          cursor: 'pointer',
-          color: '#e2e8f0',
-          width: 'calc(100% - 3rem)'
-        }}
-      >
-        🚪 Sair
-      </button>
-
-      <div style={styles.roleInfo}>
-        Role atual: <strong>{currentRole}</strong>
-      </div>
     </aside>
   );
-};
-
-const styles = {
-  sidebar: {
-    width: '260px',
-    backgroundColor: '#1e293b',
-    color: '#e2e8f0',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100vh',
-    position: 'fixed',
-    left: 0,
-    top: 0,
-    overflowY: 'auto'
-  },
-  logo: {
-    padding: '1.5rem',
-    fontSize: '1.1rem',
-    fontWeight: 'bold',
-    borderBottom: '1px solid #334155',
-    marginBottom: '1rem'
-  },
-  nav: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  navLink: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.75rem 1.5rem',
-    color: '#cbd5e1',
-    textDecoration: 'none',
-    transition: 'all 0.2s'
-  },
-  activeLink: {
-    backgroundColor: '#334155',
-    color: 'white',
-    borderLeft: '4px solid #10b981'
-  },
-  icon: {
-    fontSize: '1.2rem',
-    width: '1.5rem'
-  },
-  rfBadge: {
-    marginLeft: 'auto',
-    fontSize: '0.7rem',
-    backgroundColor: '#0f172a',
-    padding: '2px 6px',
-    borderRadius: '12px'
-  },
-  roleInfo: {
-    padding: '1rem',
-    borderTop: '1px solid #334155',
-    fontSize: '0.8rem',
-    textAlign: 'center',
-    marginTop: 'auto'
-  }
 };
 
 export default Sidebar;

@@ -1,97 +1,108 @@
-// Menu items mapped to your TCC use cases (UC) and functional requirements (RF)
+// src/utils/permissions.js
 export const MENU = [
   {
+    id: 'identificacao-planta',
+    label: 'Identificar Planta',
+    icon: '🌿',
+    path: '/identificacao-planta',
+    public: true,
+    allowedRoles: ['admin', 'tecnico', 'paciente'], // shown to all, even unauthenticated
+    rf: 'RF03',
+    uc: 'UC02'
+  },
+  {
+    id: 'consultas',
+    label: 'Pesquisa de Plantas',
+    icon: '🔍',
+    path: '/consultas',
+    public: true,
+    allowedRoles: ['admin', 'tecnico', 'paciente'],
+    rf: 'RF07',
+    uc: 'UC03'
+  },
+  {
+    id: 'autodiagnostico',
+    label: 'Autodiagnóstico',
+    icon: '🩺',
+    path: '/autodiagnostico',
+    public: true,
+    allowedRoles: ['admin', 'tecnico', 'paciente'],
+    rf: 'RF04',
+    uc: 'UC04',
+    disclaimer: '⚠️ Não substitui consulta médica.'
+  },
+  // --- Private pages (require login) ---
+  {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'Painel',
     icon: '📊',
-    path: '/',
+    path: '/dashboard',
+    public: false,
     allowedRoles: ['admin', 'tecnico', 'paciente'],
     rf: 'RF01',
     uc: 'UC01'
   },
   {
     id: 'registro-tratamentos',
-    label: 'Registro de Tratamentos',
+    label: 'Registo de Tratamentos',
     icon: '📝',
     path: '/registro-tratamentos',
+    public: false,
     allowedRoles: ['admin', 'tecnico'],
     rf: 'RF01',
     uc: 'UC01'
   },
   {
     id: 'captura-midia',
-    label: 'Captura de Mídia (RF02)',
+    label: 'Captura de Mídia',
     icon: '📸',
     path: '/captura-midia',
+    public: false,
     allowedRoles: ['admin', 'tecnico'],
     rf: 'RF02',
     uc: 'UC02'
   },
   {
     id: 'geolocalizacao',
-    label: 'Geolocalização (RF06)',
+    label: 'Geolocalização',
     icon: '📍',
     path: '/geolocalizacao',
+    public: false,
     allowedRoles: ['admin', 'tecnico'],
     rf: 'RF06',
     uc: 'UC03'
   },
   {
-    id: 'autodiagnostico',
-    label: 'Autodiagnóstico (RF04)',
-    icon: '🩺',
-    path: '/autodiagnostico',
-    allowedRoles: ['admin', 'tecnico', 'paciente'],
-    rf: 'RF04',
-    uc: 'UC04',
-    disclaimer: '⚠️ RD02: Esta ferramenta não substitui uma consulta médica profissional.'
-  },
-  {
     id: 'relatorios',
-    label: 'Relatórios (RF08)',
+    label: 'Relatórios',
     icon: '📈',
     path: '/relatorios',
+    public: false,
     allowedRoles: ['admin'],
     rf: 'RF08',
     uc: 'UC05'
   },
   {
     id: 'gestao-utilizadores',
-    label: 'Gestão de Utilizadores (RF07)',
+    label: 'Gestão de Utilizadores',
     icon: '👥',
     path: '/gestao-utilizadores',
+    public: false,
     allowedRoles: ['admin'],
     rf: 'RF07',
     uc: 'UC06'
   },
   {
-  id: 'consultas',
-  label: 'Pesquisa de Plantas (RF07)',
-  icon: '🔍',
-  path: '/consultas',
-  allowedRoles: ['admin', 'tecnico', 'paciente'],
-  rf: 'RF07',
-  uc: 'UC03'
-},
-  {
     id: 'configuracoes',
     label: 'Configurações',
     icon: '⚙️',
     path: '/configuracoes',
+    public: false,
     allowedRoles: ['admin', 'tecnico', 'paciente'],
     rf: 'RF10',
     uc: 'UC08'
-  },
-  {
-  id: 'identificacao-planta',
-  label: 'Identificador de Plantas',
-  icon: '🌿',
-  path: '/identificacao-planta',
-  allowedRoles: ['admin', 'tecnico', 'paciente']
-}
+  }
 ];
 
-// Helper function to get items visible to a given role
-export const getMenuByRole = (role) => {
-  return MENU.filter(item => item.allowedRoles.includes(role));
-};
+export const getPublicMenu = () => MENU.filter(item => item.public);
+export const getPrivateMenuByRole = (role) => MENU.filter(item => !item.public && item.allowedRoles.includes(role));
