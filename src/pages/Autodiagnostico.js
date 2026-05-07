@@ -67,9 +67,9 @@ const Autodiagnostico = () => {
       <p style={{ color: 'var(--text-secondary)', marginBottom: 12 }}>
         Descreva os seus sintomas — a IA considera as plantas da sua região.
       </p>
-      <div style={{ background: '#fff3e0', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1.5rem', fontSize: 14 }}>
-        ⚠️ <strong>RD02:</strong> Esta ferramenta não substitui uma consulta médica. Em caso de emergência, vá ao hospital.
-      </div>
+    <div style={{ background: '#fff3e0', padding: '1rem', borderRadius: 'var(--radius)', marginBottom: '1.5rem', fontSize: 14 }}>
+  ⚠️ Esta ferramenta não substitui uma consulta médica. Em caso de emergência, vá ao hospital.
+</div>
 
       <textarea rows={4} value={symptoms} onChange={e => setSymptoms(e.target.value)}
         placeholder="Ex: dor de cabeça forte, febre baixa, cansaço..."

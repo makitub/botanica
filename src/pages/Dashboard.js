@@ -5,9 +5,9 @@ const Dashboard = () => {
   const { currentRole } = useAuth();
   return (
     <div>
-      <h1>📊 Dashboard</h1>
-      <p>RF01 / UC01 – Visão geral do sistema</p>
-      <p>Bem-vindo, papel: <strong>{currentRole}</strong></p>
+      <h1>📊 Painel</h1>
+      <p>Visão geral do sistema.</p>
+      <p>Bem‑vindo, perfil: <strong>{currentRole}</strong></p>
     </div>
   );
 };

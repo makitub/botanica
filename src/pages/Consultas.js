@@ -28,7 +28,7 @@ const Consultas = () => {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <h1>🔍 Pesquisa de Plantas / Tratamentos (RF07)</h1>
+     <h1>🔍 Pesquisa de Plantas / Tratamentos</h1>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
         Digite um nome de planta, doença ou sintoma para encontrar informações na base de conhecimento tradicional.
       </p>

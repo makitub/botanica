@@ -30,7 +30,7 @@ const Geolocalizacao = () => {
   return (
     <div style={{ maxWidth: 600, margin: '0 auto' }}>
       <h1 style={{ fontSize: '2rem', fontWeight: 500, letterSpacing: '-0.02em' }}>📍 Geolocalização</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>Registo automático de coordenadas (RF06)</p>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: 32 }}>Registo automático de coordenadas</p>
 
       <button onClick={getLocation} style={{
         backgroundColor: 'var(--primary)',
@@ -59,7 +59,6 @@ const Geolocalizacao = () => {
           <p><strong>Latitude:</strong> {location.lat}</p>
           <p><strong>Longitude:</strong> {location.lng}</p>
           <p><strong>Data/Hora:</strong> {location.timestamp}</p>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 16 }}>🔒 Dados armazenados com criptografia (RNF01)</p>
         </div>
       )}
     </div>
