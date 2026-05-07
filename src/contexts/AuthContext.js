@@ -1,17 +1,16 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState(null); // null = não autenticado
+  const [currentRole, setCurrentRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const login = (role) => {
     setCurrentRole(role);
     setIsAuthenticated(true);
-    // Opcional: guardar no localStorage para persistência
     localStorage.setItem('role', role);
     localStorage.setItem('authenticated', 'true');
   };
@@ -23,19 +22,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('authenticated');
   };
 
-  // Verificar se há sessão guardada ao iniciar
-  const checkAuth = () => {
+  useEffect(() => {
     const storedRole = localStorage.getItem('role');
     const storedAuth = localStorage.getItem('authenticated');
     if (storedAuth === 'true' && storedRole) {
       setCurrentRole(storedRole);
       setIsAuthenticated(true);
     }
-  };
-
-  // Chamar checkAuth ao montar o provider
-  React.useEffect(() => {
-    checkAuth();
   }, []);
 
   return (

@@ -1,4 +1,3 @@
-// src/utils/permissions.js
 export const MENU = [
   {
     id: 'identificacao-planta',
@@ -6,9 +5,7 @@ export const MENU = [
     icon: '🌿',
     path: '/identificacao-planta',
     public: true,
-    allowedRoles: ['admin', 'tecnico', 'paciente'], // shown to all, even unauthenticated
-    rf: 'RF03',
-    uc: 'UC02'
+    allowedRoles: ['admin', 'tecnico']  // no paciente
   },
   {
     id: 'consultas',
@@ -16,9 +13,7 @@ export const MENU = [
     icon: '🔍',
     path: '/consultas',
     public: true,
-    allowedRoles: ['admin', 'tecnico', 'paciente'],
-    rf: 'RF07',
-    uc: 'UC03'
+    allowedRoles: ['admin', 'tecnico']
   },
   {
     id: 'autodiagnostico',
@@ -26,10 +21,8 @@ export const MENU = [
     icon: '🩺',
     path: '/autodiagnostico',
     public: true,
-    allowedRoles: ['admin', 'tecnico', 'paciente'],
-    rf: 'RF04',
-    uc: 'UC04',
-    disclaimer: '⚠️ Não substitui consulta médica.'
+    allowedRoles: ['admin', 'tecnico'],
+    disclaimer: '⚠️ Não substitui consulta médica profissional.'
   },
   // --- Private pages (require login) ---
   {
@@ -38,9 +31,7 @@ export const MENU = [
     icon: '📊',
     path: '/dashboard',
     public: false,
-    allowedRoles: ['admin', 'tecnico', 'paciente'],
-    rf: 'RF01',
-    uc: 'UC01'
+    allowedRoles: ['admin', 'tecnico']
   },
   {
     id: 'registro-tratamentos',
@@ -48,9 +39,7 @@ export const MENU = [
     icon: '📝',
     path: '/registro-tratamentos',
     public: false,
-    allowedRoles: ['admin', 'tecnico'],
-    rf: 'RF01',
-    uc: 'UC01'
+    allowedRoles: ['admin', 'tecnico']
   },
   {
     id: 'captura-midia',
@@ -58,9 +47,7 @@ export const MENU = [
     icon: '📸',
     path: '/captura-midia',
     public: false,
-    allowedRoles: ['admin', 'tecnico'],
-    rf: 'RF02',
-    uc: 'UC02'
+    allowedRoles: ['admin', 'tecnico']
   },
   {
     id: 'geolocalizacao',
@@ -68,9 +55,7 @@ export const MENU = [
     icon: '📍',
     path: '/geolocalizacao',
     public: false,
-    allowedRoles: ['admin', 'tecnico'],
-    rf: 'RF06',
-    uc: 'UC03'
+    allowedRoles: ['admin', 'tecnico']
   },
   {
     id: 'relatorios',
@@ -78,9 +63,7 @@ export const MENU = [
     icon: '📈',
     path: '/relatorios',
     public: false,
-    allowedRoles: ['admin'],
-    rf: 'RF08',
-    uc: 'UC05'
+    allowedRoles: ['admin']
   },
   {
     id: 'gestao-utilizadores',
@@ -88,9 +71,7 @@ export const MENU = [
     icon: '👥',
     path: '/gestao-utilizadores',
     public: false,
-    allowedRoles: ['admin'],
-    rf: 'RF07',
-    uc: 'UC06'
+    allowedRoles: ['admin']
   },
   {
     id: 'configuracoes',
@@ -98,9 +79,7 @@ export const MENU = [
     icon: '⚙️',
     path: '/configuracoes',
     public: false,
-    allowedRoles: ['admin', 'tecnico', 'paciente'],
-    rf: 'RF10',
-    uc: 'UC08'
+    allowedRoles: ['admin', 'tecnico']
   }
 ];
 

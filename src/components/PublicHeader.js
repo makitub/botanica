@@ -1,4 +1,3 @@
-// src/components/PublicHeader.jsx
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { getPublicMenu } from '../utils/permissions';
@@ -26,7 +25,7 @@ const PublicHeader = () => {
           fontSize: '1.25rem',
           color: theme.colors.deepForest
         }}>
-          Angola Botânica
+          Comunidade Botânica Ispk
         </span>
       </Link>
 
@@ -49,50 +48,17 @@ const PublicHeader = () => {
           </Link>
         ))}
 
-        {/* Province discovery shortcut */}
-        <Link
-          to="/plantas-da-regiao"
-          style={{
-            background: theme.colors.acaciaGold,
-            color: 'white',
-            padding: '0.4rem 1.2rem',
-            borderRadius: theme.radii.pill,
-            textDecoration: 'none',
-            fontWeight: 600,
-            fontSize: '0.9rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.3rem'
-          }}
-        >
-          📍 Plantas da minha região
-        </Link>
-
         {isAuthenticated ? (
-          <button
-            onClick={logout}
-            style={{
-              background: 'transparent',
-              border: `1px solid ${theme.colors.mutedClay}`,
-              padding: '0.4rem 1rem',
-              borderRadius: theme.radii.pill,
-              cursor: 'pointer',
-              color: theme.colors.textSecondary
-            }}
-          >
-            🚪 Sair
-          </button>
+          <button onClick={logout} style={{
+            background: 'transparent',
+            border: `1px solid ${theme.colors.mutedClay}`,
+            padding: '0.4rem 1rem', borderRadius: theme.radii.pill,
+            cursor: 'pointer', color: theme.colors.textSecondary
+          }}>🚪 Sair</button>
         ) : (
-          <Link
-            to="/login"
-            style={{
-              color: theme.colors.deepForest,
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
-          >
-            Entrar
-          </Link>
+          <Link to="/login" style={{
+            color: theme.colors.deepForest, textDecoration: 'none', fontWeight: 500
+          }}>Entrar</Link>
         )}
       </nav>
     </header>

@@ -1,3 +1,4 @@
+// src/pages/Login.js
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -10,16 +11,13 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
-    
-    // Simulação de login (substituir por chamada real à API mais tarde)
-    if (email === 'admin@botanica.com' && password === 'admin123') {
+
+    if (email === 'admin@comunidadebotanica.ao' && password === 'admin123') {
       login('admin');
-    } else if (email === 'tecnico@botanica.com' && password === 'tecnico123') {
+    } else if (email === 'tecnico@comunidadebotanica.ao' && password === 'tecnico123') {
       login('tecnico');
-    } else if (email === 'paciente@botanica.com' && password === 'paciente123') {
-      login('paciente');
     } else {
-      setError('Credenciais inválidas. Tente: admin@botanica.com / admin123');
+      setError('Credenciais inválidas. Tente: admin@comunidadebotanica.ao / admin123');
     }
   };
 
@@ -29,19 +27,19 @@ const Login = () => {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '100vh',
-      background: 'var(--background)'
+      background: '#fbfbfb'
     }}>
       <div style={{
-        background: 'var(--surface)',
+        background: '#ffffff',
         padding: '2rem',
-        borderRadius: 'var(--radius)',
-        boxShadow: 'var(--shadow-md)',
+        borderRadius: '20px',
+        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.05)',
         width: '100%',
         maxWidth: '400px'
       }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>🌿 Botânica</h1>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>🌿 Comunidade Botânica Ispk</h1>
         <h2 style={{ textAlign: 'center', fontSize: '1.5rem', marginBottom: '1.5rem' }}>Acesso ao Sistema</h2>
-        
+
         {error && (
           <div style={{
             background: '#fee',
@@ -68,7 +66,7 @@ const Login = () => {
                 width: '100%',
                 padding: '0.75rem',
                 borderRadius: '8px',
-                border: '1px solid var(--border)',
+                border: '1px solid #e9ecef',
                 fontSize: '1rem'
               }}
             />
@@ -84,7 +82,7 @@ const Login = () => {
                 width: '100%',
                 padding: '0.75rem',
                 borderRadius: '8px',
-                border: '1px solid var(--border)',
+                border: '1px solid #e9ecef',
                 fontSize: '1rem'
               }}
             />
@@ -94,7 +92,7 @@ const Login = () => {
             style={{
               width: '100%',
               padding: '0.75rem',
-              backgroundColor: 'var(--primary)',
+              backgroundColor: '#1e3a2f',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
@@ -107,11 +105,10 @@ const Login = () => {
           </button>
         </form>
 
-        <div style={{ marginTop: '1.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+        <div style={{ marginTop: '1.5rem', fontSize: '0.8rem', color: '#5a6e5a', textAlign: 'center' }}>
           <p>Demo:</p>
-          <p><strong>Administrador:</strong> admin@botanica.com / admin123</p>
-          <p><strong>Técnico de Campo:</strong> tecnico@botanica.com / tecnico123</p>
-          <p><strong>Paciente:</strong> paciente@botanica.com / paciente123</p>
+          <p><strong>Administrador:</strong> admin@comunidadebotanica.ao / admin123</p>
+          <p><strong>Técnico de Campo:</strong> tecnico@comunidadebotanica.ao / tecnico123</p>
         </div>
       </div>
     </div>
