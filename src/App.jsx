@@ -84,7 +84,7 @@ function Screen({ children, title, subtitle }) {
             }}>{title}</h1>
           )}
           {subtitle && (
-            <p style={{ fontSize: 16, color: '#6b7c6e', marginTop: 4, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 18, color: '#6b7c6e', marginTop: 4, lineHeight: 1.6 }}>
               {subtitle}
             </p>
           )}
@@ -274,7 +274,7 @@ function DiagnoseScreen() {
   return (
     <Screen>
       <h1 style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
-      <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
+     <p style={{ fontSize:18, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
       <Disclaimer />
       <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'16px', minHeight:300, maxHeight:400, overflowY:'auto', marginBottom:16 }}>
         {messages.map((msg, idx) => {
@@ -302,10 +302,10 @@ function DiagnoseScreen() {
                   <div key={idx2} style={{
                     background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10
                   }}>
-                    <h3 style={{ fontSize:16, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
-                    <p style={{ fontSize:12, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
-                    <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Dose:</strong> {r.dosage}</p>
-                    <p style={{ fontSize:12, color:'#9aa89c' }}><strong>Cuidados:</strong> {r.precautions}</p>
+                  <h3 style={{ fontSize:20, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
+                  <p style={{ fontSize:16, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
+                  <p style={{ fontSize:16, color:'#6b7c6e' }}><strong>Dose:</strong> {r.dosage}</p>
+                  <p style={{ fontSize:16, color:'#9aa89c' }}><strong>Cuidados:</strong> {r.precautions}</p>
                     <SpeakButton text={`${r.plantName}. Preparo: ${r.preparation}. Dose: ${r.dosage}. Cuidados: ${r.precautions}`} />
                   </div>
                 ))}
@@ -321,8 +321,8 @@ function DiagnoseScreen() {
                 maxWidth:'80%', padding:'10px 14px', borderRadius:14,
                 background: isUser ? '#1a9a60' : '#f0f4e8',
                 color: isUser ? '#fff' : '#0f1a12',
-                fontSize:13,
-                lineHeight:1.6,
+               fontSize:16,
+               lineHeight:1.7,
                 whiteSpace:'pre-wrap',
                 wordBreak:'break-word'
               }}>
@@ -347,18 +347,19 @@ function DiagnoseScreen() {
           onKeyDown={handleKeyDown}
           placeholder="Descreve os teus sintomas..."
           style={{
-            flex:1, padding:'12px 14px', fontSize:13, border:'1.5px solid #d4e0d8',
+            flex:1, padding:'14px 18px', fontSize:16, border:'1.5px solid #d4e0d8',
             borderRadius:14, background:'#fafcfa', color:'#0f1a12',
             fontFamily:'Georgia, serif', outline:'none'
           }}
         />
         <button onClick={sendMessage} disabled={loading || !input.trim()}
-          style={{
-            padding:'12px 18px', background: input.trim() ? '#1a9a60' : '#c8d8cc',
-            color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer'
-          }}>
-          Enviar
-        </button>
+        style={{
+          padding:'14px 24px', background: input.trim() ? '#1a9a60' : '#c8d8cc',
+          color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer',
+          fontSize:16
+        }}>
+        Enviar
+      </button>
       </div>
     </Screen>
   );
@@ -441,7 +442,7 @@ function IdentifyScreen() {
 
   return (
     <Screen>
-      <h1 style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Planta</h1>
+      <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
       <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Tire uma foto da planta para identificação automática</p>
       {!previewUrl ? (
         <label style={{ display:'block', border:'2px dashed #a0d8b8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#f4faf6', marginBottom:16 }}>
@@ -1087,8 +1088,8 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
               return (
                 <button key={id} onClick={() => navigate(id)}
                   style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
-                  <span style={{ fontSize:18, color: isActive ? '#1a9a60' : '#9aa89c' }}>{item.icon}</span>
-                  <span style={{ fontSize:9, color: isActive ? '#1a9a60' : '#b0bab2', fontWeight: isActive ? 700 : 400 }}>
+                 <span style={{ fontSize:28, color: isActive ? '#1a9a60' : '#9aa89c' }}>{item.icon}</span>
+<span style={{ fontSize:13, color: isActive ? '#1a9a60' : '#b0bab2', fontWeight: isActive ? 700 : 400 }}>
                     {lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}
                   </span>
                 </button>
