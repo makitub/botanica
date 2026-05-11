@@ -679,12 +679,14 @@ function UsersScreen() {
 }
 
 function SettingsScreen({ lang, setLang }) {
+  const [largeFont, setLargeFont] = useState(false);
   return (
     <Screen title="Definições" subtitle="Acessibilidade e preferências · Mayenge">
       <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-          { label:'Tamanho de letra', sub:'Normal', action:()=>{} },
+          { label:'Letra grande', sub: largeFont ? 'Ativado — Texto ampliado' : 'Desativado — Toque para ativar',
+  action: () => setLargeFont(prev => !prev) },
           { label:'Alto contraste', sub:'Desativado — Para visão reduzida', action:()=>{} },
           { label:'Modo offline', sub:'Dados locais disponíveis', action:()=>{} },
         ].map((item,i,arr) => (
@@ -710,6 +712,7 @@ function SettingsScreen({ lang, setLang }) {
 
 /* ─── BOTANICA UI (the whole visual shell) ──────────────────────────────── */
 function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, lang, setLang, sideRef, isAuthenticated, onLogout }) {
+  const [largeFont, setLargeFont] = useState(false);
   const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({
     groupId, groupLabel,
     items: MENU.filter(m => m.group === groupId && m.roles.includes(role))
@@ -752,6 +755,9 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
   return (
     <>
       <style>{`
+      .large-font, .large-font * {
+  font-size: 160% !important;
+}
         @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
         * { box-sizing:border-box; margin:0; padding:0; }
         body { font-family:'DM Sans', sans-serif; }
@@ -772,7 +778,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
         ::-webkit-scrollbar-track { background:transparent; }
         ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
       `}</style>
-
+      <div style={{ width:'100%', ... }} className={largeFont ? 'large-font' : ''}>
       <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f7faf8', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }}>
 
         {/* Sidebar overlay */}
