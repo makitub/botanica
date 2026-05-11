@@ -127,7 +127,7 @@ function PlantCard({ plant, onClick }) {
       </div>
       <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', marginBottom:2, fontFamily:'Georgia, serif' }}>{plant.name}</div>
       <div style={{ fontSize:11, color:'#9aa89c', fontStyle:'italic', marginBottom:6 }}>{plant.sci}</div>
-      <div style={{ fontSize:11, color:'#6b7c6e', marginBottom:8 }}>{plant.use}</div>
+      <div style={{ fontSize:11, color:'#3a4a3c', marginBottom:8 }}>{plant.use}</div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <span style={{ fontSize:11, color:'#9aa89c' }}>
           <span style={{ color: plant.color, fontWeight:600 }}>{plant.kimbundu}</span> · {plant.region}
@@ -138,7 +138,7 @@ function PlantCard({ plant, onClick }) {
   );
 }
 
-function Tag({ label, color = '#1a9a60' }) {
+function Tag({ label, color = '#0f8b4a' }) {
   return (
     <span style={{
       fontSize: 10, fontWeight: 600, color,
@@ -284,23 +284,23 @@ function DiagnoseScreen() {
             return (
               <div key={idx} style={{ marginBottom:12 }}>
                 {triage === 'red' && (
-                  <div style={{ background:'#fff0f0', border:'1.5px solid #f08080', borderRadius:14, padding:'14px', marginBottom:12, color:'#c0392b' }}>
+                  <div style={{ background:'#fff0f0', border:'1.5px solid #fca5a5', borderRadius:14, padding:'14px', marginBottom:12, color:'#dc2626' }}>
                     🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}
                   </div>
                 )}
                 {triage === 'yellow' && (
-                  <div style={{ background:'#fff8e7', border:'1.5px solid #f4a261', borderRadius:14, padding:'14px', marginBottom:12, color:'#a64b2a' }}>
+                  <div style={{ background:'#fffbeb', border:'1.5px solid #d97706', borderRadius:14, padding:'14px', marginBottom:12, color:'#92400e' }}>
                     ⚠️ <strong>Atenção:</strong> {urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}
                   </div>
                 )}
                 {triage === 'green' && (
-                  <div style={{ background:'#e8f5ee', border:'1.5px solid #a0d8b8', borderRadius:14, padding:'14px', marginBottom:12, color:'#1a6b4a' }}>
+                  <div style={{ background:'#d1fae5', border:'1.5px solid #6ee7b7', borderRadius:14, padding:'14px', marginBottom:12, color:'#065f46' }}>
                     ✅ <strong>Situação estável:</strong> Siga as sugestões abaixo.
                   </div>
                 )}
                 {remedies && remedies.map((r, idx2) => (
                   <div key={idx2} style={{
-                    background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10
+                   background:'#ffffff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10
                   }}>
                   <h3 style={{ fontSize:20, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
                   <p style={{ fontSize:16, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
@@ -465,7 +465,7 @@ function IdentifyScreen() {
         </button>
       )}
       {loading && <p style={{ textAlign:'center', color:'#6b9a74', marginTop:12 }}>Processando imagem com IA...</p>}
-      {error && <div style={{ color:'#c0392b', marginTop:16, fontSize:12, background:'#fff0f0', padding:12, borderRadius:12 }}>{error}</div>}
+      {error && <div style={{ color:'#c0392b', marginTop:16, fontSize:12, background:'#fee2e2', padding:12, borderRadius:12 }}>{error}</div>}
       {result && !result.erro && (
         <div style={{ marginTop:20, border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden' }}>
           <div style={{ background:'#1a6b4a', color:'#fff', padding:'16px 20px', fontFamily:'Georgia, serif' }}>
@@ -971,7 +971,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
   ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
 `}</style>
 
-      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f7faf8', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={largeFont ? 'large-font' : ''}>
+      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={largeFont ? 'large-font' : ''}>
 
         {/* Sidebar overlay */}
         {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(10,20,14,0.5)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
@@ -982,7 +982,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
               <div style={{ width:36, height:36, borderRadius:10, background:'#0d5c3a', color:'#a0e8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>✦</div>
               <div>
-                <div style={{ fontSize:16, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>Botanica</div>
+                <div style={{ fontSize:16, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>Botanica</div>
                 <div style={{ fontSize:10, color:'#9aa89c' }}>Comunidade Ispk</div>
               </div>
             </div>
@@ -1035,7 +1035,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
                       style={{
                         display:'flex', alignItems:'center', gap:12,
                         padding:'10px 20px', cursor:'pointer',
-                        background: isActive ? '#f0faf5' : 'transparent',
+                        background: isActive ? '#e6f7ee' : 'transparent',
                         borderLeft: isActive ? '3px solid #1a9a60' : '3px solid transparent',
                         transition:'all 0.12s'
                       }}>
