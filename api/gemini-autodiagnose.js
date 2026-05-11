@@ -1,31 +1,9 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+// api/gemini-autodiagnose.js
+const Groq = require("groq-sdk");
 
-// Helper to wait
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-async function callGemini(prompt) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY não configurada no servidor.");
-  }
-
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-  // First attempt
-  try {
-    const result = await model.generateContent(prompt);
-    return result.response.text();
-  } catch (err) {
-    // If rate limited, wait and retry once
-    if (err?.status === 429 || err?.message?.includes("429")) {
-      console.warn("Rate limit atingido. Aguardando 2 segundos...");
-      await sleep(2000);
-      const retryResult = await model.generateContent(prompt);
-      return retryResult.response.text();
-    }
-    throw err; // rethrow other errors
-  }
-}
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -42,6 +20,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Sintomas são obrigatórios." });
     }
 
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY não configurada no servidor.");
+    }
+
     const region = province && province !== "Desconhecida"
       ? `província de ${province}, Angola`
       : "Angola";
@@ -52,7 +34,7 @@ Um paciente apresenta os seguintes sintomas: "${symptoms}".
 A tua localização actual é: ${region}.
 Dá prioridade a plantas que crescem naturalmente nesta região.
 
-Fornece a tua resposta **exclusivamente** no seguinte formato JSON válido, sem texto adicional:
+Fornece a tua resposta **exclusivamente** no seguinte formato JSON válido, sem texto adicional antes ou depois:
 {
   "triage": "green|yellow|red",
   "urgentMessage": "mensagem de urgência (ou string vazia)",
@@ -66,8 +48,15 @@ Fornece a tua resposta **exclusivamente** no seguinte formato JSON válido, sem 
   ]
 }`;
 
-    const text = await callGemini(prompt);
+    // Use Groq chat completions with a fast text model
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: "llama3-70b-8192",      // reliable and fast; you can also use "mixtral-8x7b-32768"
+      temperature: 0.3,
+      max_tokens: 1024,
+    });
 
+    const text = completion.choices[0]?.message?.content || "";
     const jsonStart = text.indexOf("{");
     const jsonEnd = text.lastIndexOf("}") + 1;
     if (jsonStart === -1 || jsonEnd <= jsonStart) throw new Error("Resposta não contém JSON válido.");
@@ -78,8 +67,7 @@ Fornece a tua resposta **exclusivamente** no seguinte formato JSON válido, sem 
     return res.status(200).json(data);
   } catch (error) {
     console.error("Erro autodiagnóstico:", error);
-
-    // If the error is still a rate limit, return 429 so frontend knows
+    // Groq might throw errors with status 429; pass it to frontend
     const statusCode = error?.status === 429 ? 429 : 500;
     return res.status(statusCode).json({
       error: statusCode === 429

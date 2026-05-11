@@ -1,61 +1,65 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// api/gemini-plant.js
+const Groq = require("groq-sdk");
 
-async function callGeminiVision(prompt, imagePart) {
-  if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY não configurada.");
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-  try {
-    const result = await model.generateContent([prompt, imagePart]);
-    return result.response.text();
-  } catch (err) {
-    if (err?.status === 429 || err?.message?.includes("429")) {
-      console.warn("Rate limit vision. Retrying...");
-      await sleep(2000);
-      const retry = await model.generateContent([prompt, imagePart]);
-      return retry.response.text();
-    }
-    throw err;
-  }
-}
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido" });
 
   try {
     const { imageBase64, imageMime } = req.body;
     if (!imageBase64) return res.status(400).json({ error: "Imagem obrigatória." });
+    if (!process.env.GROQ_API_KEY) throw new Error("GROQ_API_KEY não configurada.");
 
-    const imagePart = {
-      inlineData: {
-        data: imageBase64,
-        mimeType: imageMime || "image/jpeg",
-      },
-    };
+    // Build a data URL from the base64 image
+    const mime = imageMime || "image/jpeg";
+    const imageUrl = `data:${mime};base64,${imageBase64}`;
 
-    const prompt = `Identifica esta planta medicinal angolana. Responde só em JSON:
+    const prompt = `Identifica esta planta medicinal angolana com base na imagem fornecida. Responde apenas com o seguinte objeto JSON, sem nenhum texto adicional:
+
 {
-  "nome_popular": "...",
-  "nome_cientifico": "...",
-  "caracteristicas": "...",
-  "usos_medicinais": "...",
-  "preparacao": "...",
-  "dose_recomendada": "...",
-  "quem_pode_usar": [...],
-  "contraindicacoes": [...]
-}`;
+  "nome_popular": "Nome popular da planta (em português ou kimbundu se souberes)",
+  "nome_cientifico": "Nome científico",
+  "caracteristicas": "Descrição breve das folhas, flores ou frutos visíveis",
+  "usos_medicinais": "Usos tradicionais em Angola (se conhecidos)",
+  "preparacao": "Como preparar a planta para uso medicinal",
+  "dose_recomendada": "Dose habitual segura",
+  "quem_pode_usar": ["adultos", "crianças", ...],
+  "contraindicacoes": ["gestantes", ...]
+}
 
-    const text = await callGeminiVision(prompt, imagePart);
+Se a planta não for identificável, retorna { "erro": "Não foi possível identificar a planta." }`;
+
+    // Use Groq vision model (11B for more daily requests)
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            { type: "image_url", image_url: { url: imageUrl } }
+          ]
+        }
+      ],
+      model: "llama-3.2-11b-vision-preview",   // 14,400 RPD free; or use "llama-3.2-90b-vision-preview" for higher accuracy
+      temperature: 0.2,
+      max_tokens: 800,
+    });
+
+    const text = completion.choices[0]?.message?.content || "";
     const jsonStart = text.indexOf("{");
     const jsonEnd = text.lastIndexOf("}") + 1;
-    if (jsonStart === -1 || jsonEnd <= jsonStart) throw new Error("JSON inválido");
+    if (jsonStart === -1 || jsonEnd <= jsonStart) throw new Error("Resposta não contém JSON válido.");
     const data = JSON.parse(text.slice(jsonStart, jsonEnd));
 
+    // Allow the special error object from the AI
     return res.status(200).json(data);
   } catch (error) {
     console.error("Erro identificação:", error);
