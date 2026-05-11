@@ -79,12 +79,12 @@ function Screen({ children, title, subtitle }) {
         <div style={{ marginBottom: 28 }}>
           {title && (
             <h1 style={{
-              fontSize: 22, fontWeight: 700, color: '#0f1a12',
+              fontSize: 28, fontWeight: 700, color: '#0f1a12',
               letterSpacing: '-0.02em', fontFamily: 'Lora, Georgia, serif'
             }}>{title}</h1>
           )}
           {subtitle && (
-            <p style={{ fontSize: 13, color: '#6b7c6e', marginTop: 4, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 16, color: '#6b7c6e', marginTop: 4, lineHeight: 1.6 }}>
               {subtitle}
             </p>
           )}
@@ -229,8 +229,34 @@ function DiagnoseScreen() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro no chatbot');
-      const assistantReply = { role: 'assistant', content: data.reply };
-      setMessages(prev => [...prev, assistantReply]);
+
+      const reply = data.reply;
+      const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
+      const match = reply.match(jsonBlockRegex);
+      let displayText = reply;
+      let resultData = null;
+
+      if (match) {
+        displayText = reply.replace(jsonBlockRegex, '').trim();
+        try {
+          resultData = JSON.parse(match[1]);
+        } catch (jsonErr) {
+          console.warn('Failed to parse assistant JSON:', jsonErr);
+          displayText = reply;
+        }
+      }
+
+      if (displayText) {
+        setMessages(prev => [...prev, { role: 'assistant', content: displayText }]);
+      }
+
+      if (resultData && resultData.triage) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          type: 'result',
+          content: resultData
+        }]);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -253,6 +279,39 @@ function DiagnoseScreen() {
       <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'16px', minHeight:300, maxHeight:400, overflowY:'auto', marginBottom:16 }}>
         {messages.map((msg, idx) => {
           const isUser = msg.role === 'user';
+          if (msg.type === 'result') {
+            const { triage, urgentMessage, remedies } = msg.content;
+            return (
+              <div key={idx} style={{ marginBottom:12 }}>
+                {triage === 'red' && (
+                  <div style={{ background:'#fff0f0', border:'1.5px solid #f08080', borderRadius:14, padding:'14px', marginBottom:12, color:'#c0392b' }}>
+                    🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}
+                  </div>
+                )}
+                {triage === 'yellow' && (
+                  <div style={{ background:'#fff8e7', border:'1.5px solid #f4a261', borderRadius:14, padding:'14px', marginBottom:12, color:'#a64b2a' }}>
+                    ⚠️ <strong>Atenção:</strong> {urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}
+                  </div>
+                )}
+                {triage === 'green' && (
+                  <div style={{ background:'#e8f5ee', border:'1.5px solid #a0d8b8', borderRadius:14, padding:'14px', marginBottom:12, color:'#1a6b4a' }}>
+                    ✅ <strong>Situação estável:</strong> Siga as sugestões abaixo.
+                  </div>
+                )}
+                {remedies && remedies.map((r, idx2) => (
+                  <div key={idx2} style={{
+                    background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10
+                  }}>
+                    <h3 style={{ fontSize:16, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
+                    <p style={{ fontSize:12, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
+                    <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Dose:</strong> {r.dosage}</p>
+                    <p style={{ fontSize:12, color:'#9aa89c' }}><strong>Cuidados:</strong> {r.precautions}</p>
+                    <SpeakButton text={`${r.plantName}. Preparo: ${r.preparation}. Dose: ${r.dosage}. Cuidados: ${r.precautions}`} />
+                  </div>
+                ))}
+              </div>
+            );
+          }
           return (
             <div key={idx} style={{
               display:'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
@@ -304,7 +363,6 @@ function DiagnoseScreen() {
     </Screen>
   );
 }
-
 /* ─── SCREEN: Identificar Planta (real API) ────────────────────────────── */
 function IdentifyScreen() {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -460,7 +518,7 @@ function HomeScreen({ role, onNavigate }) {
         </div>
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
-        {[{ val:'142', label:'Plantas', sub:'catalogadas' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'27', label:'Províncias', sub:'cobertas' }].map(s => (
+        {[{ val:'100 mil', label:'Plantas', sub:'catalogadas' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
           <div key={s.label} style={{ background:'#f4f7f5', borderRadius:14, padding:'14px 12px', textAlign:'center' }}>
             <div style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{s.val}</div>
             <div style={{ fontSize:11, fontWeight:600, color:'#3d6b4f', marginTop:1 }}>{s.label}</div>
@@ -726,7 +784,6 @@ function SettingsScreen({ lang, setLang, largeFont, setLargeFont }) {
       <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-          { label:'Letra grande', sub: largeFont ? 'Ativado — Texto ampliado' : 'Desativado — Toque para ativar', action: ()=>setLargeFont(prev => !prev) },
           { label:'Alto contraste', sub:'Desativado — Para visão reduzida', action:()=>{} },
           { label:'Modo offline', sub:'Dados locais disponíveis', action:()=>{} },
         ].map((item,i,arr) => (
@@ -892,29 +949,26 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-        * { box-sizing:border-box; margin:0; padding:0; }
-        body { font-family:'DM Sans', sans-serif; }
-        h1,h2,h3 { font-family:'Lora', Georgia, serif; }
-        .large-font, .large-font * {
-          font-size: 160% !important;
-        }
-        @keyframes fadeUp {
-          from { opacity:0; transform:translateY(12px); }
-          to   { opacity:1; transform:translateY(0); }
-        }
-        @keyframes slideIn {
-          from { transform:translateX(-100%); }
-          to   { transform:translateX(0); }
-        }
-        @keyframes pulse {
-          0%,100% { opacity:1; }
-          50%      { opacity:0.5; }
-        }
-        ::-webkit-scrollbar { width:4px; }
-        ::-webkit-scrollbar-track { background:transparent; }
-        ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
-      `}</style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; }
+  h1,h2,h3 { font-family:'Lora', Georgia, serif; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideIn {
+    from { transform:translateX(-100%); }
+    to   { transform:translateX(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; }
+    50%      { opacity:0.5; }
+  }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
+`}</style>
 
       <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f7faf8', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={largeFont ? 'large-font' : ''}>
 
