@@ -51,7 +51,7 @@ Fornece a tua resposta **exclusivamente** no seguinte formato JSON válido, sem 
     // Use Groq chat completions with a fast text model
     const completion = await groq.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
-      model: "llama3-70b-8192",      // reliable and fast; you can also use "mixtral-8x7b-32768"
+      model: "llama-3.3-70b-versatile",     // reliable and fast; you can also use "mixtral-8x7b-32768"
       temperature: 0.3,
       max_tokens: 1024,
     });

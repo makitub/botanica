@@ -48,7 +48,7 @@ Se a planta não for identificável, retorna { "erro": "Não foi possível ident
           ]
         }
       ],
-      model: "llama-3.2-11b-vision-preview",   // 14,400 RPD free; or use "llama-3.2-90b-vision-preview" for higher accuracy
+     model: "meta-llama/llama-4-scout-17b-16e-instruct",   // 14,400 RPD free; or use "llama-3.2-90b-vision-preview" for higher accuracy
       temperature: 0.2,
       max_tokens: 800,
     });
