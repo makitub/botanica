@@ -72,6 +72,26 @@ async function getProvinceFromLatLng(lat, lng) {
 }
 
 /* ─── REUSABLE COMPONENTS ───────────────────────────────────────────────── */
+function SpeakButton({ text, label = 'Ouvir' }) {
+  const speak = () => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-PT';
+    utterance.rate = 0.8;
+    window.speechSynthesis.speak(utterance);
+  };
+  return (
+    <button onClick={speak} style={{
+      background:'none', border:'1px solid #1a9a60', borderRadius:8,
+      padding:'2px 8px', fontSize:11, color:'#1a9a60', cursor:'pointer',
+      marginLeft:8
+    }} title="Ouvir descrição">
+      🔊 {label}
+    </button>
+  );
+}
+
 function Screen({ children, title, subtitle }) {
   return (
     <div style={{ animation:'fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both' }}>
@@ -165,38 +185,53 @@ function Disclaimer() {
 
 /* ─── SCREEN: Autodiagnóstico (real API) ────────────────────────────────── */
 function DiagnoseScreen() {
-  const [symptoms, setSymptoms] = useState('');
-  const [result, setResult] = useState(null);
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }
+  ]);
+  const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [province, setProvince] = useState('');
 
-  const analyze = async () => {
-    if (!symptoms.trim()) return;
+  // Get province silently on mount
+  useEffect(() => {
+    (async () => {
+      let prov = 'Desconhecida';
+      if (navigator.geolocation) {
+        try {
+          const pos = await new Promise((resolve, reject) =>
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000, maximumAge: 300000 })
+          );
+          prov = await getProvinceFromLatLng(pos.coords.latitude, pos.coords.longitude);
+        } catch (geoErr) { console.warn('GPS error:', geoErr); }
+      }
+      setProvince(prov);
+    })();
+  }, []);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const newUserMsg = { role: 'user', content: input };
+    const updatedMessages = [...messages, newUserMsg];
+    setMessages(updatedMessages);
+    setInput('');
     setLoading(true);
     setError('');
-    setResult(null);
-
-    let prov = 'Desconhecida';
-    if (navigator.geolocation) {
-      try {
-        const pos = await new Promise((resolve, reject) =>
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000, maximumAge: 300000 })
-        );
-        prov = await getProvinceFromLatLng(pos.coords.latitude, pos.coords.longitude);
-      } catch (geoErr) { console.warn('GPS error:', geoErr); }
-    }
-    setProvince(prov);
 
     try {
-      const res = await fetch('/api/gemini-autodiagnose', {
+      const res = await fetch('/api/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symptoms, language: 'pt', province: prov })
+        body: JSON.stringify({
+          messages: updatedMessages,
+          province: province,
+          language: 'pt'
+        })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro na API');
-      setResult(data);
+      if (!res.ok) throw new Error(data.error || 'Erro no chatbot');
+      const assistantReply = { role: 'assistant', content: data.reply };
+      setMessages(prev => [...prev, assistantReply]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -204,61 +239,72 @@ function DiagnoseScreen() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
   return (
     <Screen>
-      <h1 style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif', letterSpacing:'-0.02em' }}>🩺 Autodiagnóstico</h1>
-      <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Descreva os seus sintomas em português ou Kimbundu</p>
+      <h1 style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
+      <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
       <Disclaimer />
-      <textarea rows={4} value={symptoms} onChange={e=>setSymptoms(e.target.value)}
-        placeholder="Ex: dor de cabeça, febre há 2 dias, cansaço… ou em Kimbundu: ngixi ya mutwe..."
-        style={{ width:'100%', padding:'14px 16px', fontSize:13, lineHeight:1.7,
-                 border:'1.5px solid #d4e0d8', borderRadius:14, resize:'vertical',
-                 background:'#fafcfa', color:'#0f1a12', fontFamily:'Georgia, serif',
-                 outline:'none', marginBottom:16 }}
-      />
-      <button onClick={analyze} disabled={!symptoms.trim() || loading}
-        style={{ width:'100%', padding:'14px', fontSize:14, fontWeight:700,
-                 background: symptoms.trim() && !loading ? '#1a9a60' : '#c8d8cc',
-                 color:'#fff', border:'none', borderRadius:14, cursor: symptoms.trim() ? 'pointer' : 'default',
-                 fontFamily:'Georgia, serif' }}>
-        {loading ? '🌿 Analisando...' : '✦ Analisar sintomas'}
-      </button>
-      {loading && <p style={{ textAlign:'center', color:'#6b9a74', marginTop:16 }}>A consultar a base de dados de medicina tradicional angolana...</p>}
-      {error && <div style={{ color:'#c0392b', marginTop:16, fontSize:12, background:'#fff0f0', padding:12, borderRadius:12 }}>{error}</div>}
-      {result && (
-        <div style={{ marginTop:20, animation:'fadeUp 0.4s ease both' }}>
-          {province && (
-            <div style={{ background:'#f0f4e8', padding:'8px 14px', borderRadius:12, marginBottom:12, fontSize:12, color:'#2d5a27' }}>
-              📍 Remédios baseados na flora de <strong>{province}</strong>
+      <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'16px', minHeight:300, maxHeight:400, overflowY:'auto', marginBottom:16 }}>
+        {messages.map((msg, idx) => {
+          const isUser = msg.role === 'user';
+          return (
+            <div key={idx} style={{
+              display:'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
+              marginBottom:12
+            }}>
+              <div style={{
+                maxWidth:'80%', padding:'10px 14px', borderRadius:14,
+                background: isUser ? '#1a9a60' : '#f0f4e8',
+                color: isUser ? '#fff' : '#0f1a12',
+                fontSize:13,
+                lineHeight:1.6,
+                whiteSpace:'pre-wrap',
+                wordBreak:'break-word'
+              }}>
+                {msg.content}
+              </div>
             </div>
-          )}
-          {result.triage === 'red' && (
-            <div style={{ background:'#fff0f0', border:'1.5px solid #f08080', borderRadius:14, padding:'14px', marginBottom:12, color:'#c0392b' }}>
-              🚨 <strong>Urgência:</strong> {result.urgentMessage || 'Procure atendimento hospitalar imediatamente!'}
-            </div>
-          )}
-          {result.triage === 'yellow' && (
-            <div style={{ background:'#fff8e7', border:'1.5px solid #f4a261', borderRadius:14, padding:'14px', marginBottom:12, color:'#a64b2a' }}>
-              ⚠️ Atenção: {result.urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}
-            </div>
-          )}
-          {result.remedies?.map((r, idx) => (
-            <div key={idx} style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10 }}>
-              <h3 style={{ fontSize:16, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
-              <p style={{ fontSize:12, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
-              <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Dose:</strong> {r.dosage}</p>
-              <p style={{ fontSize:12, color:'#9aa89c' }}><strong>Cuidados:</strong> {r.precautions}</p>
-            </div>
-          ))}
-          {(!result.remedies || result.remedies.length === 0) && (
-            <p style={{ color:'#6b7c6e' }}>Nenhum remédio natural encontrado. Consulte um médico.</p>
-          )}
-        </div>
-      )}
+          );
+        })}
+        {loading && (
+          <div style={{ textAlign:'center', color:'#6b9a74', padding:8 }}>
+            Ndembo está a pensar...
+          </div>
+        )}
+        {error && (
+          <div style={{ color:'#c0392b', fontSize:12, padding:8 }}>{error}</div>
+        )}
+      </div>
+      <div style={{ display:'flex', gap:10 }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Descreve os teus sintomas..."
+          style={{
+            flex:1, padding:'12px 14px', fontSize:13, border:'1.5px solid #d4e0d8',
+            borderRadius:14, background:'#fafcfa', color:'#0f1a12',
+            fontFamily:'Georgia, serif', outline:'none'
+          }}
+        />
+        <button onClick={sendMessage} disabled={loading || !input.trim()}
+          style={{
+            padding:'12px 18px', background: input.trim() ? '#1a9a60' : '#c8d8cc',
+            color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer'
+          }}>
+          Enviar
+        </button>
+      </div>
     </Screen>
   );
 }
-
 /* ─── SCREEN: Identificar Planta (real API) ────────────────────────────── */
 function IdentifyScreen() {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -710,6 +756,105 @@ function SettingsScreen({ lang, setLang }) {
   );
 }
 
+function HelpBot() {
+  const [open, setOpen] = useState(false);
+  const [topic, setTopic] = useState('welcome');
+
+  const topics = {
+    welcome: {
+      title: 'Bem‑vindo ao Comunidade Botânica Ispk',
+      text: 'Esta aplicação preserva o saber medicinal angolano. Podes identificar plantas, fazer um autodiagnóstico e ver tratamentos tradicionais. Usa o menu superior esquerdo para navegar. Ouve com atenção:'
+    },
+    diagnose: {
+      title: 'Autodiagnóstico com Ndembo',
+      text: 'Conversa com o curandeiro virtual. Ele vai perguntar sobre os teus sintomas e sugerir plantas medicinais da tua região. As sugestões não substituem um médico.'
+    },
+    identify: {
+      title: 'Identificar planta',
+      text: 'Tira uma foto da planta e a IA identifica o seu nome popular, científico e usos medicinais.'
+    },
+    plants: {
+      title: 'Plantas Medicinais',
+      text: 'Catálogo com todas as plantas registadas pelos anciãos angolanos. Pesquisa por nome português, kimbundu ou científico.'
+    },
+    treatments: {
+      title: 'Tratamentos tradicionais',
+      text: 'Lista de preparos transmitidos por anciãos. Cada um inclui a planta, o nome do ancião e a região.'
+    },
+    settings: {
+      title: 'Definições',
+      text: 'Podes trocar entre português e kimbundu, aumentar o tamanho da letra e ativar o modo alto contraste.'
+    }
+  };
+
+  const speak = (text) => {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-PT';
+    utterance.rate = 0.85;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  return (
+    <>
+      {/* Floating button */}
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          position:'fixed', bottom:20, right:20, width:52, height:52,
+          borderRadius:'50%', background:'#1a9a60', color:'#fff',
+          fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
+          cursor:'pointer', zIndex:1000
+        }}>
+        🌱
+      </button>
+
+      {/* Modal */}
+      {open && (
+        <div style={{
+          position:'fixed', inset:0, background:'rgba(0,0,0,0.5)',
+          display:'flex', justifyContent:'center', alignItems:'center',
+          zIndex:2000
+        }} onClick={() => setOpen(false)}>
+          <div style={{
+            background:'#fff', borderRadius:20, padding:'24px',
+            maxWidth:400, width:'90%', maxHeight:'80vh', overflowY:'auto'
+          }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontSize:20, fontFamily:'Lora, Georgia, serif', marginBottom:12 }}>
+              {topics[topic].title}
+            </h2>
+            <p style={{ fontSize:14, lineHeight:1.7, marginBottom:20, color:'#1f2e22' }}>
+              {topics[topic].text}
+            </p>
+            <button onClick={() => speak(topics[topic].text)}
+              style={{ marginBottom:12, padding:'8px 14px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:8, cursor:'pointer' }}>
+              🔊 Ouvir explicação
+            </button>
+
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              {Object.keys(topics).map(key => (
+                <button key={key} onClick={() => setTopic(key)}
+                  style={{
+                    padding:'6px 10px', background: topic===key ? '#1a9a60' : '#f0f4f1',
+                    color: topic===key ? '#fff' : '#0f1a12', border:'none',
+                    borderRadius:6, fontSize:11, cursor:'pointer'
+                  }}>
+                  {key==='welcome'?'Início':key==='diagnose'?'Autodiagnóstico':key==='identify'?'Identificar':key==='plants'?'Plantas':key==='treatments'?'Tratamentos':key==='settings'?'Definições':''}
+                </button>
+              ))}
+            </div>
+
+            <button onClick={() => setOpen(false)}
+              style={{ marginTop:16, padding:'8px 14px', background:'#e8ede9', border:'none', borderRadius:8, cursor:'pointer', width:'100%' }}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ─── BOTANICA UI (the whole visual shell) ──────────────────────────────── */
 function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, lang, setLang, sideRef, isAuthenticated, onLogout }) {
   const [largeFont, setLargeFont] = useState(false);
@@ -970,5 +1115,6 @@ export default function App() {
     <AuthProvider>
       <BotanicaApp />
     </AuthProvider>
+    <HelpBot />
   );
 }
