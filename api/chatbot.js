@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Método não permitido" });
 
   try {
-    const { messages, province, language } = req.body;
+    const { messages, province } = req.body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "Histórico de mensagens é obrigatório." });
@@ -24,32 +24,32 @@ export default async function handler(req, res) {
       throw new Error("GROQ_API_KEY não configurada.");
     }
 
-    // System prompt with medical instructions
-    const systemPrompt = `Tu és um assistente médico tradicional de Angola, chamado "Ndembo". O teu objetivo é conversar com o paciente, fazer perguntas para entender melhor os sintomas, e depois dar uma recomendação no formato JSON.
+    const systemPrompt = `Tu és um assistente médico tradicional de Angola, chamado "Ndembo".
+O teu objetivo é conversar com o paciente, fazer perguntas para entender os sintomas, e depois dar uma recomendação no formato JSON.
 A localização do paciente é: ${province && province !== 'Desconhecida' ? `província de ${province}, Angola` : 'Angola'}.
-Segue este protocolo:
+Protocolo:
 1. Começa por perguntar educadamente sobre os sintomas.
 2. Faz perguntas de acompanhamento (febre, dor, há quanto tempo, etc.).
-3. Quando tiveres informações suficientes, responde com o seguinte JSON EXACTO dentro de um bloco de código (```json):
+3. Quando tiveres informações suficientes, responde com o seguinte JSON dentro de \`\`\`json:
 {
   "triage": "green|yellow|red",
-  "urgentMessage": "mensagem de urgência (se aplicável)",
+  "urgentMessage": "mensagem de urgência",
   "remedies": [
     {
-      "plantName": "Nome popular da planta",
+      "plantName": "Nome popular",
       "preparation": "Modo de preparo",
       "dosage": "Dosagem",
       "precautions": "Contraindicações"
     }
   ]
 }
-4. Se os sintomas forem graves (triage red), diz ao paciente para ir ao hospital imediatamente e inclui a urgência.
-5. Mantém um tom acolhedor e respeitoso, usando palavras simples.`;
+4. Se os sintomas forem graves, diz ao paciente para ir ao hospital imediatamente.
+5. Mantém um tom acolhedor e usa palavras simples.`;
 
     const allMessages = [
       { role: "system", content: systemPrompt },
       ...messages.map(m => ({
-        role: m.role, // "user" or "assistant"
+        role: m.role,
         content: m.content
       }))
     ];
