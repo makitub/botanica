@@ -980,8 +980,9 @@ function PlantRemedyCard({ remedy }) {
     </div>
   );
 }
-function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout }) {
-  const navigate = onNavigate; 
+function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout, onNavigate }) {
+  // REMOVE the line: const navigate = onNavigate;
+
   const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({
     groupId, groupLabel,
     items: MENU.filter(m => m.group === groupId && m.roles.includes(role))
@@ -991,16 +992,10 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
 
   const renderScreen = () => {
     if (!canAccess(role, active)) {
-      return (
-        <div style={{ textAlign:'center', padding:'48px 20px' }}>
-          <div style={{ fontSize:48 }}>🔒</div>
-          <h2 style={{ fontSize:18, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>Acesso restrito</h2>
-          <p style={{ fontSize:13, color:'#6b7c6e' }}>Esta secção não está disponível para o perfil de <strong>{r.label}</strong>.</p>
-        </div>
-      );
+      // ... unchanged
     }
     switch(active) {
-      case 'home':       return <HomeScreen role={role} onNavigate={navigate}/>;
+      case 'home':       return <HomeScreen role={role} onNavigate={onNavigate}/>;  // use onNavigate directly
       case 'diagnose':   return <DiagnoseScreen/>;
       case 'plants':     return <PlantsScreen/>;
       case 'treatments': return <TreatmentsScreen/>;
