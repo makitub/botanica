@@ -922,6 +922,62 @@ function HelpBot() {
 }
 
 /* ─── BOTANICA UI (the whole visual shell) ──────────────────────────────── */
+/* ─── PLANT REMEDY CARD (com imagem real ou fallback) ──────────────────── */
+function PlantRemedyCard({ remedy }) {
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchImage() {
+      try {
+        const res = await fetch('/api/plant-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plantName: remedy.plantName })
+        });
+        const data = await res.json();
+        if (!cancelled && data.imageUrl) {
+          setImageUrl(data.imageUrl);
+        }
+      } catch (err) {
+        console.warn('Could not fetch plant image:', err);
+      }
+    }
+    fetchImage();
+    return () => { cancelled = true; };
+  }, [remedy.plantName]);
+
+  return (
+    <div style={{
+      background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10,
+      display:'flex', gap:16, alignItems:'flex-start'
+    }}>
+      {/* Imagem da planta */}
+      <div style={{
+        width:80, height:80, borderRadius:12, background:'#e6f7ee',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        flexShrink:0, overflow:'hidden'
+      }}>
+        {imageUrl ? (
+          <img src={imageUrl} alt={remedy.plantName} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+        ) : (
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='36' height='36'%3E%3Cpath fill='%230f8b4a' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E"
+            alt="Planta"
+            style={{ width:40, height:40 }}
+          />
+        )}
+      </div>
+      <div style={{ flex:1 }}>
+        <h3 style={{ fontSize:20, fontWeight:700, color:'#0a1a0d', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {remedy.plantName}</h3>
+        <p style={{ fontSize:16, color:'#3a4a3c', marginTop:4 }}><strong>Preparo:</strong> {remedy.preparation}</p>
+        <p style={{ fontSize:16, color:'#3a4a3c' }}><strong>Dose:</strong> {remedy.dosage}</p>
+        <p style={{ fontSize:16, color:'#3a4a3c' }}><strong>Cuidados:</strong> {remedy.precautions}</p>
+        <SpeakButton text={`${remedy.plantName}. Preparo: ${remedy.preparation}. Dose: ${remedy.dosage}. Cuidados: ${remedy.precautions}`} />
+      </div>
+    </div>
+  );
+}
 function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout }) {
   const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({
     groupId, groupLabel,
@@ -985,7 +1041,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
   ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
 `}</style>
 
-    <div style={{ width:'100%', maxWidth:480, ... }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
+    <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
 
         {/* Sidebar overlay */}
         {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(10,20,14,0.5)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
@@ -1129,7 +1185,6 @@ function BotanicaApp() {
   const [role, setRole] = useState('paciente');
   const [active, setActive] = useState('home');
   const [sideOpen, setSideOpen] = useState(false);
-  const [highContrast, setHighContrast] = useState(false);
   const [lang, setLang] = useState('pt');
   const [largeFont, setLargeFont] = useState(false);
   const sideRef = useRef(null);
@@ -1150,17 +1205,7 @@ function BotanicaApp() {
 
   if (!isAuthenticated && (role === 'admin' || role === 'tecnico')) {
     return (
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#f7faf8'
-                  .high-contrast, .high-contrast * {
-  background: #000 !important;
-  color: #fff !important;
-  border-color: #fff !important;
-}
-.high-contrast button {
-  background: #000 !important;
-  color: #ff0 !important;
-  border: 2px solid #ff0 !important;
-}}}>
+     <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#f7faf8' }}>
         <div style={{ maxWidth:400, width:'100%', padding:'2rem' }}>
           <h2 style={{ fontFamily:'Lora, Georgia, serif', textAlign:'center', marginBottom:'2rem' }}>🌿 Comunidade Botânica Ispk</h2>
           <LoginForm onLogin={handleLogin} />
@@ -1196,13 +1241,7 @@ function BotanicaApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <BotanicaApp
-  role={role}
-  ...
-  highContrast={highContrast}
-  setHighContrast={setHighContrast}
-  ...
-/>
+      <BotanicaApp />
     </AuthProvider>
   );
 }
