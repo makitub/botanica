@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginForm from './components/LoginForm';
+import { jsPDF } from "jspdf";
 
 /* ─── CONSTANTS ─────────────────────────────────────────────────────────── */
 const ROLES = {
@@ -16,7 +17,6 @@ const MENU = [
   { id:'plants',    label:'Plantas Medicinais',labelK:'Miti ya Buanga',   icon:'✦',  roles:['admin','tecnico','paciente'], group:'main'   },
   { id:'treatments',label:'Tratamentos',       labelK:'Buanga',           icon:'❋',  roles:['admin','tecnico','paciente'], group:'main'   },
   { id:'identify',  label:'Identificar Planta',labelK:'Zibula Muti',      icon:'◎',  roles:['admin','tecnico','paciente'], group:'main'   },
-  { id:'search',    label:'Pesquisa',          labelK:'Kambula',          icon:'⊕',  roles:['admin','tecnico','paciente'], group:'main'   },
   { id:'register',  label:'Registar Saber',    labelK:'Sonika Kijiji',    icon:'✎',  roles:['admin','tecnico'],            group:'field'  },
   { id:'media',     label:'Multimédia',        labelK:'Mambu',            icon:'◉',  roles:['admin','tecnico'],            group:'field'  },
   { id:'reports',   label:'Relatórios',        labelK:'Mavovo',           icon:'▦',  roles:['admin'],                      group:'admin'  },
@@ -185,13 +185,21 @@ function SpeakButton({ text, label = 'Ouvir' }) {
 
 /* ─── SCREEN: Chatbot Autodiagnóstico ──────────────────────────────────── */
 function DiagnoseScreen() {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem('diagnose_messages');
+    return saved ? JSON.parse(saved) : [
+      { role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }
+    ];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [province, setProvince] = useState('');
+
+  // Salvar sempre que as mensagens mudam
+  useEffect(() => {
+    localStorage.setItem('diagnose_messages', JSON.stringify(messages));
+  }, [messages]);
 
   useEffect(() => {
     (async () => {
@@ -271,10 +279,52 @@ function DiagnoseScreen() {
     }
   };
 
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(14);
+    doc.text("Comunidade Botânica Ispk - Autodiagnóstico", 10, 15);
+    doc.setFontSize(10);
+    doc.text(`Data: ${new Date().toLocaleString()}`, 10, 22);
+    doc.text(`Província: ${province}`, 10, 28);
+
+    let y = 40;
+    messages.forEach((msg) => {
+      const prefix = msg.role === 'user' ? 'Utente' : 'Ndembo';
+      const text = msg.type === 'result'
+        ? `${prefix}: [Recomendação final com triagem e remédios]`
+        : `${prefix}: ${msg.content}`;
+      
+      const lines = doc.splitTextToSize(text, 180);
+      if (y + lines.length * 6 > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFontSize(10);
+      doc.text(lines, 10, y);
+      y += lines.length * 6 + 4;
+    });
+
+    doc.save(`autodiagnostico_${new Date().toISOString().slice(0,10)}.pdf`);
+  };
+
+  const clearHistory = () => {
+    if (window.confirm('Apagar toda a conversa?')) {
+      setMessages([{ role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }]);
+      localStorage.removeItem('diagnose_messages');
+    }
+  };
+
   return (
     <Screen>
-      <h1 style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
-     <p style={{ fontSize:18, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+        <h1 style={{ fontSize:28, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
+        <div style={{ display:'flex', gap:8 }}>
+          <button onClick={clearHistory} style={{ background:'#f4f7f5', border:'1px solid #d4e0d8', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Apagar conversa">🗑️</button>
+          <button onClick={exportPDF} style={{ background:'#0f8b4a', color:'#fff', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Exportar PDF">📄 PDF</button>
+        </div>
+      </div>
+      <p style={{ fontSize:18, color:'#3a4a3c', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
       <Disclaimer />
       <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'16px', minHeight:300, maxHeight:400, overflowY:'auto', marginBottom:16 }}>
         {messages.map((msg, idx) => {
@@ -284,7 +334,7 @@ function DiagnoseScreen() {
             return (
               <div key={idx} style={{ marginBottom:12 }}>
                 {triage === 'red' && (
-                  <div style={{ background:'#fff0f0', border:'1.5px solid #fca5a5', borderRadius:14, padding:'14px', marginBottom:12, color:'#dc2626' }}>
+                  <div style={{ background:'#fee2e2', border:'1.5px solid #fca5a5', borderRadius:14, padding:'14px', marginBottom:12, color:'#dc2626' }}>
                     🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}
                   </div>
                 )}
@@ -299,35 +349,46 @@ function DiagnoseScreen() {
                   </div>
                 )}
                 {remedies && remedies.map((r, idx2) => (
-                  <div key={idx2} style={{
-                   background:'#ffffff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10
-                  }}>
-                  <h3 style={{ fontSize:20, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
-                  <p style={{ fontSize:16, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
-                  <p style={{ fontSize:16, color:'#6b7c6e' }}><strong>Dose:</strong> {r.dosage}</p>
-                  <p style={{ fontSize:16, color:'#9aa89c' }}><strong>Cuidados:</strong> {r.precautions}</p>
-                    <SpeakButton text={`${r.plantName}. Preparo: ${r.preparation}. Dose: ${r.dosage}. Cuidados: ${r.precautions}`} />
-                  </div>
+                  <PlantRemedyCard key={idx2} remedy={r} />
                 ))}
               </div>
             );
           }
           return (
             <div key={idx} style={{
-              display:'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
+              display:'flex', flexDirection:'column',
+              alignItems: isUser ? 'flex-end' : 'flex-start',
               marginBottom:12
             }}>
               <div style={{
                 maxWidth:'80%', padding:'10px 14px', borderRadius:14,
-                background: isUser ? '#1a9a60' : '#f0f4e8',
-                color: isUser ? '#fff' : '#0f1a12',
-               fontSize:16,
-               lineHeight:1.7,
+                background: isUser ? '#0f8b4a' : '#e6f7ee',
+                color: isUser ? '#fff' : '#0a1a0d',
+                fontSize:16,
+                lineHeight:1.7,
                 whiteSpace:'pre-wrap',
                 wordBreak:'break-word'
               }}>
                 {msg.content}
               </div>
+              {!isUser && (
+                <button
+                  onClick={() => {
+                    const utterance = new SpeechSynthesisUtterance(msg.content);
+                    utterance.lang = 'pt-PT';
+                    utterance.rate = 0.9;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                  }}
+                  style={{
+                    background:'none', border:'none', cursor:'pointer',
+                    fontSize:14, marginTop:4, color:'#0f8b4a'
+                  }}
+                  title="Ouvir mensagem"
+                >
+                  🔊
+                </button>
+              )}
             </div>
           );
         })}
@@ -337,7 +398,7 @@ function DiagnoseScreen() {
           </div>
         )}
         {error && (
-          <div style={{ color:'#c0392b', fontSize:12, padding:8 }}>{error}</div>
+          <div style={{ color:'#dc2626', fontSize:12, padding:8 }}>{error}</div>
         )}
       </div>
       <div style={{ display:'flex', gap:10 }}>
@@ -353,13 +414,13 @@ function DiagnoseScreen() {
           }}
         />
         <button onClick={sendMessage} disabled={loading || !input.trim()}
-        style={{
-          padding:'14px 24px', background: input.trim() ? '#1a9a60' : '#c8d8cc',
-          color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer',
-          fontSize:16
-        }}>
-        Enviar
-      </button>
+          style={{
+            padding:'14px 24px', background: input.trim() ? '#0f8b4a' : '#c8d8cc',
+            color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer',
+            fontSize:16
+          }}>
+          Enviar
+        </button>
       </div>
     </Screen>
   );
@@ -591,55 +652,6 @@ function TreatmentsScreen() {
           </div>
         </div>
       ))}
-    </Screen>
-  );
-}
-
-function SearchScreen() {
-  const [q, setQ] = useState('');
-  const trending = ['Febre','Malária','Dor de cabeça','Tosse','Moringa','Mulemba'];
-  const results = q.length > 1 ? PLANTS.filter(p =>
-    p.name.toLowerCase().includes(q.toLowerCase()) ||
-    p.use.toLowerCase().includes(q.toLowerCase()) ||
-    p.kimbundu.toLowerCase().includes(q.toLowerCase())
-  ) : [];
-
-  return (
-    <Screen title="Pesquisa" subtitle="Plantas, sintomas, doenças">
-      <div style={{ display:'flex', alignItems:'center', gap:10, background:'#f4f7f5', borderRadius:14, padding:'12px 16px', marginBottom:20 }}>
-        <span style={{ color:'#6b9a74', fontSize:16 }}>⊕</span>
-        <input value={q} onChange={e=>setQ(e.target.value)}
-          placeholder="Pesquisar em português ou Kimbundu..."
-          style={{ flex:1, border:'none', background:'transparent', fontSize:13, color:'#0f1a12', outline:'none', fontFamily:'Georgia, serif' }}
-          autoFocus
-        />
-        {q && <button onClick={()=>setQ('')} style={{ background:'none', border:'none', cursor:'pointer', color:'#9aa89c', fontSize:16 }}>×</button>}
-      </div>
-      {!q && (
-        <>
-          <p style={{ fontSize:11, fontWeight:700, color:'#9aa89c', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Pesquisas populares</p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-            {trending.map(t => (
-              <button key={t} onClick={()=>setQ(t)} style={{ padding:'7px 14px', background:'#fff', border:'1.5px solid #e0e8e2', borderRadius:20, fontSize:12, color:'#4a6b54', cursor:'pointer', fontFamily:'Georgia, serif' }}>{t}</button>
-            ))}
-          </div>
-        </>
-      )}
-      {results.length > 0 && (
-        <div>
-          <p style={{ fontSize:11, color:'#9aa89c', marginBottom:12 }}>{results.length} resultado(s) para "{q}"</p>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-            {results.map(p => <PlantCard key={p.id} plant={p} onClick={()=>{}} />)}
-          </div>
-        </div>
-      )}
-      {q.length > 1 && results.length === 0 && (
-        <div style={{ textAlign:'center', padding:32, color:'#9aa89c' }}>
-          <div style={{ fontSize:28, marginBottom:8 }}>✦</div>
-          <p style={{ fontSize:13 }}>Sem resultados para "{q}"</p>
-          <p style={{ fontSize:11, marginTop:4 }}>Tente em Kimbundu ou outro nome regional</p>
-        </div>
-      )}
     </Screen>
   );
 }
@@ -938,7 +950,6 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
       case 'plants':     return <PlantsScreen/>;
       case 'treatments': return <TreatmentsScreen/>;
       case 'identify':   return <IdentifyScreen/>;
-      case 'search':     return <SearchScreen/>;
       case 'register':   return <RegisterScreen/>;
       case 'reports':    return <ReportsScreen/>;
       case 'users':      return <UsersScreen/>;
@@ -1077,11 +1088,15 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
 
         {/* Bottom tab bar */}
         <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(255,255,255,0.95)', backdropFilter:'blur(12px)', borderTop:'1px solid #e8ede9', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px' }}>
-          {['home','plants','search','diagnose','settings']
-            .filter(id => id !== 'diagnose' || role === 'paciente' || role === 'admin' || role === 'tecnico')
-            .concat(role !== 'paciente' ? ['register'] : [])
-            .slice(0,5)
-            .map(id => {
+        {(() => {
+  const tabs = ['home', 'plants', 'diagnose', 'identify'];
+  if (role === 'paciente') {
+    tabs.push('settings');
+  } else {
+    tabs.push('register');
+  }
+  return tabs;
+})().map(id => {
               const item = MENU.find(m => m.id === id);
               if (!item) return null;
               const isActive = active === id;
