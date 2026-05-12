@@ -978,20 +978,13 @@ function PlantRemedyCard({ remedy }) {
     </div>
   );
 }
-function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout }) {
+function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout }) {
   const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({
     groupId, groupLabel,
     items: MENU.filter(m => m.group === groupId && m.roles.includes(role))
   })).filter(g => g.items.length > 0);
 
   const r = ROLES[role];
-
-  const navigate = (id) => {
-    if (canAccess(role, id)) {
-      setActive(id);
-      setSideOpen(false);
-    }
-  };
 
   const renderScreen = () => {
     if (!canAccess(role, active)) {
@@ -1101,7 +1094,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
                 {group.items.map(item => {
                   const isActive = active === item.id;
                   return (
-                    <div key={item.id} onClick={() => navigate(item.id)}
+                    <div key={item.id} onClick={() => onNavigate(item.id)}
                       style={{
                         display:'flex', alignItems:'center', gap:12,
                         padding:'10px 20px', cursor:'pointer',
@@ -1130,6 +1123,14 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
 
         {/* Top bar */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'#fff', borderBottom:'1px solid #e8ede9', position:'sticky', top:0, zIndex:30 }}>
+          {active !== 'home' && (
+          <button onClick={goBack} style={{
+          width:38, height:38, borderRadius:10, border:'1.5px solid #e8ede9',
+          background:'#fafcfa', cursor:'pointer', fontSize:18, color:'#4a6b54',
+          marginRight:8
+          }}>
+          ←
+          </button>)}
           <button onClick={()=>setSideOpen(o=>!o)} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #e8ede9', background:'#fafcfa', cursor:'pointer', fontSize:18, color:'#4a6b54' }}>☰</button>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <div style={{ width:8, height:8, borderRadius:'50%', background:'#1a9a60' }}/>
@@ -1160,7 +1161,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
               if (!item) return null;
               const isActive = active === id;
               return (
-                <button key={id} onClick={() => navigate(id)}
+                <button key={id} onClick={() => onNavigate(id)}
                   style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
                 <span style={{ fontSize:24, color: isActive ? '#0f8b4a' : '#8b7d6b' }}>{item.icon}</span>
                 <span style={{ fontSize:11, color: isActive ? '#0f8b4a' : '#6b5d4f', fontWeight: isActive ? 700 : 500 }}>
@@ -1189,6 +1190,42 @@ function BotanicaApp() {
   const [largeFont, setLargeFont] = useState(false);
   const sideRef = useRef(null);
 
+  const goBack = () => {
+  window.history.back();
+};
+  // Sincronização com histórico do navegador
+useEffect(() => {
+  const handlePopState = (e) => {
+    if (e.state && e.state.screen) {
+      setActive(e.state.screen);
+      setSideOpen(false);   // fecha a gaveta se estava aberta
+    }
+  };
+  window.addEventListener('popstate', handlePopState);
+  return () => window.removeEventListener('popstate', handlePopState);
+}, []);
+
+useEffect(() => {
+  // Quando o ecrã ativo muda, guardamos o estado no histórico SEMPRE que for uma navegação explícita
+  // (O pushState é chamado dentro da função navigate, não aqui)
+  // Mas podemos usar um efeito p/ garantir que a home inicial tenha um state
+  if (active === 'home') {
+    window.history.replaceState({ screen: active }, '', '');
+  }
+}, [active]);  
+
+  const navigate = (id) => {
+  if (!canAccess(role, id)) return;
+
+  // Só guarda uma nova entrada se o ecrã for diferente
+  if (id !== active) {
+    window.history.pushState({ screen: id }, '', `#${id}`);
+    setActive(id);
+    setSideOpen(false);
+    // Se voltar ao início, podemos limpar o estado anterior? O histórico do navegador já fica correcto.
+  }
+};
+  
   useEffect(() => {
     if (isAuthenticated) setRole(currentRole);
     else setRole('paciente');
@@ -1221,6 +1258,7 @@ function BotanicaApp() {
 
   return (
     <BotanicaUI
+      goBack={goBack}
       role={role}
       setRole={setRole}
       active={active}
