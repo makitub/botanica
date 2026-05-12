@@ -981,6 +981,7 @@ function PlantRemedyCard({ remedy }) {
   );
 }
 function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout }) {
+  const navigate = onNavigate; 
   const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({
     groupId, groupLabel,
     items: MENU.filter(m => m.group === groupId && m.roles.includes(role))
