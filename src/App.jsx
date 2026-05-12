@@ -673,29 +673,29 @@ function PlantsScreen() {
 function TreatmentsScreen() {
   return (
     <Screen title="Tratamentos" subtitle="Saberes ancestrais preservados · Buanga">
-      {TREATMENTS.map((t,i) => (
-       <div key={i} style={{
-        background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14,
-        padding:'16px 18px', marginBottom:10, cursor:'pointer',
-        transition:'all 0.15s',
-        width:'100%', maxWidth:400,   // centraliza e limita largura
-        marginLeft:'auto', marginRight:'auto'
-      }}
-        onMouseEnter={e=>{ e.currentTarget.style.borderColor='#a0d8b8'; e.currentTarget.style.background='#fafcfa'; }}
-        onMouseLeave={e=>{ e.currentTarget.style.borderColor='#e8ede9'; e.currentTarget.style.background='#fff'; }}>
-        {/* conteúdo igual ao anterior */}
-        <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>{t.name}</div>
-        <div style={{ fontSize:12, color:'#6b9a74', marginBottom:8 }}>✦ {t.plant} · {t.elder}</div>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-            {t.tags.map(tag => <Tag key={tag} label={tag} color='#1a6b4a'/>)}
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
+        {TREATMENTS.map((t,i) => (
+          <div key={i} style={{
+            background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14,
+            padding:'16px 18px', marginBottom:10, cursor:'pointer',
+            transition:'all 0.15s',
+            width:'100%', maxWidth:400,
+            marginLeft:'auto', marginRight:'auto'
+          }}
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor='#a0d8b8'; e.currentTarget.style.background='#fafcfa'; }}
+            onMouseLeave={e=>{ e.currentTarget.style.borderColor='#e8ede9'; e.currentTarget.style.background='#fff'; }}>
+            <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>{t.name}</div>
+            <div style={{ fontSize:12, color:'#6b9a74', marginBottom:8 }}>✦ {t.plant} · {t.elder}</div>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+                {t.tags.map(tag => <Tag key={tag} label={tag} color='#1a6b4a'/>)}
+              </div>
+              <span style={{ fontSize:11, color:'#b0bab2' }}>{t.region}</span>
+            </div>
           </div>
-          <span style={{ fontSize:11, color:'#b0bab2' }}>{t.region}</span>
-        </div>
+        ))}
       </div>
-    ))}
-  </div>
-</Screen>
+    </Screen>
   );
 }
 
