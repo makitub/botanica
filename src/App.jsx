@@ -32,12 +32,36 @@ const GROUPS = {
 };
 
 const PLANTS = [
-  { id:1, name:'Moringa',      sci:'Moringa oleifera',      use:'Nutritivo · Imunidade',    kimbundu:'Mukenga',   region:'Luanda',  confidence:97, treatments:14, color:'#2d7a4f' },
-  { id:2, name:'Boldo',        sci:'Peumus boldus',         use:'Digestivo · Fígado',        kimbundu:'Ntombo',    region:'Huambo',  confidence:94, treatments:8,  color:'#5a7a2d' },
-  { id:3, name:'Capim-limão',  sci:'Cymbopogon citratus',  use:'Ansiolítico · Febre',       kimbundu:'Nkasa',     region:'Malanje', confidence:91, treatments:11, color:'#7a6b2d' },
-  { id:4, name:'Quiabento',    sci:'Abelmoschus esculentus',use:'Anti-inflamatório',         kimbundu:'Kibondo',   region:'Cabinda', confidence:88, treatments:6,  color:'#2d5a7a' },
-  { id:5, name:'Mulemba',      sci:'Ficus thonningii',     use:'Malária · Dor',             kimbundu:'Mulemba',   region:'Bié',     confidence:96, treatments:19, color:'#7a2d5a' },
-  { id:6, name:'Nkasa',        sci:'Erythrophleum suaveol.',use:'Antibacteriano',            kimbundu:'Nkasa',     region:'Uíge',    confidence:82, treatments:5,  color:'#4a2d7a' },
+   { id:1,  name:'Moringa',            sci:'Moringa oleifera',        use:'Nutritivo, Imunidade',       kimbundu:'Mukenga',  region:'Luanda',  confidence:97, treatments:14, color:'#2d7a4f' },
+  { id:2,  name:'Boldo',              sci:'Peumus boldus',           use:'Digestivo, Fígado',          kimbundu:'Ntombo',   region:'Huambo',  confidence:94, treatments:8,  color:'#5a7a2d' },
+  { id:3,  name:'Capim-limão',        sci:'Cymbopogon citratus',    use:'Ansiolítico, Febre',         kimbundu:'Nkasa',    region:'Malanje', confidence:91, treatments:11, color:'#7a6b2d' },
+  { id:4,  name:'Quiabento',          sci:'Abelmoschus esculentus', use:'Anti-inflamatório',          kimbundu:'Kibondo',  region:'Cabinda', confidence:88, treatments:6,  color:'#2d5a7a' },
+  { id:5,  name:'Mulemba',            sci:'Ficus thonningii',       use:'Malária, Dor',               kimbundu:'Mulemba',  region:'Bié',     confidence:96, treatments:19, color:'#7a2d5a' },
+  { id:6,  name:'Nkasa',              sci:'Erythrophleum suaveol.', use:'Antibacteriano',             kimbundu:'Nkasa',    region:'Uíge',    confidence:82, treatments:5,  color:'#4a2d7a' },
+  { id:7,  name:'Gengibre',           sci:'Zingiber officinale',    use:'Anti‑inflamatório, Dor',     kimbundu:'Gengibre', region:'Luanda',  confidence:90, treatments:20, color:'#b8860b' },
+  { id:8,  name:'Alho',               sci:'Allium sativum',         use:'Antibiótico, Coração',       kimbundu:'Alho',     region:'Huíla',   confidence:95, treatments:30, color:'#8b7355' },
+  { id:9,  name:'Cebola',             sci:'Allium cepa',            use:'Expectorante, Diurético',    kimbundu:'Cebola',   region:'Benguela',confidence:88, treatments:12, color:'#d2b48c' },
+  { id:10, name:'Eucalipto',          sci:'Eucalyptus globulus',    use:'Respiratório, Febre',        kimbundu:'Eucalipto',region:'Huambo',  confidence:92, treatments:18, color:'#4682b4' },
+  { id:11, name:'Macela',             sci:'Achyrocline satureioides',use:'Digestivo, Calmante',      kimbundu:'Macela',   region:'Moxico',  confidence:85, treatments:7,  color:'#ffd700' },
+  { id:12, name:'Erva‑cidreira',      sci:'Melissa officinalis',    use:'Calmante, Sono',             kimbundu:'Cidreira', region:'Cuanza Sul',confidence:93, treatments:10, color:'#98fb98' },
+  { id:13, name:'Hortelã',            sci:'Mentha spicata',         use:'Digestivo, Náusea',          kimbundu:'Hortelã',  region:'Lunda Norte',confidence:89, treatments:9,  color:'#3cb371' },
+  { id:14, name:'Alecrim',            sci:'Rosmarinus officinalis', use:'Memória, Circulação',        kimbundu:'Alecrim',  region:'Namibe',  confidence:86, treatments:6,  color:'#6b8e23' },
+  { id:15, name:'Babosa',             sci:'Aloe vera',              use:'Queimaduras, Pele',          kimbundu:'Babosa',   region:'Cunene',  confidence:97, treatments:25, color:'#228b22' },
+  { id:16, name:'Nim',                sci:'Azadirachta indica',     use:'Antiparasitário, Pele',      kimbundu:'Nim',      region:'Cuando Cubango',confidence:83, treatments:4, color:'#556b2f' },
+  { id:17, name:'Jambolão',           sci:'Syzygium cumini',        use:'Diabetes, Inflamação',       kimbundu:'Jambolão', region:'Zaire',  confidence:80, treatments:3,  color:'#8b0000' },
+  { id:18, name:'Cajueiro',           sci:'Anacardium occidentale', use:'Anti‑inflamatório, Cicatrizante', kimbundu:'Caju',region:'Bengo', confidence:91, treatments:11, color:'#cd853f' },
+  { id:19, name:'Embaúba',            sci:'Cecropia pachystachya',  use:'Pressão alta, Diurético',    kimbundu:'Embaúba',  region:'Cabinda', confidence:78, treatments:4,  color:'#8fbc8f' },
+  { id:20, name:'Picão',              sci:'Bidens pilosa',          use:'Hepatite, Icterícia',        kimbundu:'Picão',    region:'Malanje', confidence:82, treatments:6,  color:'#daa520' },
+  { id:21, name:'Carqueja',           sci:'Baccharis trimera',      use:'Digestivo, Fígado',          kimbundu:'Carqueja', region:'Bié',    confidence:87, treatments:9,  color:'#bdb76b' },
+  { id:22, name:'Quebra‑pedra',       sci:'Phyllanthus niruri',     use:'Cálculo renal, Fígado',      kimbundu:'Quebra‑pedra',region:'Huíla',confidence:90, treatments:15, color:'#3cb371' },
+  { id:23, name:'Mastruz',            sci:'Chenopodium ambrosioides',use:'Vermífugo, Tosse',         kimbundu:'Mastruz',  region:'Luanda',  confidence:88, treatments:10, color:'#8b4513' },
+  { id:24, name:'Guabiroba',          sci:'Campomanesia xanthocarpa',use:'Anti‑inflamatório, Vitamina',kimbundu:'Guabiroba',region:'Cuanza Norte',confidence:76, treatments:4, color:'#f4a460' },
+  { id:25, name:'Pau‑ferro',          sci:'Libidibia ferrea',       use:'Cicatrizante, Tónico',       kimbundu:'Pau‑ferro',region:'Namibe',  confidence:81, treatments:5,  color:'#a0522d' },
+  { id:26, name:'Sucupira',           sci:'Pterodon emarginatus',   use:'Reumatismo, Dor',            kimbundu:'Sucupira', region:'Moxico',  confidence:79, treatments:7,  color:'#8b6508' },
+  { id:27, name:'Ipê‑roxo',           sci:'Handroanthus impetiginosus',use:'Anti‑inflamatório, Câncer',kimbundu:'Ipê',     region:'Bié',     confidence:84, treatments:6,  color:'#800080' },
+  { id:28, name:'Unha‑de‑gato',       sci:'Uncaria tomentosa',      use:'Imunidade, Inflamação',      kimbundu:'Unha‑de‑gato',region:'Lunda Sul',confidence:86, treatments:8, color:'#dc143c' },
+  { id:29, name:'Jatobá',             sci:'Hymenaea courbaril',     use:'Fortificante, Pulmão',       kimbundu:'Jatobá',   region:'Zaire',  confidence:83, treatments:5,  color:'#b22222' },
+  { id:30, name:'Copaíba',           sci:'Copaifera langsdorffii', use:'Cicatrizante, Anti‑inflamatório',kimbundu:'Copaíba',region:'Cabinda', confidence:92, treatments:12, color:'#2e8b57' },
 ];
 
 const TREATMENTS = [
@@ -358,44 +382,50 @@ function DiagnoseScreen() {
             );
           }
           return (
-            <div key={idx} style={{
-              display:'flex', flexDirection:'column',
-              alignItems: isUser ? 'flex-end' : 'flex-start',
-              marginBottom:12
-            }}>
-                <div style={{
-                maxWidth:'80%', padding:'10px 14px', borderRadius:14,
-                background: isUser ? '#0f8b4a' : '#e6f7ee',
-                color: isUser ? '#fff' : '#0a1a0d',
-                fontSize:16,
-                lineHeight:1.7,
-                whiteSpace:'pre-wrap',
-                wordBreak:'break-word',
-                border: isUser ? 'none' : '1px solid #a0d8b8',
-                boxShadow: isUser ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
-                }}>
-                {msg.content}
-              </div>
-              {!isUser && (
-                <button
-                  onClick={() => {
-                    const utterance = new SpeechSynthesisUtterance(msg.content);
-                    utterance.lang = 'pt-PT';
-                    utterance.rate = 0.9;
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.speak(utterance);
-                  }}
-                  style={{
-                    background:'none', border:'none', cursor:'pointer',
-                    fontSize:14, marginTop:4, color:'#0f8b4a'
-                  }}
-                  title="Ouvir mensagem"
-                >
-                  🔊
-                </button>
-              )}
-            </div>
-          );
+  <div key={idx} style={{
+    display:'flex',
+    alignItems:'flex-start',
+    gap:8,
+    marginBottom:16,
+    flexDirection: isUser ? 'row-reverse' : 'row'
+  }}>
+    {/* Avatar */}
+    <div style={{
+      width:32, height:32, borderRadius:'50%',
+      background: isUser ? '#0f8b4a' : '#a0d8b8',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      fontSize:16, flexShrink:0
+    }}>
+      {isUser ? '🎤' : '🌿'}
+    </div>
+    {/* Balão */}
+    <div style={{
+      maxWidth:'75%',
+      padding:'10px 14px',
+      borderRadius:16,
+      background: isUser ? '#0f8b4a' : '#e6f7ee',
+      color: isUser ? '#fff' : '#0a1a0d',
+      fontSize:16,
+      lineHeight:1.7,
+      whiteSpace:'pre-wrap',
+      wordBreak:'break-word',
+      borderBottomRightRadius: isUser ? 4 : 16,
+      borderBottomLeftRadius: isUser ? 16 : 4,
+      boxShadow: isUser ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
+    }}>
+      {msg.content}
+    </div>
+    {!isUser && (
+      <button
+        onClick={() => { /* ... áudio ... */ }}
+        style={{ background:'none', border:'none', cursor:'pointer', fontSize:14, color:'#0f8b4a', alignSelf:'flex-end', marginBottom:2 }}
+        title="Ouvir mensagem"
+      >
+        🔊
+      </button>
+    )}
+  </div>
+);
         })}
         {loading && (
           <div style={{ textAlign:'center', color:'#6b9a74', padding:8 }}>
@@ -508,7 +538,7 @@ function IdentifyScreen() {
 
   return (
     <Screen>
-      <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
+      <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Identificar plantas </h1>
       <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Tire uma foto da planta para identificação automática</p>
       {!previewUrl ? (
         <label style={{ display:'block', border:'2px dashed #a0d8b8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#f4faf6', marginBottom:16 }}>
@@ -644,20 +674,28 @@ function TreatmentsScreen() {
   return (
     <Screen title="Tratamentos" subtitle="Saberes ancestrais preservados · Buanga">
       {TREATMENTS.map((t,i) => (
-        <div key={i} style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px 18px', marginBottom:10, cursor:'pointer', transition:'all 0.15s' }}
-          onMouseEnter={e=>{ e.currentTarget.style.borderColor='#a0d8b8'; e.currentTarget.style.background='#fafcfa'; }}
-          onMouseLeave={e=>{ e.currentTarget.style.borderColor='#e8ede9'; e.currentTarget.style.background='#fff'; }}>
-          <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>{t.name}</div>
-          <div style={{ fontSize:12, color:'#6b9a74', marginBottom:8 }}>✦ {t.plant} · {t.elder}</div>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-              {t.tags.map(tag => <Tag key={tag} label={tag} color='#1a6b4a'/>)}
-            </div>
-            <span style={{ fontSize:11, color:'#b0bab2' }}>{t.region}</span>
+       <div key={i} style={{
+        background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14,
+        padding:'16px 18px', marginBottom:10, cursor:'pointer',
+        transition:'all 0.15s',
+        width:'100%', maxWidth:400,   // centraliza e limita largura
+        marginLeft:'auto', marginRight:'auto'
+      }}
+        onMouseEnter={e=>{ e.currentTarget.style.borderColor='#a0d8b8'; e.currentTarget.style.background='#fafcfa'; }}
+        onMouseLeave={e=>{ e.currentTarget.style.borderColor='#e8ede9'; e.currentTarget.style.background='#fff'; }}>
+        {/* conteúdo igual ao anterior */}
+        <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>{t.name}</div>
+        <div style={{ fontSize:12, color:'#6b9a74', marginBottom:8 }}>✦ {t.plant} · {t.elder}</div>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+            {t.tags.map(tag => <Tag key={tag} label={tag} color='#1a6b4a'/>)}
           </div>
+          <span style={{ fontSize:11, color:'#b0bab2' }}>{t.region}</span>
         </div>
-      ))}
-    </Screen>
+      </div>
+    ))}
+  </div>
+</Screen>
   );
 }
 
@@ -832,7 +870,7 @@ function HelpBot() {
 
   const topics = {
     welcome: {
-      title: 'Bem‑vindo ao Comunidade Botânica Ispk',
+      title: 'Bem‑vindo à Comunidade Botânica Ispk',
       text: 'Esta aplicação preserva o saber medicinal angolano. Podes identificar plantas, fazer um autodiagnóstico com o Ndembo, e ver tratamentos tradicionais. Usa o menu superior esquerdo para navegar. Ouve com atenção:'
     },
     diagnose: {
@@ -1032,7 +1070,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
   ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
 `}</style>
 
-    <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
+    <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight: '100vh', borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
 
         {/* Sidebar overlay */}
         {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(10,20,14,0.5)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
