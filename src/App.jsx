@@ -363,15 +363,17 @@ function DiagnoseScreen() {
               alignItems: isUser ? 'flex-end' : 'flex-start',
               marginBottom:12
             }}>
-              <div style={{
+                <div style={{
                 maxWidth:'80%', padding:'10px 14px', borderRadius:14,
                 background: isUser ? '#0f8b4a' : '#e6f7ee',
                 color: isUser ? '#fff' : '#0a1a0d',
                 fontSize:16,
                 lineHeight:1.7,
                 whiteSpace:'pre-wrap',
-                wordBreak:'break-word'
-              }}>
+                wordBreak:'break-word',
+                border: isUser ? 'none' : '1px solid #a0d8b8',
+                boxShadow: isUser ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
+                }}>
                 {msg.content}
               </div>
               {!isUser && (
@@ -518,9 +520,9 @@ function IdentifyScreen() {
       ) : (
         <div style={{ textAlign:'center', marginBottom:16 }}>
           <img src={previewUrl} alt="Preview" style={{ maxHeight:240, borderRadius:14, border:'1px solid #d4e0d8' }} />
-          <button onClick={() => { setPreviewUrl(null); setImageBase64(null); }} style={{ marginLeft:8, background:'#fff', border:'1px solid #d4e0d8', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
-            ✕ Remover
-          </button>
+         <button type="button" onClick={() => { setPreviewUrl(null); setImageBase64(null); setResult(null); }} style={{ marginLeft:8, background:'#fff', border:'1px solid #d4e0d8', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
+        ✕ Remover
+        </button>
         </div>
       )}
       {previewUrl && !result && (
@@ -625,8 +627,8 @@ function PlantsScreen() {
           style={{ flex:1, border:'none', background:'transparent', fontSize:13, color:'#0f1a12', outline:'none', fontFamily:'Georgia, serif' }}
         />
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-        {filtered.map(p => <PlantCard key={p.id} plant={p} onClick={()=>{}} />)}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, justifyItems:'center' }}>
+      {filtered.map(p => <PlantCard key={p.id} plant={p} onClick={()=>{}} />)}
       </div>
       {filtered.length === 0 && (
         <div style={{ textAlign:'center', padding:40, color:'#9aa89c' }}>
@@ -868,7 +870,7 @@ function HelpBot() {
       <button
         onClick={() => setOpen(true)}
         style={{
-          position:'fixed', bottom:20, right:20, width:52, height:52,
+          position:'fixed', bottom: 70, right:20, width:52, height:52,
           borderRadius:'50%', background:'#1a9a60', color:'#fff',
           fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
           cursor:'pointer', zIndex:1000
@@ -1147,7 +1149,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
         </div>
 
         {/* Bottom tab bar */}
-        <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(255,255,255,0.95)', backdropFilter:'blur(12px)', borderTop:'1px solid #e8ede9', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px' }}>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(255,255,255,0.95)', backdropFilter:'blur(12px)', borderTop:'1px solid #e8ede9', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px', zIndex:20 }}>
         {(() => {
   const tabs = ['home', 'plants', 'diagnose', 'identify'];
   if (role === 'paciente') {
@@ -1189,6 +1191,12 @@ function BotanicaApp() {
   const [lang, setLang] = useState('pt');
   const [largeFont, setLargeFont] = useState(false);
   const sideRef = useRef(null);
+
+  useEffect(() => {
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices(); // ativa o motor de voz
+  }
+}, []);
 
   const goBack = () => {
   window.history.back();
