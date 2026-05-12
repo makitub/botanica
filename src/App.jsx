@@ -229,8 +229,39 @@ function DiagnoseScreen() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro no chatbot');
-      const assistantReply = { role: 'assistant', content: data.reply };
-      setMessages(prev => [...prev, assistantReply]);
+
+      const reply = data.reply;
+      // Check if the reply contains a JSON block
+      const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
+      const match = reply.match(jsonBlockRegex);
+      let displayText = reply;
+      let resultData = null;
+
+      if (match) {
+        // Extract JSON block and remove it from the displayed text
+        displayText = reply.replace(jsonBlockRegex, '').trim();
+        try {
+          resultData = JSON.parse(match[1]);
+        } catch (jsonErr) {
+          console.warn('Failed to parse assistant JSON:', jsonErr);
+          // If parsing fails, just show the full reply
+          displayText = reply;
+        }
+      }
+
+      // Add the text message (if any text remains after removing JSON)
+      if (displayText) {
+        setMessages(prev => [...prev, { role: 'assistant', content: displayText }]);
+      }
+
+      // If we extracted a valid result, add a special result message
+      if (resultData && resultData.triage) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          type: 'result',
+          content: resultData
+        }]);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -253,6 +284,41 @@ function DiagnoseScreen() {
       <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'16px', minHeight:300, maxHeight:400, overflowY:'auto', marginBottom:16 }}>
         {messages.map((msg, idx) => {
           const isUser = msg.role === 'user';
+          // Special render for the result card
+          if (msg.type === 'result') {
+            const { triage, urgentMessage, remedies } = msg.content;
+            return (
+              <div key={idx} style={{ marginBottom:12 }}>
+                {triage === 'red' && (
+                  <div style={{ background:'#fff0f0', border:'1.5px solid #f08080', borderRadius:14, padding:'14px', marginBottom:12, color:'#c0392b' }}>
+                    🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}
+                  </div>
+                )}
+                {triage === 'yellow' && (
+                  <div style={{ background:'#fff8e7', border:'1.5px solid #f4a261', borderRadius:14, padding:'14px', marginBottom:12, color:'#a64b2a' }}>
+                    ⚠️ <strong>Atenção:</strong> {urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}
+                  </div>
+                )}
+                {triage === 'green' && (
+                  <div style={{ background:'#e8f5ee', border:'1.5px solid #a0d8b8', borderRadius:14, padding:'14px', marginBottom:12, color:'#1a6b4a' }}>
+                    ✅ <strong>Situação estável:</strong> Siga as sugestões abaixo.
+                  </div>
+                )}
+                {remedies && remedies.map((r, idx2) => (
+                  <div key={idx2} style={{
+                    background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10
+                  }}>
+                    <h3 style={{ fontSize:16, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
+                    <p style={{ fontSize:12, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
+                    <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Dose:</strong> {r.dosage}</p>
+                    <p style={{ fontSize:12, color:'#9aa89c' }}><strong>Cuidados:</strong> {r.precautions}</p>
+                    <SpeakButton text={`${r.plantName}. Preparo: ${r.preparation}. Dose: ${r.dosage}. Cuidados: ${r.precautions}`} />
+                  </div>
+                ))}
+              </div>
+            );
+          }
+          // Normal message bubble
           return (
             <div key={idx} style={{
               display:'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
