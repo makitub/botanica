@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginForm from './components/LoginForm';
+import { jsPDF } from "jspdf";
 
 /* ─── CONSTANTS ─────────────────────────────────────────────────────────── */
 const ROLES = {
@@ -16,7 +17,6 @@ const MENU = [
   { id:'plants',    label:'Plantas Medicinais',labelK:'Miti ya Buanga',   icon:'✦',  roles:['admin','tecnico','paciente'], group:'main'   },
   { id:'treatments',label:'Tratamentos',       labelK:'Buanga',           icon:'❋',  roles:['admin','tecnico','paciente'], group:'main'   },
   { id:'identify',  label:'Identificar Planta',labelK:'Zibula Muti',      icon:'◎',  roles:['admin','tecnico','paciente'], group:'main'   },
-  { id:'search',    label:'Pesquisa',          labelK:'Kambula',          icon:'⊕',  roles:['admin','tecnico','paciente'], group:'main'   },
   { id:'register',  label:'Registar Saber',    labelK:'Sonika Kijiji',    icon:'✎',  roles:['admin','tecnico'],            group:'field'  },
   { id:'media',     label:'Multimédia',        labelK:'Mambu',            icon:'◉',  roles:['admin','tecnico'],            group:'field'  },
   { id:'reports',   label:'Relatórios',        labelK:'Mavovo',           icon:'▦',  roles:['admin'],                      group:'admin'  },
@@ -79,12 +79,12 @@ function Screen({ children, title, subtitle }) {
         <div style={{ marginBottom: 28 }}>
           {title && (
             <h1 style={{
-              fontSize: 22, fontWeight: 700, color: '#0f1a12',
+              fontSize: 28, fontWeight: 700, color: '#0f1a12',
               letterSpacing: '-0.02em', fontFamily: 'Lora, Georgia, serif'
             }}>{title}</h1>
           )}
           {subtitle && (
-            <p style={{ fontSize: 13, color: '#6b7c6e', marginTop: 4, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 18, color: '#6b7c6e', marginTop: 4, lineHeight: 1.6 }}>
               {subtitle}
             </p>
           )}
@@ -127,7 +127,7 @@ function PlantCard({ plant, onClick }) {
       </div>
       <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', marginBottom:2, fontFamily:'Georgia, serif' }}>{plant.name}</div>
       <div style={{ fontSize:11, color:'#9aa89c', fontStyle:'italic', marginBottom:6 }}>{plant.sci}</div>
-      <div style={{ fontSize:11, color:'#6b7c6e', marginBottom:8 }}>{plant.use}</div>
+      <div style={{ fontSize:11, color:'#3a4a3c', marginBottom:8 }}>{plant.use}</div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <span style={{ fontSize:11, color:'#9aa89c' }}>
           <span style={{ color: plant.color, fontWeight:600 }}>{plant.kimbundu}</span> · {plant.region}
@@ -138,7 +138,7 @@ function PlantCard({ plant, onClick }) {
   );
 }
 
-function Tag({ label, color = '#1a9a60' }) {
+function Tag({ label, color = '#0f8b4a' }) {
   return (
     <span style={{
       fontSize: 10, fontWeight: 600, color,
@@ -185,13 +185,21 @@ function SpeakButton({ text, label = 'Ouvir' }) {
 
 /* ─── SCREEN: Chatbot Autodiagnóstico ──────────────────────────────────── */
 function DiagnoseScreen() {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem('diagnose_messages');
+    return saved ? JSON.parse(saved) : [
+      { role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }
+    ];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [province, setProvince] = useState('');
+
+  // Salvar sempre que as mensagens mudam
+  useEffect(() => {
+    localStorage.setItem('diagnose_messages', JSON.stringify(messages));
+  }, [messages]);
 
   useEffect(() => {
     (async () => {
@@ -231,30 +239,25 @@ function DiagnoseScreen() {
       if (!res.ok) throw new Error(data.error || 'Erro no chatbot');
 
       const reply = data.reply;
-      // Check if the reply contains a JSON block
       const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
       const match = reply.match(jsonBlockRegex);
       let displayText = reply;
       let resultData = null;
 
       if (match) {
-        // Extract JSON block and remove it from the displayed text
         displayText = reply.replace(jsonBlockRegex, '').trim();
         try {
           resultData = JSON.parse(match[1]);
         } catch (jsonErr) {
           console.warn('Failed to parse assistant JSON:', jsonErr);
-          // If parsing fails, just show the full reply
           displayText = reply;
         }
       }
 
-      // Add the text message (if any text remains after removing JSON)
       if (displayText) {
         setMessages(prev => [...prev, { role: 'assistant', content: displayText }]);
       }
 
-      // If we extracted a valid result, add a special result message
       if (resultData && resultData.triage) {
         setMessages(prev => [...prev, {
           role: 'assistant',
@@ -276,65 +279,116 @@ function DiagnoseScreen() {
     }
   };
 
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(14);
+    doc.text("Comunidade Botânica Ispk - Autodiagnóstico", 10, 15);
+    doc.setFontSize(10);
+    doc.text(`Data: ${new Date().toLocaleString()}`, 10, 22);
+    doc.text(`Província: ${province}`, 10, 28);
+
+    let y = 40;
+    messages.forEach((msg) => {
+      const prefix = msg.role === 'user' ? 'Utente' : 'Ndembo';
+      const text = msg.type === 'result'
+        ? `${prefix}: [Recomendação final com triagem e remédios]`
+        : `${prefix}: ${msg.content}`;
+      
+      const lines = doc.splitTextToSize(text, 180);
+      if (y + lines.length * 6 > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFontSize(10);
+      doc.text(lines, 10, y);
+      y += lines.length * 6 + 4;
+    });
+
+    doc.save(`autodiagnostico_${new Date().toISOString().slice(0,10)}.pdf`);
+  };
+
+  const clearHistory = () => {
+    if (window.confirm('Apagar toda a conversa?')) {
+      setMessages([{ role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }]);
+      localStorage.removeItem('diagnose_messages');
+    }
+  };
+
   return (
     <Screen>
-      <h1 style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
-      <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+        <h1 style={{ fontSize:28, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
+        <div style={{ display:'flex', gap:8 }}>
+          <button onClick={clearHistory} style={{ background:'#f4f7f5', border:'1px solid #d4e0d8', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Apagar conversa">🗑️</button>
+          <button onClick={exportPDF} style={{ background:'#0f8b4a', color:'#fff', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Exportar PDF">📄 PDF</button>
+        </div>
+      </div>
+      <p style={{ fontSize:18, color:'#3a4a3c', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
       <Disclaimer />
       <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'16px', minHeight:300, maxHeight:400, overflowY:'auto', marginBottom:16 }}>
         {messages.map((msg, idx) => {
           const isUser = msg.role === 'user';
-          // Special render for the result card
           if (msg.type === 'result') {
             const { triage, urgentMessage, remedies } = msg.content;
             return (
               <div key={idx} style={{ marginBottom:12 }}>
                 {triage === 'red' && (
-                  <div style={{ background:'#fff0f0', border:'1.5px solid #f08080', borderRadius:14, padding:'14px', marginBottom:12, color:'#c0392b' }}>
+                  <div style={{ background:'#fee2e2', border:'1.5px solid #fca5a5', borderRadius:14, padding:'14px', marginBottom:12, color:'#dc2626' }}>
                     🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}
                   </div>
                 )}
                 {triage === 'yellow' && (
-                  <div style={{ background:'#fff8e7', border:'1.5px solid #f4a261', borderRadius:14, padding:'14px', marginBottom:12, color:'#a64b2a' }}>
+                  <div style={{ background:'#fffbeb', border:'1.5px solid #d97706', borderRadius:14, padding:'14px', marginBottom:12, color:'#92400e' }}>
                     ⚠️ <strong>Atenção:</strong> {urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}
                   </div>
                 )}
                 {triage === 'green' && (
-                  <div style={{ background:'#e8f5ee', border:'1.5px solid #a0d8b8', borderRadius:14, padding:'14px', marginBottom:12, color:'#1a6b4a' }}>
+                  <div style={{ background:'#d1fae5', border:'1.5px solid #6ee7b7', borderRadius:14, padding:'14px', marginBottom:12, color:'#065f46' }}>
                     ✅ <strong>Situação estável:</strong> Siga as sugestões abaixo.
                   </div>
                 )}
                 {remedies && remedies.map((r, idx2) => (
-                  <div key={idx2} style={{
-                    background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10
-                  }}>
-                    <h3 style={{ fontSize:16, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {r.plantName}</h3>
-                    <p style={{ fontSize:12, color:'#6b7c6e', marginTop:4 }}><strong>Preparo:</strong> {r.preparation}</p>
-                    <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Dose:</strong> {r.dosage}</p>
-                    <p style={{ fontSize:12, color:'#9aa89c' }}><strong>Cuidados:</strong> {r.precautions}</p>
-                    <SpeakButton text={`${r.plantName}. Preparo: ${r.preparation}. Dose: ${r.dosage}. Cuidados: ${r.precautions}`} />
-                  </div>
+                  <PlantRemedyCard key={idx2} remedy={r} />
                 ))}
               </div>
             );
           }
-          // Normal message bubble
           return (
             <div key={idx} style={{
-              display:'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
+              display:'flex', flexDirection:'column',
+              alignItems: isUser ? 'flex-end' : 'flex-start',
               marginBottom:12
             }}>
               <div style={{
                 maxWidth:'80%', padding:'10px 14px', borderRadius:14,
-                background: isUser ? '#1a9a60' : '#f0f4e8',
-                color: isUser ? '#fff' : '#0f1a12',
-                fontSize:13,
-                lineHeight:1.6,
+                background: isUser ? '#0f8b4a' : '#e6f7ee',
+                color: isUser ? '#fff' : '#0a1a0d',
+                fontSize:16,
+                lineHeight:1.7,
                 whiteSpace:'pre-wrap',
                 wordBreak:'break-word'
               }}>
                 {msg.content}
               </div>
+              {!isUser && (
+                <button
+                  onClick={() => {
+                    const utterance = new SpeechSynthesisUtterance(msg.content);
+                    utterance.lang = 'pt-PT';
+                    utterance.rate = 0.9;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                  }}
+                  style={{
+                    background:'none', border:'none', cursor:'pointer',
+                    fontSize:14, marginTop:4, color:'#0f8b4a'
+                  }}
+                  title="Ouvir mensagem"
+                >
+                  🔊
+                </button>
+              )}
             </div>
           );
         })}
@@ -344,7 +398,7 @@ function DiagnoseScreen() {
           </div>
         )}
         {error && (
-          <div style={{ color:'#c0392b', fontSize:12, padding:8 }}>{error}</div>
+          <div style={{ color:'#dc2626', fontSize:12, padding:8 }}>{error}</div>
         )}
       </div>
       <div style={{ display:'flex', gap:10 }}>
@@ -354,15 +408,16 @@ function DiagnoseScreen() {
           onKeyDown={handleKeyDown}
           placeholder="Descreve os teus sintomas..."
           style={{
-            flex:1, padding:'12px 14px', fontSize:13, border:'1.5px solid #d4e0d8',
+            flex:1, padding:'14px 18px', fontSize:16, border:'1.5px solid #d4e0d8',
             borderRadius:14, background:'#fafcfa', color:'#0f1a12',
             fontFamily:'Georgia, serif', outline:'none'
           }}
         />
         <button onClick={sendMessage} disabled={loading || !input.trim()}
           style={{
-            padding:'12px 18px', background: input.trim() ? '#1a9a60' : '#c8d8cc',
-            color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer'
+            padding:'14px 24px', background: input.trim() ? '#0f8b4a' : '#c8d8cc',
+            color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer',
+            fontSize:16
           }}>
           Enviar
         </button>
@@ -370,7 +425,6 @@ function DiagnoseScreen() {
     </Screen>
   );
 }
-
 /* ─── SCREEN: Identificar Planta (real API) ────────────────────────────── */
 function IdentifyScreen() {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -449,7 +503,7 @@ function IdentifyScreen() {
 
   return (
     <Screen>
-      <h1 style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Planta</h1>
+      <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
       <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Tire uma foto da planta para identificação automática</p>
       {!previewUrl ? (
         <label style={{ display:'block', border:'2px dashed #a0d8b8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#f4faf6', marginBottom:16 }}>
@@ -472,7 +526,7 @@ function IdentifyScreen() {
         </button>
       )}
       {loading && <p style={{ textAlign:'center', color:'#6b9a74', marginTop:12 }}>Processando imagem com IA...</p>}
-      {error && <div style={{ color:'#c0392b', marginTop:16, fontSize:12, background:'#fff0f0', padding:12, borderRadius:12 }}>{error}</div>}
+      {error && <div style={{ color:'#c0392b', marginTop:16, fontSize:12, background:'#fee2e2', padding:12, borderRadius:12 }}>{error}</div>}
       {result && !result.erro && (
         <div style={{ marginTop:20, border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden' }}>
           <div style={{ background:'#1a6b4a', color:'#fff', padding:'16px 20px', fontFamily:'Georgia, serif' }}>
@@ -526,7 +580,7 @@ function HomeScreen({ role, onNavigate }) {
         </div>
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
-        {[{ val:'142', label:'Plantas', sub:'catalogadas' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'27', label:'Províncias', sub:'cobertas' }].map(s => (
+        {[{ val:'100 mil', label:'Plantas', sub:'catalogadas' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
           <div key={s.label} style={{ background:'#f4f7f5', borderRadius:14, padding:'14px 12px', textAlign:'center' }}>
             <div style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{s.val}</div>
             <div style={{ fontSize:11, fontWeight:600, color:'#3d6b4f', marginTop:1 }}>{s.label}</div>
@@ -598,55 +652,6 @@ function TreatmentsScreen() {
           </div>
         </div>
       ))}
-    </Screen>
-  );
-}
-
-function SearchScreen() {
-  const [q, setQ] = useState('');
-  const trending = ['Febre','Malária','Dor de cabeça','Tosse','Moringa','Mulemba'];
-  const results = q.length > 1 ? PLANTS.filter(p =>
-    p.name.toLowerCase().includes(q.toLowerCase()) ||
-    p.use.toLowerCase().includes(q.toLowerCase()) ||
-    p.kimbundu.toLowerCase().includes(q.toLowerCase())
-  ) : [];
-
-  return (
-    <Screen title="Pesquisa" subtitle="Plantas, sintomas, doenças">
-      <div style={{ display:'flex', alignItems:'center', gap:10, background:'#f4f7f5', borderRadius:14, padding:'12px 16px', marginBottom:20 }}>
-        <span style={{ color:'#6b9a74', fontSize:16 }}>⊕</span>
-        <input value={q} onChange={e=>setQ(e.target.value)}
-          placeholder="Pesquisar em português ou Kimbundu..."
-          style={{ flex:1, border:'none', background:'transparent', fontSize:13, color:'#0f1a12', outline:'none', fontFamily:'Georgia, serif' }}
-          autoFocus
-        />
-        {q && <button onClick={()=>setQ('')} style={{ background:'none', border:'none', cursor:'pointer', color:'#9aa89c', fontSize:16 }}>×</button>}
-      </div>
-      {!q && (
-        <>
-          <p style={{ fontSize:11, fontWeight:700, color:'#9aa89c', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Pesquisas populares</p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-            {trending.map(t => (
-              <button key={t} onClick={()=>setQ(t)} style={{ padding:'7px 14px', background:'#fff', border:'1.5px solid #e0e8e2', borderRadius:20, fontSize:12, color:'#4a6b54', cursor:'pointer', fontFamily:'Georgia, serif' }}>{t}</button>
-            ))}
-          </div>
-        </>
-      )}
-      {results.length > 0 && (
-        <div>
-          <p style={{ fontSize:11, color:'#9aa89c', marginBottom:12 }}>{results.length} resultado(s) para "{q}"</p>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-            {results.map(p => <PlantCard key={p.id} plant={p} onClick={()=>{}} />)}
-          </div>
-        </div>
-      )}
-      {q.length > 1 && results.length === 0 && (
-        <div style={{ textAlign:'center', padding:32, color:'#9aa89c' }}>
-          <div style={{ fontSize:28, marginBottom:8 }}>✦</div>
-          <p style={{ fontSize:13 }}>Sem resultados para "{q}"</p>
-          <p style={{ fontSize:11, marginTop:4 }}>Tente em Kimbundu ou outro nome regional</p>
-        </div>
-      )}
     </Screen>
   );
 }
@@ -792,7 +797,6 @@ function SettingsScreen({ lang, setLang, largeFont, setLargeFont }) {
       <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-          { label:'Letra grande', sub: largeFont ? 'Ativado — Texto ampliado' : 'Desativado — Toque para ativar', action: ()=>setLargeFont(prev => !prev) },
           { label:'Alto contraste', sub:'Desativado — Para visão reduzida', action:()=>{} },
           { label:'Modo offline', sub:'Dados locais disponíveis', action:()=>{} },
         ].map((item,i,arr) => (
@@ -946,7 +950,6 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
       case 'plants':     return <PlantsScreen/>;
       case 'treatments': return <TreatmentsScreen/>;
       case 'identify':   return <IdentifyScreen/>;
-      case 'search':     return <SearchScreen/>;
       case 'register':   return <RegisterScreen/>;
       case 'reports':    return <ReportsScreen/>;
       case 'users':      return <UsersScreen/>;
@@ -958,31 +961,28 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-        * { box-sizing:border-box; margin:0; padding:0; }
-        body { font-family:'DM Sans', sans-serif; }
-        h1,h2,h3 { font-family:'Lora', Georgia, serif; }
-        .large-font, .large-font * {
-          font-size: 160% !important;
-        }
-        @keyframes fadeUp {
-          from { opacity:0; transform:translateY(12px); }
-          to   { opacity:1; transform:translateY(0); }
-        }
-        @keyframes slideIn {
-          from { transform:translateX(-100%); }
-          to   { transform:translateX(0); }
-        }
-        @keyframes pulse {
-          0%,100% { opacity:1; }
-          50%      { opacity:0.5; }
-        }
-        ::-webkit-scrollbar { width:4px; }
-        ::-webkit-scrollbar-track { background:transparent; }
-        ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
-      `}</style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; }
+  h1,h2,h3 { font-family:'Lora', Georgia, serif; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideIn {
+    from { transform:translateX(-100%); }
+    to   { transform:translateX(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; }
+    50%      { opacity:0.5; }
+  }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
+`}</style>
 
-      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f7faf8', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={largeFont ? 'large-font' : ''}>
+      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={largeFont ? 'large-font' : ''}>
 
         {/* Sidebar overlay */}
         {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(10,20,14,0.5)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
@@ -993,7 +993,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
               <div style={{ width:36, height:36, borderRadius:10, background:'#0d5c3a', color:'#a0e8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>✦</div>
               <div>
-                <div style={{ fontSize:16, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>Botanica</div>
+                <div style={{ fontSize:16, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>Botanica</div>
                 <div style={{ fontSize:10, color:'#9aa89c' }}>Comunidade Ispk</div>
               </div>
             </div>
@@ -1046,7 +1046,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
                       style={{
                         display:'flex', alignItems:'center', gap:12,
                         padding:'10px 20px', cursor:'pointer',
-                        background: isActive ? '#f0faf5' : 'transparent',
+                        background: isActive ? '#e6f7ee' : 'transparent',
                         borderLeft: isActive ? '3px solid #1a9a60' : '3px solid transparent',
                         transition:'all 0.12s'
                       }}>
@@ -1088,19 +1088,23 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
 
         {/* Bottom tab bar */}
         <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(255,255,255,0.95)', backdropFilter:'blur(12px)', borderTop:'1px solid #e8ede9', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px' }}>
-          {['home','plants','search','diagnose','settings']
-            .filter(id => id !== 'diagnose' || role === 'paciente' || role === 'admin' || role === 'tecnico')
-            .concat(role !== 'paciente' ? ['register'] : [])
-            .slice(0,5)
-            .map(id => {
+        {(() => {
+  const tabs = ['home', 'plants', 'diagnose', 'identify'];
+  if (role === 'paciente') {
+    tabs.push('settings');
+  } else {
+    tabs.push('register');
+  }
+  return tabs;
+})().map(id => {
               const item = MENU.find(m => m.id === id);
               if (!item) return null;
               const isActive = active === id;
               return (
                 <button key={id} onClick={() => navigate(id)}
                   style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
-                  <span style={{ fontSize:18, color: isActive ? '#1a9a60' : '#9aa89c' }}>{item.icon}</span>
-                  <span style={{ fontSize:9, color: isActive ? '#1a9a60' : '#b0bab2', fontWeight: isActive ? 700 : 400 }}>
+                 <span style={{ fontSize:28, color: isActive ? '#1a9a60' : '#9aa89c' }}>{item.icon}</span>
+<span style={{ fontSize:13, color: isActive ? '#1a9a60' : '#b0bab2', fontWeight: isActive ? 700 : 400 }}>
                     {lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}
                   </span>
                 </button>
