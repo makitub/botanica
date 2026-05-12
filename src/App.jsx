@@ -97,6 +97,8 @@ function Screen({ children, title, subtitle }) {
 
 function PlantCard({ plant, onClick }) {
   const [hov, setHov] = useState(false);
+  const leafSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='${encodeURIComponent(plant.color)}' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E`;
+
   return (
     <div
       onClick={onClick}
@@ -106,33 +108,34 @@ function PlantCard({ plant, onClick }) {
         background: hov ? '#f9faf7' : '#fff',
         border: `1.5px solid ${hov ? plant.color + '44' : '#e8ede9'}`,
         borderRadius: 16,
-        padding: '18px 20px',
+        padding: '16px',
         cursor: 'pointer',
         transition: 'all 0.18s ease',
         transform: hov ? 'translateY(-2px)' : 'none',
         boxShadow: hov ? `0 8px 24px ${plant.color}18` : 'none',
+        display: 'flex',
+        gap: 12,
+        alignItems: 'center',
       }}
     >
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
-        <div style={{
-          width:40, height:40, borderRadius:12,
-          background: plant.color + '18',
-          display:'flex', alignItems:'center', justifyContent:'center',
-          fontSize:20, color: plant.color
-        }}>✦</div>
-        <span style={{
-          fontSize:11, fontWeight:600, color: plant.color,
-          background: plant.color + '14', borderRadius:8, padding:'3px 8px'
-        }}>{plant.confidence}% confiança</span>
+      <div style={{
+        width: 56, height: 56, borderRadius: 14,
+        background: plant.color + '18',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0
+      }}>
+        <img src={leafSvg} alt="" style={{ width: 36, height: 36 }} />
       </div>
-      <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', marginBottom:2, fontFamily:'Georgia, serif' }}>{plant.name}</div>
-      <div style={{ fontSize:11, color:'#9aa89c', fontStyle:'italic', marginBottom:6 }}>{plant.sci}</div>
-      <div style={{ fontSize:11, color:'#3a4a3c', marginBottom:8 }}>{plant.use}</div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <span style={{ fontSize:11, color:'#9aa89c' }}>
-          <span style={{ color: plant.color, fontWeight:600 }}>{plant.kimbundu}</span> · {plant.region}
-        </span>
-        <span style={{ fontSize:11, color:'#9aa89c' }}>{plant.treatments} tratamentos</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: '#0a1a0d', fontFamily: 'Georgia, serif', marginBottom: 2 }}>{plant.name}</div>
+        <div style={{ fontSize: 12, color: '#3a4a3c', fontStyle: 'italic', marginBottom: 4 }}>{plant.sci}</div>
+        <div style={{ fontSize: 13, color: '#3a4a3c', marginBottom: 4 }}>{plant.use}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 11, color: '#5a5a4a' }}>
+            <span style={{ color: plant.color, fontWeight: 600 }}>{plant.kimbundu}</span> · {plant.region}
+          </span>
+          <span style={{ fontSize: 11, color: '#5a5a4a' }}>{plant.treatments} tratamentos</span>
+        </div>
       </div>
     </div>
   );
@@ -580,7 +583,7 @@ function HomeScreen({ role, onNavigate }) {
         </div>
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
-        {[{ val:'100 mil', label:'Plantas', sub:'catalogadas' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
+        {[{ val: PLANTS.length, label: 'Plantas', sub: 'catalogadas (em expansão)' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
           <div key={s.label} style={{ background:'#f4f7f5', borderRadius:14, padding:'14px 12px', textAlign:'center' }}>
             <div style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{s.val}</div>
             <div style={{ fontSize:11, fontWeight:600, color:'#3d6b4f', marginTop:1 }}>{s.label}</div>
@@ -791,14 +794,14 @@ function UsersScreen() {
   );
 }
 
-function SettingsScreen({ lang, setLang, largeFont, setLargeFont }) {
+function SettingsScreen({ lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast }) {
   return (
     <Screen title="Definições" subtitle="Acessibilidade e preferências · Mayenge">
       <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-          { label:'Alto contraste', sub:'Desativado — Para visão reduzida', action:()=>{} },
-          { label:'Modo offline', sub:'Dados locais disponíveis', action:()=>{} },
+         { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: () => setHighContrast(prev => !prev) },
+          { label: 'Modo offline', sub: 'Em desenvolvimento – Acesso sem internet em breve', action: () => {} },
         ].map((item,i,arr) => (
           <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom: i<arr.length-1 ? '1px solid #f0f4f1' : 'none', cursor:'pointer' }}
             onMouseEnter={e=>e.currentTarget.style.background='#fafcfa'}
@@ -919,7 +922,7 @@ function HelpBot() {
 }
 
 /* ─── BOTANICA UI (the whole visual shell) ──────────────────────────────── */
-function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, lang, setLang, largeFont, setLargeFont, sideRef, isAuthenticated, onLogout }) {
+function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout }) {
   const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({
     groupId, groupLabel,
     items: MENU.filter(m => m.group === groupId && m.roles.includes(role))
@@ -953,7 +956,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
       case 'register':   return <RegisterScreen/>;
       case 'reports':    return <ReportsScreen/>;
       case 'users':      return <UsersScreen/>;
-      case 'settings':   return <SettingsScreen lang={lang} setLang={setLang} largeFont={largeFont} setLargeFont={setLargeFont}/>;
+     case 'settings':   return <SettingsScreen lang={lang} setLang={setLang} largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast} />;
       default:           return <HomeScreen role={role} onNavigate={navigate}/>;
     }
   };
@@ -982,7 +985,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
   ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
 `}</style>
 
-      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight:640, borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={largeFont ? 'large-font' : ''}>
+    <div style={{ width:'100%', maxWidth:480, ... }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
 
         {/* Sidebar overlay */}
         {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(10,20,14,0.5)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
@@ -1050,9 +1053,9 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
                         borderLeft: isActive ? '3px solid #1a9a60' : '3px solid transparent',
                         transition:'all 0.12s'
                       }}>
-                      <span style={{ fontSize:16, color: isActive ? '#1a9a60' : '#6b9a74' }}>{item.icon}</span>
+                      <span style={{ fontSize:18, color: isActive ? '#0f8b4a' : '#6b5d4f' }}>{item.icon}</span>
                       <div style={{ flex:1 }}>
-                        <div style={{ fontSize:13, fontWeight: isActive ? 600 : 400, color: isActive ? '#1a6b4a' : '#2a3a2c' }}>
+                       <div style={{ fontSize:14, fontWeight: isActive ? 600 : 400, color: isActive ? '#0f8b4a' : '#2a2a1d' }}>
                           {lang === 'ki' ? item.labelK : item.label}
                         </div>
                       </div>
@@ -1103,8 +1106,8 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
               return (
                 <button key={id} onClick={() => navigate(id)}
                   style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
-                 <span style={{ fontSize:28, color: isActive ? '#1a9a60' : '#9aa89c' }}>{item.icon}</span>
-<span style={{ fontSize:13, color: isActive ? '#1a9a60' : '#b0bab2', fontWeight: isActive ? 700 : 400 }}>
+                <span style={{ fontSize:24, color: isActive ? '#0f8b4a' : '#8b7d6b' }}>{item.icon}</span>
+                <span style={{ fontSize:11, color: isActive ? '#0f8b4a' : '#6b5d4f', fontWeight: isActive ? 700 : 500 }}>
                     {lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}
                   </span>
                 </button>
@@ -1122,9 +1125,11 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, l
 /* ─── APP ROOT ──────────────────────────────────────────────────────────── */
 function BotanicaApp() {
   const { isAuthenticated, currentRole, login, logout } = useAuth();
+  const [highContrast, setHighContrast] = useState(false);
   const [role, setRole] = useState('paciente');
   const [active, setActive] = useState('home');
   const [sideOpen, setSideOpen] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
   const [lang, setLang] = useState('pt');
   const [largeFont, setLargeFont] = useState(false);
   const sideRef = useRef(null);
@@ -1145,7 +1150,17 @@ function BotanicaApp() {
 
   if (!isAuthenticated && (role === 'admin' || role === 'tecnico')) {
     return (
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#f7faf8' }}>
+      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#f7faf8'
+                  .high-contrast, .high-contrast * {
+  background: #000 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+}
+.high-contrast button {
+  background: #000 !important;
+  color: #ff0 !important;
+  border: 2px solid #ff0 !important;
+}}}>
         <div style={{ maxWidth:400, width:'100%', padding:'2rem' }}>
           <h2 style={{ fontFamily:'Lora, Georgia, serif', textAlign:'center', marginBottom:'2rem' }}>🌿 Comunidade Botânica Ispk</h2>
           <LoginForm onLogin={handleLogin} />
@@ -1181,7 +1196,13 @@ function BotanicaApp() {
 export default function App() {
   return (
     <AuthProvider>
-      <BotanicaApp />
+      <BotanicaApp
+  role={role}
+  ...
+  highContrast={highContrast}
+  setHighContrast={setHighContrast}
+  ...
+/>
     </AuthProvider>
   );
 }
