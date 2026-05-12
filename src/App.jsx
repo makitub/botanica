@@ -1281,6 +1281,7 @@ useEffect(() => {
       sideRef={sideRef}
       isAuthenticated={isAuthenticated}
       onLogout={handleLogout}
+      onNavigate={navigate}
     />
   );
 }
