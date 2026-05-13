@@ -651,7 +651,7 @@ function PlantsScreen() {
     p.kimbundu.toLowerCase().includes(filter.toLowerCase()) ||
     p.sci.toLowerCase().includes(filter.toLowerCase())
   );
-    return (
+  return (
     <Screen title="Plantas Medicinais" subtitle="Catálogo de medicina natural angolana · Miti ya Buanga">
       <div style={{ display:'flex', alignItems:'center', gap:10, background:'#f4f7f5', borderRadius:12, padding:'10px 14px', marginBottom:20 }}>
         <span style={{ color:'#9aa89c', fontSize:16 }}>⊕</span>
