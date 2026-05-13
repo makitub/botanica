@@ -508,7 +508,7 @@ function HomeScreen({ role, onNavigate }) {
         <h2 style={{ fontSize:20, fontWeight:700, marginBottom:8, fontFamily:'Georgia, serif', letterSpacing:'-0.02em' }}>Bem-vindo ao Botanica</h2>
         <p style={{ fontSize:12, opacity:0.8, lineHeight:1.6, maxWidth:260 }}>O saber ancestral angolano ao serviço da saúde de todos.</p>
         <div style={{ marginTop:14, display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.18)', borderRadius:20, padding:'5px 12px', fontSize:11, backdropFilter:'blur(4px)' }}>
-          <span style={{
+        <span style={{
   display:'inline-block',
   width:24, height:24, borderRadius:'50%',
   backgroundColor: r.color,
@@ -905,35 +905,37 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-        * { box-sizing:border-box; margin:0; padding:0; }
-        body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; }
-        h1,h2,h3 { font-family:'Lora', Georgia, serif; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes slideIn { from { transform:translateX(-100%); } to { transform:translateX(0); } }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
-        ::-webkit-scrollbar { width:4px; }
-        ::-webkit-scrollbar-track { background:transparent; }
-        ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
-       :root {
-  --bg: #f2f7f2;
-  --text: #0f1a12;
-  --border: #e8ede9;
-  --btn-bg: #f4f7f5;
-}
-body {
-  background-color: var(--bg) !important;
-  color: var(--text) !important;
-}
-* {
-  border-color: var(--border) !important;
-}
-button {
-  background-color: var(--btn-bg) !important;
-}
-        .large-font * { font-size: 1.12em !important; line-height: 1.7 !important; }
-      `}</style>
+     <style>{`
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; background:#f2f7f2; color:#0a1a0d; }
+  h1,h2,h3 { font-family:'Lora', Georgia, serif; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideIn { from { transform:translateX(-100%); } to { transform:translateX(0); } }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
+  .high-contrast, .high-contrast * {
+    background-color: #000 !important;
+    color: #ff0 !important;
+    border-color: #fff !important;
+  }
+  .high-contrast button {
+    background-color: #333 !important;
+    color: #ff0 !important;
+    border: 1px solid #fff !important;
+  }
+  .high-contrast input, .high-contrast textarea {
+    background-color: #111 !important;
+    color: #ff0 !important;
+  }
+  .high-contrast .plant-card {
+    background-color: #1a1a1a !important;
+    border-color: #444 !important;
+  }
+  .large-font * { font-size: 1.12em !important; line-height: 1.7 !important; }
+`}</style>
 
       <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight:'100vh', borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
 
