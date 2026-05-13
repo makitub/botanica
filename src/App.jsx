@@ -32,7 +32,7 @@ const GROUPS = {
 };
 
 const PLANTS = [
-   { id:1,  name:'Moringa',            sci:'Moringa oleifera',        use:'Nutritivo, Imunidade',       kimbundu:'Mukenga',  region:'Luanda',  confidence:97, treatments:14, color:'#2d7a4f' },
+  { id:1,  name:'Moringa',            sci:'Moringa oleifera',        use:'Nutritivo, Imunidade',       kimbundu:'Mukenga',  region:'Luanda',  confidence:97, treatments:14, color:'#2d7a4f' },
   { id:2,  name:'Boldo',              sci:'Peumus boldus',           use:'Digestivo, Fígado',          kimbundu:'Ntombo',   region:'Huambo',  confidence:94, treatments:8,  color:'#5a7a2d' },
   { id:3,  name:'Capim-limão',        sci:'Cymbopogon citratus',    use:'Ansiolítico, Febre',         kimbundu:'Nkasa',    region:'Malanje', confidence:91, treatments:11, color:'#7a6b2d' },
   { id:4,  name:'Quiabento',          sci:'Abelmoschus esculentus', use:'Anti-inflamatório',          kimbundu:'Kibondo',  region:'Cabinda', confidence:88, treatments:6,  color:'#2d5a7a' },
@@ -89,16 +89,16 @@ async function getProvinceFromLatLng(lat, lng) {
     const address = data.address;
     const province = address.state || address.province || address.region || '';
     const match = ANGOLA_PROVINCES.find(p => province.toLowerCase().includes(p.toLowerCase()));
-    return match || province || 'Desconhecida';
+    return match || province || 'Luanda';  // fallback Luanda em vez de 'Desconhecida'
   } catch {
-    return 'Desconhecida';
+    return 'Luanda';
   }
 }
 
 /* ─── REUSABLE COMPONENTS ───────────────────────────────────────────────── */
 function Screen({ children, title, subtitle }) {
   return (
-   <div style={{ animation:'fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both', width:'100%', maxWidth:480, margin:'0 auto' }}>
+    <div style={{ animation:'fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both', width:'100%', maxWidth:480, margin:'0 auto' }}>
       {(title || subtitle) && (
         <div style={{ marginBottom: 28 }}>
           {title && (
@@ -132,33 +132,34 @@ function PlantCard({ plant, onClick }) {
         background: hov ? '#f9faf7' : '#fff',
         border: `1.5px solid ${hov ? plant.color + '44' : '#e8ede9'}`,
         borderRadius: 16,
-        padding: '16px',
+        padding: '14px 16px',
         cursor: 'pointer',
         transition: 'all 0.18s ease',
-        transform: hov ? 'translateY(-2px)' : 'none',
-        boxShadow: hov ? `0 8px 24px ${plant.color}18` : 'none',
+        boxShadow: hov ? `0 6px 20px ${plant.color}18` : 'none',
         display: 'flex',
-        gap: 12,
-        alignItems: 'center',
+        gap: 14,
+        alignItems: 'flex-start',
+        width: '100%',
+        overflow: 'hidden',
       }}
     >
       <div style={{
-        width: 56, height: 56, borderRadius: 14,
+        width: 48, height: 48, borderRadius: 13,
         background: plant.color + '18',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0
+        flexShrink: 0, marginTop: 2
       }}>
-        <img src={leafSvg} alt="" style={{ width: 36, height: 36 }} />
+        <img src={leafSvg} alt="" style={{ width: 30, height: 30 }} />
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#0a1a0d', fontFamily: 'Georgia, serif', marginBottom: 2 }}>{plant.name}</div>
-        <div style={{ fontSize: 12, color: '#3a4a3c', fontStyle: 'italic', marginBottom: 4 }}>{plant.sci}</div>
-        <div style={{ fontSize: 13, color: '#3a4a3c', marginBottom: 4 }}>{plant.use}</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 11, color: '#5a5a4a' }}>
+      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: '#0a1a0d', fontFamily: 'Georgia, serif', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.name}</div>
+        <div style={{ fontSize: 11, color: '#3a4a3c', fontStyle: 'italic', marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.sci}</div>
+        <div style={{ fontSize: 12, color: '#3a4a3c', marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.use}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, color: '#5a5a4a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
             <span style={{ color: plant.color, fontWeight: 600 }}>{plant.kimbundu}</span> · {plant.region}
           </span>
-          <span style={{ fontSize: 11, color: '#5a5a4a' }}>{plant.treatments} tratamentos</span>
+          <span style={{ fontSize: 11, color: '#5a5a4a', flexShrink: 0, whiteSpace: 'nowrap' }}>{plant.treatments} trat.</span>
         </div>
       </div>
     </div>
@@ -223,14 +224,13 @@ function DiagnoseScreen() {
   const [error, setError] = useState('');
   const [province, setProvince] = useState('');
 
-  // Salvar sempre que as mensagens mudam
   useEffect(() => {
     localStorage.setItem('diagnose_messages', JSON.stringify(messages));
   }, [messages]);
 
   useEffect(() => {
     (async () => {
-      let prov = 'Desconhecida';
+      let prov = 'Luanda';
       if (navigator.geolocation) {
         try {
           const pos = await new Promise((resolve, reject) =>
@@ -256,41 +256,22 @@ function DiagnoseScreen() {
       const res = await fetch('/api/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: updatedMessages,
-          province: province,
-          language: 'pt'
-        })
+        body: JSON.stringify({ messages: updatedMessages, province, language: 'pt' })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro no chatbot');
-
       const reply = data.reply;
       const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
       const match = reply.match(jsonBlockRegex);
       let displayText = reply;
       let resultData = null;
-
       if (match) {
         displayText = reply.replace(jsonBlockRegex, '').trim();
-        try {
-          resultData = JSON.parse(match[1]);
-        } catch (jsonErr) {
-          console.warn('Failed to parse assistant JSON:', jsonErr);
-          displayText = reply;
-        }
+        try { resultData = JSON.parse(match[1]); } catch (jsonErr) { console.warn('Failed to parse assistant JSON:', jsonErr); displayText = reply; }
       }
-
-      if (displayText) {
-        setMessages(prev => [...prev, { role: 'assistant', content: displayText }]);
-      }
-
+      if (displayText) setMessages(prev => [...prev, { role: 'assistant', content: displayText }]);
       if (resultData && resultData.triage) {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          type: 'result',
-          content: resultData
-        }]);
+        setMessages(prev => [...prev, { role: 'assistant', type: 'result', content: resultData }]);
       }
     } catch (err) {
       setError(err.message);
@@ -300,10 +281,7 @@ function DiagnoseScreen() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
   const exportPDF = () => {
@@ -314,24 +292,16 @@ function DiagnoseScreen() {
     doc.setFontSize(10);
     doc.text(`Data: ${new Date().toLocaleString()}`, 10, 22);
     doc.text(`Província: ${province}`, 10, 28);
-
     let y = 40;
     messages.forEach((msg) => {
       const prefix = msg.role === 'user' ? 'Utente' : 'Ndembo';
-      const text = msg.type === 'result'
-        ? `${prefix}: [Recomendação final com triagem e remédios]`
-        : `${prefix}: ${msg.content}`;
-      
+      const text = msg.type === 'result' ? `${prefix}: [Recomendação final com triagem e remédios]` : `${prefix}: ${msg.content}`;
       const lines = doc.splitTextToSize(text, 180);
-      if (y + lines.length * 6 > 280) {
-        doc.addPage();
-        y = 20;
-      }
+      if (y + lines.length * 6 > 280) { doc.addPage(); y = 20; }
       doc.setFontSize(10);
       doc.text(lines, 10, y);
       y += lines.length * 6 + 4;
     });
-
     doc.save(`autodiagnostico_${new Date().toISOString().slice(0,10)}.pdf`);
   };
 
@@ -344,122 +314,72 @@ function DiagnoseScreen() {
 
   return (
     <Screen>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-        <h1 style={{ fontSize:28, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>🩺 Autodiagnóstico com IA</h1>
-        <div style={{ display:'flex', gap:8 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12, gap:8 }}>
+        <h1 style={{ fontSize:22, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif', flex:1, lineHeight:1.3 }}>🩺 Autodiagnóstico com IA</h1>
+        <div style={{ display:'flex', gap:8, flexShrink:0 }}>
           <button onClick={clearHistory} style={{ background:'#f4f7f5', border:'1px solid #d4e0d8', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Apagar conversa">🗑️</button>
           <button onClick={exportPDF} style={{ background:'#0f8b4a', color:'#fff', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Exportar PDF">📄 PDF</button>
         </div>
       </div>
-      <p style={{ fontSize:18, color:'#3a4a3c', marginTop:4, marginBottom:20 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
+      <p style={{ fontSize:14, color:'#3a4a3c', marginTop:4, marginBottom:16 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
       <Disclaimer />
-      <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'16px', minHeight:300, maxHeight:400, overflowY:'auto', marginBottom:16 }}>
+      <div style={{ background:'#fff', borderRadius:16, border:'1px solid #e8ede9', padding:'12px', minHeight:260, maxHeight:360, overflowY:'auto', overflowX:'hidden', marginBottom:12, width:'100%' }}>
         {messages.map((msg, idx) => {
           const isUser = msg.role === 'user';
           if (msg.type === 'result') {
             const { triage, urgentMessage, remedies } = msg.content;
             return (
               <div key={idx} style={{ marginBottom:12 }}>
-                {triage === 'red' && (
-                  <div style={{ background:'#fee2e2', border:'1.5px solid #fca5a5', borderRadius:14, padding:'14px', marginBottom:12, color:'#dc2626' }}>
-                    🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}
-                  </div>
-                )}
-                {triage === 'yellow' && (
-                  <div style={{ background:'#fffbeb', border:'1.5px solid #d97706', borderRadius:14, padding:'14px', marginBottom:12, color:'#92400e' }}>
-                    ⚠️ <strong>Atenção:</strong> {urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}
-                  </div>
-                )}
-                {triage === 'green' && (
-                  <div style={{ background:'#d1fae5', border:'1.5px solid #6ee7b7', borderRadius:14, padding:'14px', marginBottom:12, color:'#065f46' }}>
-                    ✅ <strong>Situação estável:</strong> Siga as sugestões abaixo.
-                  </div>
-                )}
-                {remedies && remedies.map((r, idx2) => (
-                  <PlantRemedyCard key={idx2} remedy={r} />
-                ))}
+                {triage === 'red' && (<div style={{ background:'#fee2e2', border:'1.5px solid #fca5a5', borderRadius:14, padding:'14px', marginBottom:12, color:'#dc2626' }}>🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}</div>)}
+                {triage === 'yellow' && (<div style={{ background:'#fffbeb', border:'1.5px solid #d97706', borderRadius:14, padding:'14px', marginBottom:12, color:'#92400e' }}>⚠️ <strong>Atenção:</strong> {urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}</div>)}
+                {triage === 'green' && (<div style={{ background:'#d1fae5', border:'1.5px solid #6ee7b7', borderRadius:14, padding:'14px', marginBottom:12, color:'#065f46' }}>✅ <strong>Situação estável:</strong> Siga as sugestões abaixo.</div>)}
+                {remedies && remedies.map((r, idx2) => (<PlantRemedyCard key={idx2} remedy={r} />))}
               </div>
             );
           }
           return (
-  <div key={idx} style={{
-    display:'flex',
-    alignItems:'flex-start',
-    gap:8,
-    marginBottom:16,
-    flexDirection: isUser ? 'row-reverse' : 'row'
-  }}>
-    {/* Avatar */}
-    <div style={{
-      width:32, height:32, borderRadius:'50%',
-      background: isUser ? '#0f8b4a' : '#a0d8b8',
-      display:'flex', alignItems:'center', justifyContent:'center',
-      fontSize:16, flexShrink:0
-    }}>
-      {isUser ? '🎤' : '🌿'}
-    </div>
-    {/* Balão */}
-    <div style={{
-      maxWidth:'75%',
-      padding:'10px 14px',
-      borderRadius:16,
-      background: isUser ? '#0f8b4a' : '#e6f7ee',
-      color: isUser ? '#fff' : '#0a1a0d',
-      fontSize:16,
-      lineHeight:1.7,
-      whiteSpace:'pre-wrap',
-      wordBreak:'break-word',
-      borderBottomRightRadius: isUser ? 4 : 16,
-      borderBottomLeftRadius: isUser ? 16 : 4,
-      boxShadow: isUser ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
-    }}>
-      {msg.content}
-    </div>
-    {!isUser && (
-      <button
-        onClick={() => { /* ... áudio ... */ }}
-        style={{ background:'none', border:'none', cursor:'pointer', fontSize:14, color:'#0f8b4a', alignSelf:'flex-end', marginBottom:2 }}
-        title="Ouvir mensagem"
-      >
-        🔊
-      </button>
-    )}
-  </div>
-);
+            <div key={idx} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:16, flexDirection: isUser ? 'row-reverse' : 'row' }}>
+              <div style={{ width:32, height:32, borderRadius:'50%', background: isUser ? '#0f8b4a' : '#a0d8b8', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0 }}>
+                {isUser ? '🎤' : '🌿'}
+              </div>
+              <div style={{
+                maxWidth:'75%', padding:'10px 14px', borderRadius:16,
+                background: isUser ? '#0f8b4a' : '#e6f7ee',
+                color: isUser ? '#fff' : '#0a1a0d',
+                fontSize:16, lineHeight:1.7, whiteSpace:'pre-wrap', wordBreak:'break-word',
+                borderBottomRightRadius: isUser ? 4 : 16,
+                borderBottomLeftRadius: isUser ? 16 : 4,
+                boxShadow: isUser ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
+              }}>
+                {msg.content}
+              </div>
+              {!isUser && (
+                <button onClick={() => { const utterance = new SpeechSynthesisUtterance(msg.content); utterance.lang = 'pt-PT'; utterance.rate = 0.9; window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance); }}
+                  style={{ background:'none', border:'none', cursor:'pointer', fontSize:14, marginTop:4, color:'#0f8b4a' }} title="Ouvir mensagem">🔊</button>
+              )}
+            </div>
+          );
         })}
-        {loading && (
-          <div style={{ textAlign:'center', color:'#6b9a74', padding:8 }}>
-            Ndembo está a pensar...
-          </div>
-        )}
-        {error && (
-          <div style={{ color:'#dc2626', fontSize:12, padding:8 }}>{error}</div>
-        )}
+        {loading && <div style={{ textAlign:'center', color:'#6b9a74', padding:8 }}>Ndembo está a pensar...</div>}
+        {error && <div style={{ color:'#dc2626', fontSize:12, padding:8 }}>{error}</div>}
       </div>
-      <div style={{ display:'flex', gap:10 }}>
+      <div style={{ display:'flex', gap:8, width:'100%' }}>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Descreve os teus sintomas..."
-          style={{
-            flex:1, padding:'14px 18px', fontSize:16, border:'1.5px solid #d4e0d8',
-            borderRadius:14, background:'#fafcfa', color:'#0f1a12',
-            fontFamily:'Georgia, serif', outline:'none'
-          }}
+          style={{ flex:1, padding:'12px 14px', fontSize:15, border:'1.5px solid #d4e0d8', borderRadius:14, background:'#fafcfa', color:'#0f1a12', fontFamily:'Georgia, serif', outline:'none', minWidth:0 }}
         />
         <button onClick={sendMessage} disabled={loading || !input.trim()}
-          style={{
-            padding:'14px 24px', background: input.trim() ? '#0f8b4a' : '#c8d8cc',
-            color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer',
-            fontSize:16
-          }}>
+          style={{ padding:'12px 18px', background: input.trim() ? '#0f8b4a' : '#c8d8cc', color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer', fontSize:15, flexShrink:0 }}>
           Enviar
         </button>
       </div>
     </Screen>
   );
 }
+
 /* ─── SCREEN: Identificar Planta (real API) ────────────────────────────── */
 function IdentifyScreen() {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -484,17 +404,11 @@ function IdentifyScreen() {
         let width = img.width;
         let height = img.height;
         if (width > maxSize || height > maxSize) {
-          if (width > height) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
-          } else {
-            width = Math.round((width * maxSize) / height);
-            height = maxSize;
-          }
+          if (width > height) { height = Math.round((height * maxSize) / width); width = maxSize; }
+          else { width = Math.round((width * maxSize) / height); height = maxSize; }
         }
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width; canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
@@ -516,7 +430,6 @@ function IdentifyScreen() {
       return;
     }
     lastRequestTime.current = now;
-
     if (!imageBase64) return;
     setLoading(true);
     setError('');
@@ -529,19 +442,14 @@ function IdentifyScreen() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erro na identificação');
       setResult(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
   };
 
   return (
     <Screen>
-     <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Plantas</h1>
-<p style={{ fontSize:16, color:'#3a4a3c', marginTop:4, marginBottom:20 }}>
-  Tire uma foto de folhas, flores ou frutos para identificação automática
-</p>
+      <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Plantas</h1>
+      <p style={{ fontSize:16, color:'#3a4a3c', marginTop:4, marginBottom:20 }}>Tire uma foto de folhas, flores ou frutos para identificação automática</p>
       {!previewUrl ? (
         <label style={{ display:'block', border:'2px dashed #a0d8b8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#f4faf6', marginBottom:16 }}>
           <input type="file" accept="image/*" onChange={handleFile} style={{ display:'none' }} />
@@ -552,9 +460,9 @@ function IdentifyScreen() {
       ) : (
         <div style={{ textAlign:'center', marginBottom:16 }}>
           <img src={previewUrl} alt="Preview" style={{ maxHeight:240, borderRadius:14, border:'1px solid #d4e0d8' }} />
-         <button type="button" onClick={() => { setPreviewUrl(null); setImageBase64(null); setResult(null); }} style={{ marginLeft:8, background:'#fff', border:'1px solid #d4e0d8', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
-        ✕ Remover
-        </button>
+          <button type="button" onClick={() => { setPreviewUrl(null); setImageBase64(null); setResult(null); }} style={{ marginLeft:8, background:'#fff', border:'1px solid #d4e0d8', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
+            ✕ Remover
+          </button>
         </div>
       )}
       {previewUrl && !result && (
@@ -575,20 +483,8 @@ function IdentifyScreen() {
             <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Usos medicinais:</strong> {result.usos_medicinais}</p>
             <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Preparação:</strong> {result.preparacao}</p>
             <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Dose:</strong> {result.dose_recomendada}</p>
-            {result.quem_pode_usar && (
-              <div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:8 }}>
-                {result.quem_pode_usar.map((g,i) => (
-                  <span key={i} style={{ background:'#d8f3dc', color:'#1b4332', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{g}</span>
-                ))}
-              </div>
-            )}
-            {result.contraindicacoes && (
-              <div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:6 }}>
-                {result.contraindicacoes.map((c,i) => (
-                  <span key={i} style={{ background:'#fde8d8', color:'#7f3d1b', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{c}</span>
-                ))}
-              </div>
-            )}
+            {result.quem_pode_usar && (<div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:8 }}>{result.quem_pode_usar.map((g,i)=><span key={i} style={{ background:'#d8f3dc', color:'#1b4332', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{g}</span>)}</div>)}
+            {result.contraindicacoes && (<div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:6 }}>{result.contraindicacoes.map((c,i)=><span key={i} style={{ background:'#fde8d8', color:'#7f3d1b', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{c}</span>)}</div>)}
           </div>
         </div>
       )}
@@ -598,7 +494,6 @@ function IdentifyScreen() {
 }
 
 /* ─── OTHER SCREENS ─────────────────────────────────────────────────────── */
-
 function HomeScreen({ role, onNavigate }) {
   const r = ROLES[role];
   const greeting = new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite';
@@ -847,7 +742,7 @@ function SettingsScreen({ lang, setLang, largeFont, setLargeFont, highContrast, 
       <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-         { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: () => { setHighContrast(prev => !prev); alert('Alto contraste ' + (highContrast ? 'desativado' : 'ativado')); } },
+         { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: () => setHighContrast(prev => !prev) },
           { label: 'Modo offline', sub: 'Em desenvolvimento – Acesso sem internet em breve', action: () => {} },
         ].map((item,i,arr) => (
           <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom: i<arr.length-1 ? '1px solid #f0f4f1' : 'none', cursor:'pointer' }}
@@ -876,30 +771,12 @@ function HelpBot() {
   const [topic, setTopic] = useState('welcome');
 
   const topics = {
-    welcome: {
-      title: 'Bem‑vindo à Comunidade Botânica Ispk',
-      text: 'Esta aplicação preserva o saber medicinal angolano. Podes identificar plantas, fazer um autodiagnóstico com o Ndembo, e ver tratamentos tradicionais. Usa o menu superior esquerdo para navegar. Ouve com atenção:'
-    },
-    diagnose: {
-      title: 'Autodiagnóstico com Ndembo',
-      text: 'Conversa com o curandeiro virtual. Ele vai perguntar sobre os teus sintomas e sugerir plantas medicinais da tua região. As sugestões não substituem um médico.'
-    },
-    identify: {
-      title: 'Identificar planta',
-      text: 'Tira uma foto da planta e a IA identifica o seu nome popular, científico e usos medicinais.'
-    },
-    plants: {
-      title: 'Plantas Medicinais',
-      text: 'Catálogo com todas as plantas registadas pelos anciãos angolanos. Pesquisa por nome português, kimbundu ou científico.'
-    },
-    treatments: {
-      title: 'Tratamentos tradicionais',
-      text: 'Lista de preparos transmitidos por anciãos. Cada um inclui a planta, o nome do ancião e a região.'
-    },
-    settings: {
-      title: 'Definições',
-      text: 'Podes trocar entre português e kimbundu, aumentar o tamanho da letra e ativar o modo alto contraste.'
-    }
+    welcome: { title: 'Bem‑vindo à Comunidade Botânica Ispk', text: 'Esta aplicação preserva o saber medicinal angolano. Podes identificar plantas, fazer um autodiagnóstico com o Ndembo, e ver tratamentos tradicionais. Usa o menu superior esquerdo para navegar. Ouve com atenção:' },
+    diagnose: { title: 'Autodiagnóstico com Ndembo', text: 'Conversa com o curandeiro virtual. Ele vai perguntar sobre os teus sintomas e sugerir plantas medicinais da tua região. As sugestões não substituem um médico.' },
+    identify: { title: 'Identificar planta', text: 'Tira uma foto da planta e a IA identifica o seu nome popular, científico e usos medicinais.' },
+    plants: { title: 'Plantas Medicinais', text: 'Catálogo com todas as plantas registadas pelos anciãos angolanos. Pesquisa por nome português, kimbundu ou científico.' },
+    treatments: { title: 'Tratamentos tradicionais', text: 'Lista de preparos transmitidos por anciãos. Cada um inclui a planta, o nome do ancião e a região.' },
+    settings: { title: 'Definições', text: 'Podes trocar entre português e kimbundu, aumentar o tamanho da letra e ativar o modo alto contraste.' }
   };
 
   const speak = (text) => {
@@ -912,55 +789,24 @@ function HelpBot() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        style={{
-          position:'fixed', top: 70, right:20, width:52, height:52,
-          borderRadius:'50%', background:'#1a9a60', color:'#fff',
-          fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
-          cursor:'pointer', zIndex:1000
-        }}>
+      <button onClick={() => setOpen(true)}
+        style={{ position:'fixed', top: 70, right:20, width:52, height:52, borderRadius:'50%', background:'#1a9a60', color:'#fff', fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.2)', cursor:'pointer', zIndex:1000 }}>
         🌱
       </button>
-
       {open && (
-        <div style={{
-          position:'fixed', inset:0, background:'rgba(0,0,0,0.5)',
-          display:'flex', justifyContent:'center', alignItems:'center',
-          zIndex:2000
-        }} onClick={() => setOpen(false)}>
-          <div style={{
-            background:'#fff', borderRadius:20, padding:'24px',
-            maxWidth:400, width:'90%', maxHeight:'80vh', overflowY:'auto'
-          }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontSize:20, fontFamily:'Lora, Georgia, serif', marginBottom:12 }}>
-              {topics[topic].title}
-            </h2>
-            <p style={{ fontSize:14, lineHeight:1.7, marginBottom:20, color:'#1f2e22' }}>
-              {topics[topic].text}
-            </p>
-            <button onClick={() => speak(topics[topic].text)}
-              style={{ marginBottom:12, padding:'8px 14px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:8, cursor:'pointer' }}>
-              🔊 Ouvir explicação
-            </button>
-
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:2000 }} onClick={() => setOpen(false)}>
+          <div style={{ background:'#fff', borderRadius:20, padding:'24px', maxWidth:400, width:'90%', maxHeight:'80vh', overflowY:'auto' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontSize:20, fontFamily:'Lora, Georgia, serif', marginBottom:12 }}>{topics[topic].title}</h2>
+            <p style={{ fontSize:14, lineHeight:1.7, marginBottom:20, color:'#1f2e22' }}>{topics[topic].text}</p>
+            <button onClick={() => speak(topics[topic].text)} style={{ marginBottom:12, padding:'8px 14px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:8, cursor:'pointer' }}>🔊 Ouvir explicação</button>
             <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
               {Object.keys(topics).map(key => (
-                <button key={key} onClick={() => setTopic(key)}
-                  style={{
-                    padding:'6px 10px', background: topic===key ? '#1a9a60' : '#f0f4f1',
-                    color: topic===key ? '#fff' : '#0f1a12', border:'none',
-                    borderRadius:6, fontSize:11, cursor:'pointer'
-                  }}>
+                <button key={key} onClick={() => setTopic(key)} style={{ padding:'6px 10px', background: topic===key ? '#1a9a60' : '#f0f4f1', color: topic===key ? '#fff' : '#0f1a12', border:'none', borderRadius:6, fontSize:11, cursor:'pointer' }}>
                   {key==='welcome'?'Início':key==='diagnose'?'Autodiagnóstico':key==='identify'?'Identificar':key==='plants'?'Plantas':key==='treatments'?'Tratamentos':key==='settings'?'Definições':''}
                 </button>
               ))}
             </div>
-
-            <button onClick={() => setOpen(false)}
-              style={{ marginTop:16, padding:'8px 14px', background:'#e8ede9', border:'none', borderRadius:8, cursor:'pointer', width:'100%' }}>
-              Fechar
-            </button>
+            <button onClick={() => setOpen(false)} style={{ marginTop:16, padding:'8px 14px', background:'#e8ede9', border:'none', borderRadius:8, cursor:'pointer', width:'100%' }}>Fechar</button>
           </div>
         </div>
       )}
@@ -969,51 +815,26 @@ function HelpBot() {
 }
 
 /* ─── BOTANICA UI (the whole visual shell) ──────────────────────────────── */
-/* ─── PLANT REMEDY CARD (com imagem real ou fallback) ──────────────────── */
 function PlantRemedyCard({ remedy }) {
   const [imageUrl, setImageUrl] = useState(null);
-
   useEffect(() => {
     let cancelled = false;
     async function fetchImage() {
       try {
-        const res = await fetch('/api/plant-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plantName: remedy.plantName })
-        });
+        const res = await fetch('/api/plant-image', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ plantName: remedy.plantName }) });
         const data = await res.json();
-        if (!cancelled && data.imageUrl) {
-          setImageUrl(data.imageUrl);
-        }
-      } catch (err) {
-        console.warn('Could not fetch plant image:', err);
-      }
+        if (!cancelled && data.imageUrl) setImageUrl(data.imageUrl);
+      } catch (err) { console.warn('Could not fetch plant image:', err); }
     }
     fetchImage();
     return () => { cancelled = true; };
   }, [remedy.plantName]);
 
   return (
-    <div style={{
-      background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10,
-      display:'flex', gap:16, alignItems:'flex-start'
-    }}>
-      {/* Imagem da planta */}
-      <div style={{
-        width:80, height:80, borderRadius:12, background:'#e6f7ee',
-        display:'flex', alignItems:'center', justifyContent:'center',
-        flexShrink:0, overflow:'hidden'
-      }}>
-        {imageUrl ? (
-          <img src={imageUrl} alt={remedy.plantName} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-        ) : (
-          <img
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='36' height='36'%3E%3Cpath fill='%230f8b4a' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E"
-            alt="Planta"
-            style={{ width:40, height:40 }}
-          />
-        )}
+    <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10, display:'flex', gap:16, alignItems:'flex-start' }}>
+      <div style={{ width:80, height:80, borderRadius:12, background:'#e6f7ee', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, overflow:'hidden' }}>
+        {imageUrl ? <img src={imageUrl} alt={remedy.plantName} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> :
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='36' height='36'%3E%3Cpath fill='%230f8b4a' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E" alt="Planta" style={{ width:40, height:40 }} />}
       </div>
       <div style={{ flex:1 }}>
         <h3 style={{ fontSize:20, fontWeight:700, color:'#0a1a0d', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {remedy.plantName}</h3>
@@ -1025,22 +846,17 @@ function PlantRemedyCard({ remedy }) {
     </div>
   );
 }
+
 function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout, onNavigate }) {
-  // REMOVE the line: const navigate = onNavigate;
-
-  const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({
-    groupId, groupLabel,
-    items: MENU.filter(m => m.group === groupId && m.roles.includes(role))
-  })).filter(g => g.items.length > 0);
-
+  const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({ groupId, groupLabel, items: MENU.filter(m => m.group === groupId && m.roles.includes(role)) })).filter(g => g.items.length > 0);
   const r = ROLES[role];
 
   const renderScreen = () => {
     if (!canAccess(role, active)) {
-      // ... unchanged
+      return <div style={{ textAlign:'center', padding:'48px 20px' }}><div style={{ fontSize:48 }}>🔒</div><h2 style={{ fontSize:18, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>Acesso restrito</h2><p style={{ fontSize:13, color:'#6b7c6e' }}>Esta secção não está disponível para o perfil de <strong>{r.label}</strong>.</p></div>;
     }
     switch(active) {
-      case 'home':       return <HomeScreen role={role} onNavigate={onNavigate}/>;  // use onNavigate directly
+      case 'home':       return <HomeScreen role={role} onNavigate={onNavigate}/>;
       case 'diagnose':   return <DiagnoseScreen/>;
       case 'plants':     return <PlantsScreen/>;
       case 'treatments': return <TreatmentsScreen/>;
@@ -1048,189 +864,105 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
       case 'register':   return <RegisterScreen/>;
       case 'reports':    return <ReportsScreen/>;
       case 'users':      return <UsersScreen/>;
-     case 'settings':   return <SettingsScreen lang={lang} setLang={setLang} largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast} />;
-      default:           return <HomeScreen role={role} onNavigate={navigate}/>;
+      case 'settings':   return <SettingsScreen lang={lang} setLang={setLang} largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast} />;
+      default:           return <HomeScreen role={role} onNavigate={onNavigate}/>;
     }
   };
 
   return (
     <>
       <style>{`
-  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; }
-  h1,h2,h3 { font-family:'Lora', Georgia, serif; }
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(12px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-  @keyframes slideIn {
-    from { transform:translateX(-100%); }
-    to   { transform:translateX(0); }
-  }
-  @keyframes pulse {
-    0%,100% { opacity:1; }
-    50%      { opacity:0.5; }
-  }
-  ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
-    .high-contrast, .high-contrast * {
-    background-color: #000 !important;
-    color: #ff0 !important;
-    border-color: #fff !important;
-  }
-  .high-contrast button {
-    background-color: #333 !important;
-    color: #ff0 !important;
-    border: 1px solid #fff !important;
-  }
-  .high-contrast input, .high-contrast textarea {
-    background-color: #111 !important;
-    color: #ff0 !important;
-  }
-`}</style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; }
+        h1,h2,h3 { font-family:'Lora', Georgia, serif; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes slideIn { from { transform:translateX(-100%); } to { transform:translateX(0); } }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
+        .high-contrast, .high-contrast * { background-color:#000 !important; color:#ff0 !important; border-color:#fff !important; }
+        .high-contrast button { background-color:#333 !important; color:#ff0 !important; border:1px solid #fff !important; }
+        .high-contrast input, .high-contrast textarea { background-color:#111 !important; color:#ff0 !important; }
+        .large-font * { font-size: 1.12em !important; line-height: 1.7 !important; }
+      `}</style>
 
-    <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight: '100vh', borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
+      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight:'100vh', borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
 
-        {/* Sidebar overlay */}
         {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(10,20,14,0.5)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
 
-        {/* Sidebar drawer */}
         <div ref={sideRef} style={{ position:'absolute', top:0, left:0, bottom:0, width:260, background:'#fff', borderRight:'1px solid #e8ede9', zIndex:50, transform: sideOpen ? 'translateX(0)' : 'translateX(-100%)', transition:'transform 0.28s cubic-bezier(0.16,1,0.3,1)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
           <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #f0f4f1' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
               <div style={{ width:36, height:36, borderRadius:10, background:'#0d5c3a', color:'#a0e8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>✦</div>
-              <div>
-                <div style={{ fontSize:16, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>Botanica</div>
-                <div style={{ fontSize:10, color:'#9aa89c' }}>Comunidade Ispk</div>
-              </div>
+              <div><div style={{ fontSize:16, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>Botanica</div><div style={{ fontSize:10, color:'#9aa89c' }}>Comunidade Ispk</div></div>
             </div>
-
-            {/* Role switcher – only if authenticated */}
             {isAuthenticated ? (
               <>
                 <p style={{ fontSize:10, fontWeight:700, color:'#b0bab2', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Perfil ativo</p>
                 <div style={{ display:'flex', gap:4, marginBottom:10 }}>
                   {Object.entries(ROLES).map(([id, rd]) => (
-                    <button key={id} onClick={() => { setRole(id); if(!canAccess(id,active)) setActive('home'); }}
-                      style={{
-                        flex:1, padding:'7px 4px', borderRadius:10, border:'1.5px solid',
-                        fontSize:10, fontWeight:700, cursor:'pointer',
-                        borderColor: role===id ? rd.color : '#e8ede9',
-                        background: role===id ? rd.color : 'transparent',
-                        color: role===id ? '#fff' : '#9aa89c',
-                        transition:'all 0.15s'
-                      }}>
+                    <button key={id} onClick={() => { setRole(id); if(!canAccess(id,active)) setActive('home'); }} style={{ flex:1, padding:'7px 4px', borderRadius:10, border:'1.5px solid', fontSize:10, fontWeight:700, cursor:'pointer', borderColor: role===id ? rd.color : '#e8ede9', background: role===id ? rd.color : 'transparent', color: role===id ? '#fff' : '#9aa89c', transition:'all 0.15s' }}>
                       {id==='admin'?'🛡️':id==='tecnico'?'🌿':'🫀'}<br/><span style={{ fontSize:9 }}>{id==='admin'?'Admin':id==='tecnico'?'Técnico':'Paciente'}</span>
                     </button>
                   ))}
                 </div>
-                <button onClick={onLogout} style={{
-                  background:'#f4f7f5', border:'1px solid #d4e0d8', borderRadius:8,
-                  padding:'5px 10px', fontSize:10, cursor:'pointer', width:'100%'
-                }}>🚪 Sair da conta</button>
+                <button onClick={onLogout} style={{ background:'#f4f7f5', border:'1px solid #d4e0d8', borderRadius:8, padding:'5px 10px', fontSize:10, cursor:'pointer', width:'100%' }}>🚪 Sair da conta</button>
               </>
             ) : (
-              <button onClick={() => setRole('admin')} style={{
-                marginTop:10, padding:'8px 12px', background:'#1a9a60', color:'#fff',
-                border:'none', borderRadius:10, fontSize:12, fontWeight:600, cursor:'pointer', width:'100%'
-              }}>
-                Entrar como Admin/Técnico
-              </button>
+              <button onClick={() => setRole('admin')} style={{ marginTop:10, padding:'8px 12px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:10, fontSize:12, fontWeight:600, cursor:'pointer', width:'100%' }}>Entrar como Admin/Técnico</button>
             )}
           </div>
-
-          {/* Nav groups */}
           <div style={{ flex:1, padding:'10px 0', overflowY:'auto' }}>
             {menuByGroup.map(group => (
               <div key={group.groupId}>
-                <p style={{ fontSize:10, fontWeight:700, color:'#b0bab2', letterSpacing:'0.08em', textTransform:'uppercase', padding:'10px 20px 5px' }}>
-                  {group.groupLabel}
-                </p>
+                <p style={{ fontSize:10, fontWeight:700, color:'#b0bab2', letterSpacing:'0.08em', textTransform:'uppercase', padding:'10px 20px 5px' }}>{group.groupLabel}</p>
                 {group.items.map(item => {
                   const isActive = active === item.id;
                   return (
-                    <div key={item.id} onClick={() => onNavigate(item.id)}
-                      style={{
-                        display:'flex', alignItems:'center', gap:12,
-                        padding:'10px 20px', cursor:'pointer',
-                        background: isActive ? '#e6f7ee' : 'transparent',
-                        borderLeft: isActive ? '3px solid #1a9a60' : '3px solid transparent',
-                        transition:'all 0.12s'
-                      }}>
+                    <div key={item.id} onClick={() => onNavigate(item.id)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 20px', cursor:'pointer', background: isActive ? '#e6f7ee' : 'transparent', borderLeft: isActive ? '3px solid #1a9a60' : '3px solid transparent', transition:'all 0.12s' }}>
                       <span style={{ fontSize:18, color: isActive ? '#0f8b4a' : '#6b5d4f' }}>{item.icon}</span>
-                      <div style={{ flex:1 }}>
-                       <div style={{ fontSize:14, fontWeight: isActive ? 600 : 400, color: isActive ? '#0f8b4a' : '#2a2a1d' }}>
-                          {lang === 'ki' ? item.labelK : item.label}
-                        </div>
-                      </div>
+                      <div style={{ flex:1 }}><div style={{ fontSize:14, fontWeight: isActive ? 600 : 400, color: isActive ? '#0f8b4a' : '#2a2a1d' }}>{lang === 'ki' ? item.labelK : item.label}</div></div>
                     </div>
                   );
                 })}
               </div>
             ))}
           </div>
-
-          <div style={{ padding:'14px 20px', borderTop:'1px solid #f0f4f1', fontSize:11, color:'#b0bab2', textAlign:'center' }}>
-            <div style={{ fontWeight:600, color:'#4a6b54', marginBottom:2 }}>Botanica v1.0</div>
-            ISPK · Engenharia Informática · 2026
-          </div>
+          <div style={{ padding:'14px 20px', borderTop:'1px solid #f0f4f1', fontSize:11, color:'#b0bab2', textAlign:'center' }}><div style={{ fontWeight:600, color:'#4a6b54', marginBottom:2 }}>Botanica v1.0</div>ISPK · Engenharia Informática · 2026</div>
         </div>
 
-        {/* Top bar */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'#fff', borderBottom:'1px solid #e8ede9', position:'sticky', top:0, zIndex:30 }}>
-          {active !== 'home' && (
-          <button onClick={goBack} style={{
-          width:38, height:38, borderRadius:10, border:'1.5px solid #e8ede9',
-          background:'#fafcfa', cursor:'pointer', fontSize:18, color:'#4a6b54',
-          marginRight:8
-          }}>
-          ←
-          </button>)}
+          {active !== 'home' && <button onClick={goBack} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #e8ede9', background:'#fafcfa', cursor:'pointer', fontSize:18, color:'#4a6b54', marginRight:8 }}>←</button>}
           <button onClick={()=>setSideOpen(o=>!o)} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #e8ede9', background:'#fafcfa', cursor:'pointer', fontSize:18, color:'#4a6b54' }}>☰</button>
-          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <div style={{ width:8, height:8, borderRadius:'50%', background:'#1a9a60' }}/>
-            <span style={{ fontSize:14, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>Botanica</span>
-          </div>
-          <div style={{ width:38, height:38, borderRadius:10, background: r.color+'20', color: r.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700 }}>
-            {role==='admin'?'A':role==='tecnico'?'T':'P'}
-          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}><div style={{ width:8, height:8, borderRadius:'50%', background:'#1a9a60' }}/><span style={{ fontSize:14, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>Botanica</span></div>
+          <div style={{ width:38, height:38, borderRadius:10, background: r.color+'20', color: r.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700 }}>{role==='admin'?'A':role==='tecnico'?'T':'P'}</div>
         </div>
 
-        {/* Main content */}
-        <div style={{ flex:1, padding:'20px 18px 100px', overflowY:'auto' }}>
+        <div style={{ flex:1, padding:'20px 16px 90px', overflowY:'auto', overflowX:'hidden', width:'100%', maxWidth:'100%', boxSizing:'border-box' }}>
           {renderScreen()}
         </div>
 
-        {/* Bottom tab bar */}
         <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(255,255,255,0.95)', backdropFilter:'blur(12px)', borderTop:'1px solid #e8ede9', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px', zIndex:20 }}>
-        {(() => {
-  const tabs = ['home', 'plants', 'diagnose', 'identify'];
-  if (role === 'paciente') {
-    tabs.push('settings');
-  } else {
-    tabs.push('register');
-  }
-  return tabs;
-})().map(id => {
-              const item = MENU.find(m => m.id === id);
-              if (!item) return null;
-              const isActive = active === id;
-              return (
-                <button key={id} onClick={() => onNavigate(id)}
-                  style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
+          {(() => {
+            const tabs = ['home', 'plants', 'diagnose', 'identify'];
+            if (role === 'paciente') tabs.push('settings');
+            else tabs.push('register');
+            return tabs;
+          })().map(id => {
+            const item = MENU.find(m => m.id === id);
+            if (!item) return null;
+            const isActive = active === id;
+            return (
+              <button key={id} onClick={() => onNavigate(id)} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
                 <span style={{ fontSize:24, color: isActive ? '#0f8b4a' : '#8b7d6b' }}>{item.icon}</span>
-                <span style={{ fontSize:11, color: isActive ? '#0f8b4a' : '#6b5d4f', fontWeight: isActive ? 700 : 500 }}>
-                    {lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}
-                  </span>
-                </button>
-              );
-            })}
+                <span style={{ fontSize:11, color: isActive ? '#0f8b4a' : '#6b5d4f', fontWeight: isActive ? 700 : 500 }}>{lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
-
-      {/* Floating HelpBot */}
       <HelpBot />
     </>
   );
@@ -1247,52 +979,28 @@ function BotanicaApp() {
   const [largeFont, setLargeFont] = useState(false);
   const sideRef = useRef(null);
 
+  useEffect(() => { if (window.speechSynthesis) window.speechSynthesis.getVoices(); }, []);
+
+  const goBack = () => window.history.back();
+
   useEffect(() => {
-  if (window.speechSynthesis) {
-    window.speechSynthesis.getVoices(); // ativa o motor de voz
-  }
-}, []);
+    const handlePopState = (e) => { if (e.state && e.state.screen) { setActive(e.state.screen); setSideOpen(false); } };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
-  const goBack = () => {
-  window.history.back();
-};
-  // Sincronização com histórico do navegador
-useEffect(() => {
-  const handlePopState = (e) => {
-    if (e.state && e.state.screen) {
-      setActive(e.state.screen);
-      setSideOpen(false);   // fecha a gaveta se estava aberta
-    }
-  };
-  window.addEventListener('popstate', handlePopState);
-  return () => window.removeEventListener('popstate', handlePopState);
-}, []);
-
-useEffect(() => {
-  // Quando o ecrã ativo muda, guardamos o estado no histórico SEMPRE que for uma navegação explícita
-  // (O pushState é chamado dentro da função navigate, não aqui)
-  // Mas podemos usar um efeito p/ garantir que a home inicial tenha um state
-  if (active === 'home') {
-    window.history.replaceState({ screen: active }, '', '');
-  }
-}, [active]);  
+  useEffect(() => { if (active === 'home') window.history.replaceState({ screen: active }, '', ''); }, [active]);
 
   const navigate = (id) => {
-  if (!canAccess(role, id)) return;
+    if (!canAccess(role, id)) return;
+    if (id !== active) {
+      window.history.pushState({ screen: id }, '', `#${id}`);
+      setActive(id);
+      setSideOpen(false);
+    }
+  };
 
-  // Só guarda uma nova entrada se o ecrã for diferente
-  if (id !== active) {
-    window.history.pushState({ screen: id }, '', `#${id}`);
-    setActive(id);
-    setSideOpen(false);
-    // Se voltar ao início, podemos limpar o estado anterior? O histórico do navegador já fica correcto.
-  }
-};
-  
-  useEffect(() => {
-    if (isAuthenticated) setRole(currentRole);
-    else setRole('paciente');
-  }, [isAuthenticated, currentRole]);
+  useEffect(() => { if (isAuthenticated) setRole(currentRole); else setRole('paciente'); }, [isAuthenticated, currentRole]);
 
   useEffect(() => {
     const handler = e => { if (sideRef.current && !sideRef.current.contains(e.target)) setSideOpen(false); };
@@ -1305,14 +1013,12 @@ useEffect(() => {
 
   if (!isAuthenticated && (role === 'admin' || role === 'tecnico')) {
     return (
-     <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#f7faf8' }}>
+      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#f7faf8' }}>
         <div style={{ maxWidth:400, width:'100%', padding:'2rem' }}>
           <h2 style={{ fontFamily:'Lora, Georgia, serif', textAlign:'center', marginBottom:'2rem' }}>🌿 Comunidade Botânica Ispk</h2>
           <LoginForm onLogin={handleLogin} />
           <div style={{ textAlign:'center', marginTop:'1rem' }}>
-            <button onClick={() => { setRole('paciente'); setActive('home'); }} style={{ background:'none', border:'none', color:'#1a9a60', cursor:'pointer', fontSize:14 }}>
-              Continuar como visitante (paciente)
-            </button>
+            <button onClick={() => { setRole('paciente'); setActive('home'); }} style={{ background:'none', border:'none', color:'#1a9a60', cursor:'pointer', fontSize:14 }}>Continuar como visitante (paciente)</button>
           </div>
         </div>
       </div>
@@ -1321,29 +1027,14 @@ useEffect(() => {
 
   return (
     <BotanicaUI
-      goBack={goBack}
-      role={role}
-      setRole={setRole}
-      active={active}
-      setActive={setActive}
-      sideOpen={sideOpen}
-      setSideOpen={setSideOpen}
-      lang={lang}
-      setLang={setLang}
-      largeFont={largeFont}
-      setLargeFont={setLargeFont}
-      sideRef={sideRef}
-      isAuthenticated={isAuthenticated}
-      onLogout={handleLogout}
-      onNavigate={navigate}
+      goBack={goBack} role={role} setRole={setRole} active={active} setActive={setActive}
+      sideOpen={sideOpen} setSideOpen={setSideOpen} lang={lang} setLang={setLang}
+      largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast}
+      sideRef={sideRef} isAuthenticated={isAuthenticated} onLogout={handleLogout} onNavigate={navigate}
     />
   );
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <BotanicaApp />
-    </AuthProvider>
-  );
+  return (<AuthProvider><BotanicaApp /></AuthProvider>);
 }
