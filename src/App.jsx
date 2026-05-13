@@ -598,6 +598,7 @@ function IdentifyScreen() {
 }
 
 /* ─── OTHER SCREENS ─────────────────────────────────────────────────────── */
+
 function HomeScreen({ role, onNavigate }) {
   const r = ROLES[role];
   const greeting = new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite';
