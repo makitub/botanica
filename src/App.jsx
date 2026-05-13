@@ -508,7 +508,19 @@ function HomeScreen({ role, onNavigate }) {
         <h2 style={{ fontSize:20, fontWeight:700, marginBottom:8, fontFamily:'Georgia, serif', letterSpacing:'-0.02em' }}>Bem-vindo ao Botanica</h2>
         <p style={{ fontSize:12, opacity:0.8, lineHeight:1.6, maxWidth:260 }}>O saber ancestral angolano ao serviço da saúde de todos.</p>
         <div style={{ marginTop:14, display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.18)', borderRadius:20, padding:'5px 12px', fontSize:11, backdropFilter:'blur(4px)' }}>
-          <span>{r.id==='admin'?'🛡️':r.id==='tecnico'?'🌿':'🫀'}</span>
+          <span style={{
+  display:'inline-block',
+  width:24, height:24, borderRadius:'50%',
+  backgroundColor: r.color,
+  color:'#fff',
+  textAlign:'center',
+  lineHeight:'24px',
+  fontSize:14,
+  fontWeight:700,
+  marginRight:4
+}}>
+  {r.id==='admin'?'A':r.id==='tecnico'?'T':'P'}
+</span>
           <span>{r.label}</span>
         </div>
       </div>
@@ -737,12 +749,34 @@ function UsersScreen() {
 }
 
 function SettingsScreen({ lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast }) {
+  // Aplica o alto contraste imediatamente em toda a página
+  useEffect(() => {
+    if (highContrast) {
+      document.documentElement.style.setProperty('--bg', '#000');
+      document.documentElement.style.setProperty('--text', '#ff0');
+      document.documentElement.style.setProperty('--border', '#fff');
+      document.documentElement.style.setProperty('--btn-bg', '#333');
+      document.documentElement.style.filter = 'none'; // remove qualquer filtro antigo
+    } else {
+      document.documentElement.style.removeProperty('--bg');
+      document.documentElement.style.removeProperty('--text');
+      document.documentElement.style.removeProperty('--border');
+      document.documentElement.style.removeProperty('--btn-bg');
+      document.documentElement.style.filter = '';
+    }
+  }, [highContrast]);
+
+  const toggleHC = () => {
+    setHighContrast(prev => !prev);
+    alert('Alto contraste ' + (!highContrast ? 'ativado' : 'desativado')); // remova após teste
+  };
+
   return (
     <Screen title="Definições" subtitle="Acessibilidade e preferências · Mayenge">
       <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-         { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: () => setHighContrast(prev => !prev) },
+          { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: toggleHC },
           { label: 'Modo offline', sub: 'Em desenvolvimento – Acesso sem internet em breve', action: () => {} },
         ].map((item,i,arr) => (
           <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom: i<arr.length-1 ? '1px solid #f0f4f1' : 'none', cursor:'pointer' }}
@@ -882,9 +916,22 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
         ::-webkit-scrollbar { width:4px; }
         ::-webkit-scrollbar-track { background:transparent; }
         ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
-        .high-contrast, .high-contrast * { background-color:#000 !important; color:#ff0 !important; border-color:#fff !important; }
-        .high-contrast button { background-color:#333 !important; color:#ff0 !important; border:1px solid #fff !important; }
-        .high-contrast input, .high-contrast textarea { background-color:#111 !important; color:#ff0 !important; }
+       :root {
+  --bg: #f2f7f2;
+  --text: #0f1a12;
+  --border: #e8ede9;
+  --btn-bg: #f4f7f5;
+}
+body {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+}
+* {
+  border-color: var(--border) !important;
+}
+button {
+  background-color: var(--btn-bg) !important;
+}
         .large-font * { font-size: 1.12em !important; line-height: 1.7 !important; }
       `}</style>
 
