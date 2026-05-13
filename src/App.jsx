@@ -538,8 +538,10 @@ function IdentifyScreen() {
 
   return (
     <Screen>
-      <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🩺 Identificar plantas </h1>
-      <p style={{ fontSize:13, color:'#6b7c6e', marginTop:4, marginBottom:20 }}>Tire uma foto da planta para identificação automática</p>
+     <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Plantas</h1>
+<p style={{ fontSize:16, color:'#3a4a3c', marginTop:4, marginBottom:20 }}>
+  Tire uma foto de folhas, flores ou frutos para identificação automática
+</p>
       {!previewUrl ? (
         <label style={{ display:'block', border:'2px dashed #a0d8b8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#f4faf6', marginBottom:16 }}>
           <input type="file" accept="image/*" onChange={handleFile} style={{ display:'none' }} />
@@ -648,7 +650,7 @@ function PlantsScreen() {
     p.kimbundu.toLowerCase().includes(filter.toLowerCase()) ||
     p.sci.toLowerCase().includes(filter.toLowerCase())
   );
-  return (
+    return (
     <Screen title="Plantas Medicinais" subtitle="Catálogo de medicina natural angolana · Miti ya Buanga">
       <div style={{ display:'flex', alignItems:'center', gap:10, background:'#f4f7f5', borderRadius:12, padding:'10px 14px', marginBottom:20 }}>
         <span style={{ color:'#9aa89c', fontSize:16 }}>⊕</span>
@@ -657,8 +659,12 @@ function PlantsScreen() {
           style={{ flex:1, border:'none', background:'transparent', fontSize:13, color:'#0f1a12', outline:'none', fontFamily:'Georgia, serif' }}
         />
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, justifyItems:'center' }}>
-      {filtered.map(p => <PlantCard key={p.id} plant={p} onClick={()=>{}} />)}
+      <div style={{ display:'flex', flexWrap:'wrap', gap:12, justifyContent:'center' }}>
+        {filtered.map(p => (
+          <div key={p.id} style={{ width:'calc(50% - 6px)', minWidth:150 }}>
+            <PlantCard plant={p} onClick={()=>{}} />
+          </div>
+        ))}
       </div>
       {filtered.length === 0 && (
         <div style={{ textAlign:'center', padding:40, color:'#9aa89c' }}>
@@ -908,7 +914,7 @@ function HelpBot() {
       <button
         onClick={() => setOpen(true)}
         style={{
-          position:'fixed', bottom: 70, right:20, width:52, height:52,
+          position:'fixed', bottom: 120, right:20, width:52, height:52,
           borderRadius:'50%', background:'#1a9a60', color:'#fff',
           fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
           cursor:'pointer', zIndex:1000
