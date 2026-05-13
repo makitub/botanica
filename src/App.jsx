@@ -98,7 +98,7 @@ async function getProvinceFromLatLng(lat, lng) {
 /* ─── REUSABLE COMPONENTS ───────────────────────────────────────────────── */
 function Screen({ children, title, subtitle }) {
   return (
-    <div style={{ animation:'fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both' }}>
+   <div style={{ animation:'fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both', width:'100%', maxWidth:480, margin:'0 auto' }}>
       {(title || subtitle) && (
         <div style={{ marginBottom: 28 }}>
           {title && (
@@ -847,7 +847,7 @@ function SettingsScreen({ lang, setLang, largeFont, setLargeFont, highContrast, 
       <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-         { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: () => setHighContrast(prev => !prev) },
+         { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: () => { setHighContrast(prev => !prev); alert('Alto contraste ' + (highContrast ? 'desativado' : 'ativado')); } },
           { label: 'Modo offline', sub: 'Em desenvolvimento – Acesso sem internet em breve', action: () => {} },
         ].map((item,i,arr) => (
           <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom: i<arr.length-1 ? '1px solid #f0f4f1' : 'none', cursor:'pointer' }}
@@ -915,7 +915,7 @@ function HelpBot() {
       <button
         onClick={() => setOpen(true)}
         style={{
-          position:'fixed', bottom: 120, right:20, width:52, height:52,
+          position:'fixed', top: 70, right:20, width:52, height:52,
           borderRadius:'50%', background:'#1a9a60', color:'#fff',
           fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
           cursor:'pointer', zIndex:1000
@@ -1075,6 +1075,20 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:#d4e0d8; border-radius:4px; }
+    .high-contrast, .high-contrast * {
+    background-color: #000 !important;
+    color: #ff0 !important;
+    border-color: #fff !important;
+  }
+  .high-contrast button {
+    background-color: #333 !important;
+    color: #ff0 !important;
+    border: 1px solid #fff !important;
+  }
+  .high-contrast input, .high-contrast textarea {
+    background-color: #111 !important;
+    color: #ff0 !important;
+  }
 `}</style>
 
     <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f2f7f2', minHeight: '100vh', borderRadius:24, border:'1px solid #e0e8e2', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(20,60,30,0.10)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
