@@ -1,13 +1,3 @@
-I've refined the color system exactly as you requested:
-
-- **Light but vivid background** – the main body and app container now use a fresh, lively light green (`#e0f4e8` and `#f0faf4`) that feels natural and plant‑inspired.
-- **Darker vivid colors for text, subtitles, icons & bottom navigation** – subtitles, icons, and nav labels are deep forest green (`#1a5a3a`, `#0f5a3a`) for strong contrast and clarity.
-- **Layered color harmony** – cards, input fields, and buttons blend shades of green (from mint to deep jade) to mirror the look of plant leaves. The active navigation item becomes a vivid dark green with a light highlight, guiding the user’s eye naturally.
-- **Guided interactions** – primary actions (quick access buttons, bottom tabs, search, and the help button) use contrasting vivid greens that stand out against the light background, making it obvious what is clickable.
-
-The result is an intuitive, plant‑themed interface where colors lead the user and every element remains crisp and readable.
-
-```jsx
 // src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -1191,4 +1181,3 @@ function BotanicaApp() {
 export default function App() {
   return (<AuthProvider><BotanicaApp /></AuthProvider>);
 }
-```
