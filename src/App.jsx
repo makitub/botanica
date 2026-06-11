@@ -1,3 +1,13 @@
+I've refined the color system exactly as you requested:
+
+- **Light but vivid background** – the main body and app container now use a fresh, lively light green (`#e0f4e8` and `#f0faf4`) that feels natural and plant‑inspired.
+- **Darker vivid colors for text, subtitles, icons & bottom navigation** – subtitles, icons, and nav labels are deep forest green (`#1a5a3a`, `#0f5a3a`) for strong contrast and clarity.
+- **Layered color harmony** – cards, input fields, and buttons blend shades of green (from mint to deep jade) to mirror the look of plant leaves. The active navigation item becomes a vivid dark green with a light highlight, guiding the user’s eye naturally.
+- **Guided interactions** – primary actions (quick access buttons, bottom tabs, search, and the help button) use contrasting vivid greens that stand out against the light background, making it obvious what is clickable.
+
+The result is an intuitive, plant‑themed interface where colors lead the user and every element remains crisp and readable.
+
+```jsx
 // src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -103,12 +113,12 @@ function Screen({ children, title, subtitle }) {
         <div style={{ marginBottom: 28 }}>
           {title && (
             <h1 style={{
-              fontSize: 28, fontWeight: 700, color: '#1b4d2e',
+              fontSize: 28, fontWeight: 700, color: '#1a4a2a',
               letterSpacing: '-0.02em', fontFamily: 'Lora, Georgia, serif'
             }}>{title}</h1>
           )}
           {subtitle && (
-            <p style={{ fontSize: 18, color: '#4a6b4a', marginTop: 4, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 18, color: '#2a5a3a', marginTop: 4, lineHeight: 1.6 }}>
               {subtitle}
             </p>
           )}
@@ -121,7 +131,7 @@ function Screen({ children, title, subtitle }) {
 
 function PlantCard({ plant, onClick }) {
   const [hov, setHov] = useState(false);
-  const leafSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='${encodeURIComponent('#2b7a4b')}' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E`;
+  const leafSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='${encodeURIComponent('#1a6b4a')}' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E`;
 
   return (
     <div
@@ -129,13 +139,13 @@ function PlantCard({ plant, onClick }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        background: hov ? '#fefce8' : '#ffffff',
-        border: `1.5px solid ${hov ? plant.color : '#dde0dc'}`,
+        background: hov ? '#ffffff' : '#fefdf8',
+        border: `1.5px solid ${hov ? plant.color : '#d0e0d0'}`,
         borderRadius: 16,
         padding: '14px 16px',
         cursor: 'pointer',
-        transition: 'all 0.18s ease',
-        boxShadow: hov ? `0 6px 16px rgba(0,0,0,0.05)` : 'none',
+        transition: 'all 0.2s ease',
+        boxShadow: hov ? `0 8px 20px rgba(0,0,0,0.05)` : '0 2px 4px rgba(0,0,0,0.02)',
         display: 'flex',
         gap: 14,
         alignItems: 'flex-start',
@@ -145,16 +155,16 @@ function PlantCard({ plant, onClick }) {
     >
       <div style={{
         width: 48, height: 48, borderRadius: 13,
-        background: plant.color + '20',
+        background: plant.color + '25',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexShrink: 0, marginTop: 2
       }}>
         <img src={leafSvg} alt="" style={{ width: 30, height: 30 }} />
       </div>
       <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#1e3a2e', fontFamily: 'Georgia, serif', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.name}</div>
-        <div style={{ fontSize: 11, color: '#5c6e5a', fontStyle: 'italic', marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.sci}</div>
-        <div style={{ fontSize: 12, color: '#5c6e5a', marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.use}</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: '#1a3a2a', fontFamily: 'Georgia, serif', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.name}</div>
+        <div style={{ fontSize: 11, color: '#5a6e5a', fontStyle: 'italic', marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.sci}</div>
+        <div style={{ fontSize: 12, color: '#5a6e5a', marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.use}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 11, color: '#6a7c68', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
             <span style={{ color: plant.color, fontWeight: 600 }}>{plant.kimbundu}</span> · {plant.region}
@@ -170,8 +180,8 @@ function PlantDetailScreen({ plant, onBack }) {
   return (
     <div>
       <button onClick={onBack} style={{
-        background: '#eef2ea', border: '1px solid #cbdcc8', borderRadius: 20,
-        padding: '8px 16px', marginBottom: 20, color: '#2b5a3e', cursor: 'pointer',
+        background: '#eaf6e8', border: '1px solid #c8dbc8', borderRadius: 20,
+        padding: '8px 16px', marginBottom: 20, color: '#1a5a3a', cursor: 'pointer',
         display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13
       }}>
         ← Voltar à lista
@@ -180,53 +190,53 @@ function PlantDetailScreen({ plant, onBack }) {
         background: '#ffffff',
         borderRadius: 24,
         padding: '24px 20px',
-        border: '1px solid #dde0dc',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
+        border: '1px solid #dde8dc',
+        boxShadow: '0 12px 28px rgba(0,0,0,0.04)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
           <div>
-            <h2 style={{ fontSize: 26, fontWeight: 700, color: '#1e3a2e', fontFamily: 'Lora, Georgia, serif', marginBottom: 4 }}>{plant.name}</h2>
-            <p style={{ fontSize: 14, fontStyle: 'italic', color: '#5c6e5a' }}>{plant.sci}</p>
+            <h2 style={{ fontSize: 26, fontWeight: 700, color: '#1a3a2a', fontFamily: 'Lora, Georgia, serif', marginBottom: 4 }}>{plant.name}</h2>
+            <p style={{ fontSize: 14, fontStyle: 'italic', color: '#5a6e5a' }}>{plant.sci}</p>
           </div>
-          <span style={{ background: plant.color + '20', padding: '4px 10px', borderRadius: 20, fontSize: 12, color: '#1e3a2e', fontWeight: 700 }}>{plant.region}</span>
+          <span style={{ background: plant.color + '20', padding: '4px 10px', borderRadius: 20, fontSize: 12, color: '#1a5a3a', fontWeight: 700 }}>{plant.region}</span>
         </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-          <div style={{ background: '#f8faf5', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#6a7c68', textTransform: 'uppercase' }}>Kimbundu</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#1e3a2e' }}>{plant.kimbundu}</div>
+          <div style={{ background: '#f2faf0', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#5a6e5a', textTransform: 'uppercase' }}>Kimbundu</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#1a3a2a' }}>{plant.kimbundu}</div>
           </div>
-          <div style={{ background: '#f8faf5', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#6a7c68', textTransform: 'uppercase' }}>Confiança</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#1e3a2e' }}>{plant.confidence}%</div>
+          <div style={{ background: '#f2faf0', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#5a6e5a', textTransform: 'uppercase' }}>Confiança</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#1a3a2a' }}>{plant.confidence}%</div>
           </div>
-          <div style={{ background: '#f8faf5', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#6a7c68', textTransform: 'uppercase' }}>Tratamentos</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#1e3a2e' }}>{plant.treatments} registados</div>
+          <div style={{ background: '#f2faf0', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#5a6e5a', textTransform: 'uppercase' }}>Tratamentos</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#1a3a2a' }}>{plant.treatments} registados</div>
           </div>
-          <div style={{ background: '#f8faf5', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#6a7c68', textTransform: 'uppercase' }}>Usos</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#1e3a2e' }}>{plant.use}</div>
+          <div style={{ background: '#f2faf0', borderRadius: 14, padding: '12px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#5a6e5a', textTransform: 'uppercase' }}>Usos</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#1a3a2a' }}>{plant.use}</div>
           </div>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1e3a2e', marginBottom: 8, fontFamily: 'Lora, serif' }}>📖 Descrição</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#2d4a3a' }}>{plant.description}</p>
+          <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1a3a2a', marginBottom: 8, fontFamily: 'Lora, serif' }}>📖 Descrição</h3>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#2a4a32' }}>{plant.description}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1e3a2e', marginBottom: 8, fontFamily: 'Lora, serif' }}>🍵 Preparação</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#2d4a3a' }}>{plant.preparation}</p>
+          <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1a3a2a', marginBottom: 8, fontFamily: 'Lora, serif' }}>🍵 Preparação</h3>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#2a4a32' }}>{plant.preparation}</p>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1e3a2e', marginBottom: 8, fontFamily: 'Lora, serif' }}>💊 Dose recomendada</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#2d4a3a' }}>{plant.dosage}</p>
+          <h3 style={{ fontSize: 18, fontWeight: 600, color: '#1a3a2a', marginBottom: 8, fontFamily: 'Lora, serif' }}>💊 Dose recomendada</h3>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#2a4a32' }}>{plant.dosage}</p>
         </div>
 
-        <div style={{ background: '#fef7e0', borderRadius: 16, padding: '16px', marginTop: 8 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, color: '#b95c1a', marginBottom: 8 }}>⚠️ Precauções</h3>
+        <div style={{ background: '#fef8e8', borderRadius: 16, padding: '16px', marginTop: 8 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 600, color: '#b85c1a', marginBottom: 8 }}>⚠️ Precauções</h3>
           <p style={{ fontSize: 13, lineHeight: 1.6, color: '#7a4a1e' }}>{plant.precautions}</p>
         </div>
       </div>
@@ -234,7 +244,7 @@ function PlantDetailScreen({ plant, onBack }) {
   );
 }
 
-function Tag({ label, color = '#2b7a4b' }) {
+function Tag({ label, color = '#1a6b4a' }) {
   return (
     <span style={{
       fontSize: 10, fontWeight: 600, color: color,
@@ -247,7 +257,7 @@ function Tag({ label, color = '#2b7a4b' }) {
 function Disclaimer() {
   return (
     <div style={{
-      background: '#fffae6', border: '1px solid #f0cf8c', borderRadius: 12,
+      background: '#fff8e8', border: '1px solid #e0cf8c', borderRadius: 12,
       padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 20
     }}>
       <span style={{ fontSize: 16 }}>⚠️</span>
@@ -270,8 +280,8 @@ function SpeakButton({ text, label = 'Ouvir' }) {
   };
   return (
     <button onClick={speak} style={{
-      background:'none', border:'1px solid #2b7a4b', borderRadius:8,
-      padding:'2px 8px', fontSize:11, color:'#2b7a4b', cursor:'pointer',
+      background:'none', border:'1px solid #1a6b4a', borderRadius:8,
+      padding:'2px 8px', fontSize:11, color:'#1a6b4a', cursor:'pointer',
       marginLeft:8
     }} title="Ouvir descrição">
       🔊 {label}
@@ -383,15 +393,15 @@ function DiagnoseScreen() {
   return (
     <Screen>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12, gap:8 }}>
-        <h1 style={{ fontSize:22, fontWeight:700, color:'#1e3a2e', fontFamily:'Lora, Georgia, serif', flex:1, lineHeight:1.3 }}>🩺 Autodiagnóstico com IA</h1>
+        <h1 style={{ fontSize:22, fontWeight:700, color:'#1a4a2a', fontFamily:'Lora, Georgia, serif', flex:1, lineHeight:1.3 }}>🩺 Autodiagnóstico com IA</h1>
         <div style={{ display:'flex', gap:8, flexShrink:0 }}>
-          <button onClick={clearHistory} style={{ background:'#eef2ea', border:'1px solid #cbdcc8', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer', color:'#2b5a3e' }} title="Apagar conversa">🗑️</button>
-          <button onClick={exportPDF} style={{ background:'#2b7a4b', color:'#fff', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Exportar PDF">📄 PDF</button>
+          <button onClick={clearHistory} style={{ background:'#eaf6e8', border:'1px solid #c8dbc8', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer', color:'#1a5a3a' }} title="Apagar conversa">🗑️</button>
+          <button onClick={exportPDF} style={{ background:'#1a6b4a', color:'#fff', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Exportar PDF">📄 PDF</button>
         </div>
       </div>
-      <p style={{ fontSize:14, color:'#4a6b4a', marginTop:4, marginBottom:16 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
+      <p style={{ fontSize:14, color:'#2a5a3a', marginTop:4, marginBottom:16 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
       <Disclaimer />
-      <div style={{ background:'#ffffff', borderRadius:16, border:'1px solid #dde0dc', padding:'12px', minHeight:260, maxHeight:360, overflowY:'auto', overflowX:'hidden', marginBottom:12, width:'100%' }}>
+      <div style={{ background:'#ffffff', borderRadius:16, border:'1px solid #d0e0d0', padding:'12px', minHeight:260, maxHeight:360, overflowY:'auto', overflowX:'hidden', marginBottom:12, width:'100%' }}>
         {messages.map((msg, idx) => {
           const isUser = msg.role === 'user';
           if (msg.type === 'result') {
@@ -407,13 +417,13 @@ function DiagnoseScreen() {
           }
           return (
             <div key={idx} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:16, flexDirection: isUser ? 'row-reverse' : 'row' }}>
-              <div style={{ width:32, height:32, borderRadius:'50%', background: isUser ? '#2b7a4b' : '#dcfce7', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0, color: isUser ? '#fff' : '#2b7a4b' }}>
+              <div style={{ width:32, height:32, borderRadius:'50%', background: isUser ? '#1a6b4a' : '#dcfce7', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0, color: isUser ? '#fff' : '#1a6b4a' }}>
                 {isUser ? '🎤' : '🌿'}
               </div>
               <div style={{
                 maxWidth:'75%', padding:'10px 14px', borderRadius:16,
-                background: isUser ? '#2b7a4b' : '#f4f8f0',
-                color: isUser ? '#fff' : '#1e3a2e',
+                background: isUser ? '#1a6b4a' : '#f4faf0',
+                color: isUser ? '#fff' : '#1a3a2a',
                 fontSize:16, lineHeight:1.7, whiteSpace:'pre-wrap', wordBreak:'break-word',
                 borderBottomRightRadius: isUser ? 4 : 16,
                 borderBottomLeftRadius: isUser ? 16 : 4,
@@ -423,7 +433,7 @@ function DiagnoseScreen() {
               </div>
               {!isUser && (
                 <button onClick={() => { const utterance = new SpeechSynthesisUtterance(msg.content); utterance.lang = 'pt-PT'; utterance.rate = 0.9; window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance); }}
-                  style={{ background:'none', border:'none', cursor:'pointer', fontSize:14, marginTop:4, color:'#2b7a4b' }} title="Ouvir mensagem">🔊</button>
+                  style={{ background:'none', border:'none', cursor:'pointer', fontSize:14, marginTop:4, color:'#1a6b4a' }} title="Ouvir mensagem">🔊</button>
               )}
             </div>
           );
@@ -437,10 +447,10 @@ function DiagnoseScreen() {
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Descreve os teus sintomas..."
-          style={{ flex:1, padding:'12px 14px', fontSize:15, border:'1.5px solid #dde0dc', borderRadius:14, background:'#ffffff', color:'#1e3a2e', fontFamily:'Georgia, serif', outline:'none', minWidth:0 }}
+          style={{ flex:1, padding:'12px 14px', fontSize:15, border:'1.5px solid #d0e0d0', borderRadius:14, background:'#ffffff', color:'#1a3a2a', fontFamily:'Georgia, serif', outline:'none', minWidth:0 }}
         />
         <button onClick={sendMessage} disabled={loading || !input.trim()}
-          style={{ padding:'12px 18px', background: input.trim() ? '#2b7a4b' : '#cbdcc8', color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer', fontSize:15, flexShrink:0 }}>
+          style={{ padding:'12px 18px', background: input.trim() ? '#1a6b4a' : '#c8dbc8', color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer', fontSize:15, flexShrink:0 }}>
           Enviar
         </button>
       </div>
@@ -516,32 +526,32 @@ function IdentifyScreen() {
 
   return (
     <Screen>
-      <h1 style={{ fontSize:28, fontWeight:700, color:'#1e3a2e', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Plantas</h1>
-      <p style={{ fontSize:16, color:'#4a6b4a', marginTop:4, marginBottom:20 }}>Tire uma foto de folhas, flores ou frutos para identificação automática</p>
+      <h1 style={{ fontSize:28, fontWeight:700, color:'#1a4a2a', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Plantas</h1>
+      <p style={{ fontSize:16, color:'#2a5a3a', marginTop:4, marginBottom:20 }}>Tire uma foto de folhas, flores ou frutos para identificação automática</p>
       {!previewUrl ? (
-        <label style={{ display:'block', border:'2px dashed #cbdcc8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#fefce8', marginBottom:16 }}>
+        <label style={{ display:'block', border:'2px dashed #c8dbc8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#fafdf8', marginBottom:16 }}>
           <input type="file" accept="image/*" onChange={handleFile} style={{ display:'none' }} />
           <span style={{ fontSize:32 }}>📸</span><br/>
-          <span style={{ fontSize:14, fontWeight:600, color:'#2b7a4b' }}>Clique para escolher uma foto</span>
+          <span style={{ fontSize:14, fontWeight:600, color:'#1a6b4a' }}>Clique para escolher uma foto</span>
           <p style={{ fontSize:11, color:'#6a7c68' }}>JPG, PNG (até 5MB)</p>
         </label>
       ) : (
         <div style={{ textAlign:'center', marginBottom:16 }}>
-          <img src={previewUrl} alt="Preview" style={{ maxHeight:240, borderRadius:14, border:'1px solid #dde0dc' }} />
-          <button type="button" onClick={() => { setPreviewUrl(null); setImageBase64(null); setResult(null); }} style={{ marginLeft:8, background:'#eef2ea', border:'1px solid #cbdcc8', borderRadius:8, padding:'6px 12px', cursor:'pointer', color:'#2b5a3e' }}>
+          <img src={previewUrl} alt="Preview" style={{ maxHeight:240, borderRadius:14, border:'1px solid #d0e0d0' }} />
+          <button type="button" onClick={() => { setPreviewUrl(null); setImageBase64(null); setResult(null); }} style={{ marginLeft:8, background:'#eaf6e8', border:'1px solid #c8dbc8', borderRadius:8, padding:'6px 12px', cursor:'pointer', color:'#1a5a3a' }}>
             ✕ Remover
           </button>
         </div>
       )}
       {previewUrl && !result && (
-        <button onClick={analyze} disabled={loading} style={{ width:'100%', padding:'14px', background: loading ? '#cbdcc8' : '#2b7a4b', color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }}>
+        <button onClick={analyze} disabled={loading} style={{ width:'100%', padding:'14px', background: loading ? '#c8dbc8' : '#1a6b4a', color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }}>
           {loading ? 'Analisando...' : '🔍 Identificar planta'}
         </button>
       )}
       {loading && <p style={{ textAlign:'center', color:'#6a7c68', marginTop:12 }}>Processando imagem com IA...</p>}
       {error && <div style={{ color:'#b33b2c', marginTop:16, fontSize:12, background:'#ffe6e6', padding:12, borderRadius:12 }}>{error}</div>}
       {result && !result.erro && (
-        <div style={{ marginTop:20, border:'1.5px solid #dde0dc', borderRadius:14, overflow:'hidden' }}>
+        <div style={{ marginTop:20, border:'1.5px solid #d0e0d0', borderRadius:14, overflow:'hidden' }}>
           <div style={{ background:'#2b6e4e', color:'#fff', padding:'16px 20px', fontFamily:'Georgia, serif' }}>
             <div style={{ fontSize:18, fontWeight:700 }}>{result.nome_popular}</div>
             <div style={{ fontSize:12, fontStyle:'italic', opacity:0.9 }}>{result.nome_cientifico}</div>
@@ -551,7 +561,7 @@ function IdentifyScreen() {
             <p style={{ fontSize:12, color:'#4a6b4a' }}><strong>Usos medicinais:</strong> {result.usos_medicinais}</p>
             <p style={{ fontSize:12, color:'#4a6b4a' }}><strong>Preparação:</strong> {result.preparacao}</p>
             <p style={{ fontSize:12, color:'#4a6b4a' }}><strong>Dose:</strong> {result.dose_recomendada}</p>
-            {result.quem_pode_usar && (<div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:8 }}>{result.quem_pode_usar.map((g,i)=><span key={i} style={{ background:'#dcfce7', color:'#2b7a4b', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{g}</span>)}</div>)}
+            {result.quem_pode_usar && (<div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:8 }}>{result.quem_pode_usar.map((g,i)=><span key={i} style={{ background:'#dcfce7', color:'#1a6b4a', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{g}</span>)}</div>)}
             {result.contraindicacoes && (<div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:6 }}>{result.contraindicacoes.map((c,i)=><span key={i} style={{ background:'#fff3e0', color:'#b86b1f', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{c}</span>)}</div>)}
           </div>
         </div>
@@ -594,8 +604,8 @@ function HomeScreen({ role, onNavigate }) {
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
         {[{ val: PLANTS.length, label: 'Plantas', sub: 'catalogadas (em expansão)' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
-          <div key={s.label} style={{ background:'#ffffff', borderRadius:14, padding:'14px 12px', textAlign:'center', boxShadow:'0 1px 3px rgba(0,0,0,0.02)' }}>
-            <div style={{ fontSize:22, fontWeight:700, color:'#1e3a2e', fontFamily:'Georgia, serif' }}>{s.val}</div>
+          <div key={s.label} style={{ background:'#ffffff', borderRadius:14, padding:'14px 12px', textAlign:'center', boxShadow:'0 2px 6px rgba(0,0,0,0.02)' }}>
+            <div style={{ fontSize:22, fontWeight:700, color:'#1a3a2a', fontFamily:'Georgia, serif' }}>{s.val}</div>
             <div style={{ fontSize:11, fontWeight:600, color:'#4a6b4a', marginTop:1 }}>{s.label}</div>
             <div style={{ fontSize:10, color:'#8a9c86' }}>{s.sub}</div>
           </div>
@@ -604,12 +614,12 @@ function HomeScreen({ role, onNavigate }) {
       <p style={{ fontSize:11, fontWeight:700, color:'#8a9c86', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Acesso rápido</p>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
         {quickActions.map(item => (
-          <button key={item.id} onClick={() => onNavigate(item.id)} style={{ background:'#ffffff', border:'1.5px solid #e0e6dc', borderRadius:14, padding:'14px 16px', cursor:'pointer', textAlign:'left', transition:'all 0.15s ease', display:'flex', alignItems:'center', gap:10 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor='#2b7a4b'; e.currentTarget.style.background='#fefce8'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor='#e0e6dc'; e.currentTarget.style.background='#ffffff'; }}>
+          <button key={item.id} onClick={() => onNavigate(item.id)} style={{ background:'#ffffff', border:'1.5px solid #d0e0d0', borderRadius:14, padding:'14px 16px', cursor:'pointer', textAlign:'left', transition:'all 0.15s ease', display:'flex', alignItems:'center', gap:10 }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor='#1a6b4a'; e.currentTarget.style.background='#fafdf8'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor='#d0e0d0'; e.currentTarget.style.background='#ffffff'; }}>
             <span style={{ fontSize:20 }}>{item.icon}</span>
             <div>
-              <div style={{ fontSize:13, fontWeight:600, color:'#1e3a2e' }}>{item.label}</div>
+              <div style={{ fontSize:13, fontWeight:600, color:'#1a3a2a' }}>{item.label}</div>
               <div style={{ fontSize:10, color:'#8a9c86' }}>{item.labelK}</div>
             </div>
           </button>
@@ -634,13 +644,13 @@ function PlantsScreen() {
 
   return (
     <Screen title="Plantas Medicinais" subtitle="Catálogo de medicina natural angolana · Miti ya Buanga">
-      <div style={{ display:'flex', alignItems:'center', gap:10, background:'#ffffff', borderRadius:12, padding:'10px 14px', marginBottom:20, border:'1px solid #e0e6dc' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:10, background:'#ffffff', borderRadius:12, padding:'10px 14px', marginBottom:20, border:'1px solid #d0e0d0' }}>
         <span style={{ color:'#8a9c86', fontSize:16 }}>⊕</span>
         <input 
           value={filter} 
           onChange={e => setFilter(e.target.value)}
           placeholder="Pesquisar por nome, Kimbundu ou nome científico..."
-          style={{ flex:1, border:'none', background:'transparent', fontSize:13, color:'#1e3a2e', outline:'none', fontFamily:'Georgia, serif' }}
+          style={{ flex:1, border:'none', background:'transparent', fontSize:13, color:'#1a3a2a', outline:'none', fontFamily:'Georgia, serif' }}
         />
         {filter && (
           <button
@@ -685,19 +695,19 @@ function TreatmentsScreen() {
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
         {TREATMENTS.map((t,i) => (
           <div key={i} style={{
-            background:'#ffffff', border:'1.5px solid #e0e6dc', borderRadius:14,
+            background:'#ffffff', border:'1.5px solid #d0e0d0', borderRadius:14,
             padding:'16px 18px', marginBottom:10, cursor:'pointer',
             transition:'all 0.15s',
             width:'100%', maxWidth:400,
             marginLeft:'auto', marginRight:'auto'
           }}
-            onMouseEnter={e=>{ e.currentTarget.style.borderColor='#2b7a4b'; e.currentTarget.style.background='#fefce8'; }}
-            onMouseLeave={e=>{ e.currentTarget.style.borderColor='#e0e6dc'; e.currentTarget.style.background='#ffffff'; }}>
-            <div style={{ fontSize:15, fontWeight:700, color:'#1e3a2e', fontFamily:'Georgia, serif', marginBottom:4 }}>{t.name}</div>
+            onMouseEnter={e=>{ e.currentTarget.style.borderColor='#1a6b4a'; e.currentTarget.style.background='#fafdf8'; }}
+            onMouseLeave={e=>{ e.currentTarget.style.borderColor='#d0e0d0'; e.currentTarget.style.background='#ffffff'; }}>
+            <div style={{ fontSize:15, fontWeight:700, color:'#1a3a2a', fontFamily:'Georgia, serif', marginBottom:4 }}>{t.name}</div>
             <div style={{ fontSize:12, color:'#4a6b4a', marginBottom:8 }}>✦ {t.plant} · {t.elder}</div>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
               <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                {t.tags.map(tag => <Tag key={tag} label={tag} color='#2b7a4b'/>)}
+                {t.tags.map(tag => <Tag key={tag} label={tag} color='#1a6b4a'/>)}
               </div>
               <span style={{ fontSize:11, color:'#8a9c86' }}>{t.region}</span>
             </div>
@@ -719,35 +729,35 @@ function RegisterScreen() {
       <div style={{ display:'flex', gap:0, marginBottom:28 }}>
         {steps.map((s,i) => (
           <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-            <div style={{ width:28, height:28, borderRadius:'50%', background: i<=step ? '#2b7a4b' : '#e0e6dc', color: i<=step ? '#fff' : '#8a9c86', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, transition:'all 0.2s' }}>
+            <div style={{ width:28, height:28, borderRadius:'50%', background: i<=step ? '#1a6b4a' : '#d0e0d0', color: i<=step ? '#fff' : '#8a9c86', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, transition:'all 0.2s' }}>
               {i<step ? '✓' : i+1}
             </div>
-            <span style={{ fontSize:10, color: i<=step ? '#2b7a4b' : '#8a9c86', fontWeight: i===step?700:400 }}>{s}</span>
+            <span style={{ fontSize:10, color: i<=step ? '#1a6b4a' : '#8a9c86', fontWeight: i===step?700:400 }}>{s}</span>
           </div>
         ))}
       </div>
       {step===0 && (
         <div>
           <label style={{ fontSize:12, fontWeight:600, color:'#4a6b4a', display:'block', marginBottom:8 }}>Nome da planta (português ou Kimbundu)</label>
-          <input value={form.plant} onChange={e=>upd('plant',e.target.value)} placeholder="Ex: Moringa / Mukenga" style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #e0e6dc', borderRadius:12, background:'#ffffff', color:'#1e3a2e', fontFamily:'Georgia, serif', outline:'none', marginBottom:12 }} />
+          <input value={form.plant} onChange={e=>upd('plant',e.target.value)} placeholder="Ex: Moringa / Mukenga" style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #d0e0d0', borderRadius:12, background:'#ffffff', color:'#1a3a2a', fontFamily:'Georgia, serif', outline:'none', marginBottom:12 }} />
           <div style={{ display:'flex', gap:10 }}>
-            <button style={{ flex:1, padding:'12px', background:'#2b7a4b', color:'#fff', border:'none', borderRadius:12, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }} onClick={()=>{}}>◎ Identificar por câmara</button>
+            <button style={{ flex:1, padding:'12px', background:'#1a6b4a', color:'#fff', border:'none', borderRadius:12, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }} onClick={()=>{}}>◎ Identificar por câmara</button>
           </div>
         </div>
       )}
       {step===1 && (
         <div>
           <label style={{ fontSize:12, fontWeight:600, color:'#4a6b4a', display:'block', marginBottom:8 }}>Nome do ancião detentor do saber</label>
-          <input value={form.elder} onChange={e=>upd('elder',e.target.value)} placeholder="Nome do ancião" style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #e0e6dc', borderRadius:12, background:'#ffffff', color:'#1e3a2e', fontFamily:'Georgia, serif', outline:'none', marginBottom:12 }} />
-          <div style={{ background:'#fefce8', border:'1.5px dashed #cbdcc8', borderRadius:12, padding:'14px', cursor:'pointer', display:'flex', alignItems:'center', gap:10 }}>
+          <input value={form.elder} onChange={e=>upd('elder',e.target.value)} placeholder="Nome do ancião" style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #d0e0d0', borderRadius:12, background:'#ffffff', color:'#1a3a2a', fontFamily:'Georgia, serif', outline:'none', marginBottom:12 }} />
+          <div style={{ background:'#fafdf8', border:'1.5px dashed #c8dbc8', borderRadius:12, padding:'14px', cursor:'pointer', display:'flex', alignItems:'center', gap:10 }}>
             <span style={{ fontSize:20 }}>◉</span>
             <div>
-              <div style={{ fontSize:13, fontWeight:600, color:'#2b7a4b' }}>Gravar consentimento em áudio</div>
+              <div style={{ fontSize:13, fontWeight:600, color:'#1a6b4a' }}>Gravar consentimento em áudio</div>
               <div style={{ fontSize:11, color:'#6a7c68' }}>Protege o patrimônio cultural</div>
             </div>
           </div>
           <div style={{ marginTop:12, display:'flex', alignItems:'center', gap:8 }}>
-            <input type="checkbox" id="consent" checked={form.consent} onChange={e=>upd('consent',e.target.checked)} style={{ width:16, height:16, accentColor:'#2b7a4b' }} />
+            <input type="checkbox" id="consent" checked={form.consent} onChange={e=>upd('consent',e.target.checked)} style={{ width:16, height:16, accentColor:'#1a6b4a' }} />
             <label htmlFor="consent" style={{ fontSize:12, color:'#4a6b4a' }}>O ancião autorizou o registo e uso público deste saber</label>
           </div>
         </div>
@@ -755,32 +765,32 @@ function RegisterScreen() {
       {step===2 && (
         <div>
           <label style={{ fontSize:12, fontWeight:600, color:'#4a6b4a', display:'block', marginBottom:8 }}>Posologia e preparação</label>
-          <textarea value={form.preparation} onChange={e=>upd('preparation',e.target.value)} placeholder="Descreva como preparar e usar o tratamento..." rows={4} style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #e0e6dc', borderRadius:12, background:'#ffffff', color:'#1e3a2e', fontFamily:'Georgia, serif', outline:'none', resize:'vertical', marginBottom:12 }} />
+          <textarea value={form.preparation} onChange={e=>upd('preparation',e.target.value)} placeholder="Descreva como preparar e usar o tratamento..." rows={4} style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #d0e0d0', borderRadius:12, background:'#ffffff', color:'#1a3a2a', fontFamily:'Georgia, serif', outline:'none', resize:'vertical', marginBottom:12 }} />
           <div style={{ display:'flex', gap:10 }}>
-            <button style={{ flex:1, padding:'12px', background:'#eef2ea', color:'#2b5a3e', border:'1.5px solid #cbdcc8', borderRadius:12, fontSize:12, fontWeight:600, cursor:'pointer' }}>✎ Foto da planta</button>
-            <button style={{ flex:1, padding:'12px', background:'#eef2ea', color:'#2b5a3e', border:'1.5px solid #cbdcc8', borderRadius:12, fontSize:12, fontWeight:600, cursor:'pointer' }}>⊕ GPS automático</button>
+            <button style={{ flex:1, padding:'12px', background:'#eaf6e8', color:'#1a5a3a', border:'1.5px solid #c8dbc8', borderRadius:12, fontSize:12, fontWeight:600, cursor:'pointer' }}>✎ Foto da planta</button>
+            <button style={{ flex:1, padding:'12px', background:'#eaf6e8', color:'#1a5a3a', border:'1.5px solid #c8dbc8', borderRadius:12, fontSize:12, fontWeight:600, cursor:'pointer' }}>⊕ GPS automático</button>
           </div>
         </div>
       )}
       {step===3 && (
         <div style={{ textAlign:'center', padding:'20px 0' }}>
           <div style={{ fontSize:48, marginBottom:12 }}>✦</div>
-          <h3 style={{ fontSize:18, fontWeight:700, color:'#2b7a4b', fontFamily:'Georgia, serif', marginBottom:8 }}>Registo pronto para guardar</h3>
+          <h3 style={{ fontSize:18, fontWeight:700, color:'#1a6b4a', fontFamily:'Georgia, serif', marginBottom:8 }}>Registo pronto para guardar</h3>
           <p style={{ fontSize:13, color:'#4a6b4a', lineHeight:1.7, maxWidth:260, margin:'0 auto 20px' }}>Este saber do ancião ficará preservado para as próximas gerações de angolanos.</p>
-          <div style={{ background:'#fefce8', borderRadius:14, padding:'16px', textAlign:'left', marginBottom:20 }}>
+          <div style={{ background:'#fafdf8', borderRadius:14, padding:'16px', textAlign:'left', marginBottom:20 }}>
             <div style={{ fontSize:12, color:'#6a7c68', marginBottom:4 }}>Planta</div>
-            <div style={{ fontSize:14, fontWeight:600, color:'#1e3a2e', fontFamily:'Georgia, serif' }}>{form.plant || '—'}</div>
+            <div style={{ fontSize:14, fontWeight:600, color:'#1a3a2a', fontFamily:'Georgia, serif' }}>{form.plant || '—'}</div>
             <div style={{ fontSize:12, color:'#6a7c68', marginTop:10, marginBottom:4 }}>Ancião</div>
-            <div style={{ fontSize:14, fontWeight:600, color:'#1e3a2e', fontFamily:'Georgia, serif' }}>{form.elder || '—'}</div>
+            <div style={{ fontSize:14, fontWeight:600, color:'#1a3a2a', fontFamily:'Georgia, serif' }}>{form.elder || '—'}</div>
           </div>
         </div>
       )}
       <div style={{ display:'flex', gap:10, marginTop:20 }}>
         {step>0 && (
-          <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'12px', background:'#eef2ea', color:'#2b5a3e', border:'none', borderRadius:12, fontSize:13, fontWeight:600, cursor:'pointer' }}>← Anterior</button>
+          <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'12px', background:'#eaf6e8', color:'#1a5a3a', border:'none', borderRadius:12, fontSize:13, fontWeight:600, cursor:'pointer' }}>← Anterior</button>
         )}
         <button onClick={()=> step<3 ? setStep(s=>s+1) : alert('Saber registado com sucesso! Obrigado por preservar a nossa cultura.')}
-          style={{ flex:2, padding:'12px', background:'#2b7a4b', color:'#fff', border:'none', borderRadius:12, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }}>
+          style={{ flex:2, padding:'12px', background:'#1a6b4a', color:'#fff', border:'none', borderRadius:12, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }}>
           {step<3 ? 'Continuar →' : '✓ Guardar saber'}
         </button>
       </div>
@@ -798,17 +808,17 @@ function ReportsScreen() {
   return (
     <Screen title="Relatórios" subtitle="Epidemiologia comunitária">
       {reports.map((r,i) => (
-        <div key={i} style={{ display:'flex', alignItems:'center', gap:14, background:'#ffffff', border:'1.5px solid #e0e6dc', borderRadius:14, padding:'16px 18px', marginBottom:10, cursor:'pointer', transition:'all 0.15s' }}
+        <div key={i} style={{ display:'flex', alignItems:'center', gap:14, background:'#ffffff', border:'1.5px solid #d0e0d0', borderRadius:14, padding:'16px 18px', marginBottom:10, cursor:'pointer', transition:'all 0.15s' }}
           onMouseEnter={e=>e.currentTarget.style.borderColor=r.color+'80'}
-          onMouseLeave={e=>e.currentTarget.style.borderColor='#e0e6dc'}>
+          onMouseLeave={e=>e.currentTarget.style.borderColor='#d0e0d0'}>
           <div style={{ width:40, height:40, borderRadius:12, background:r.color+'20', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, color:r.color }}>{r.icon}</div>
           <div style={{ flex:1 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:'#1e3a2e', fontFamily:'Georgia, serif' }}>{r.name}</div>
+            <div style={{ fontSize:14, fontWeight:700, color:'#1a3a2e', fontFamily:'Georgia, serif' }}>{r.name}</div>
             <div style={{ fontSize:11, color:'#8a9c86', marginTop:2 }}>{r.count} · {r.date}</div>
           </div>
           <div style={{ display:'flex', gap:6 }}>
-            <button style={{ padding:'6px 10px', background:'#eef2ea', border:'1px solid #cbdcc8', borderRadius:8, fontSize:10, fontWeight:700, color:'#2b5a3e', cursor:'pointer' }}>PDF</button>
-            <button style={{ padding:'6px 10px', background:'#eef2ea', border:'1px solid #cbdcc8', borderRadius:8, fontSize:10, fontWeight:700, color:'#2b5a3e', cursor:'pointer' }}>CSV</button>
+            <button style={{ padding:'6px 10px', background:'#eaf6e8', border:'1px solid #c8dbc8', borderRadius:8, fontSize:10, fontWeight:700, color:'#1a5a3a', cursor:'pointer' }}>PDF</button>
+            <button style={{ padding:'6px 10px', background:'#eaf6e8', border:'1px solid #c8dbc8', borderRadius:8, fontSize:10, fontWeight:700, color:'#1a5a3a', cursor:'pointer' }}>CSV</button>
           </div>
         </div>
       ))}
@@ -828,17 +838,17 @@ function UsersScreen() {
       {users.map((u,i) => {
         const r = ROLES[u.role];
         return (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:14, background:'#ffffff', border:'1.5px solid #e0e6dc', borderRadius:14, padding:'14px 18px', marginBottom:8 }}>
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:14, background:'#ffffff', border:'1.5px solid #d0e0d0', borderRadius:14, padding:'14px 18px', marginBottom:8 }}>
             <div style={{ width:40, height:40, borderRadius:'50%', background: r.color+'20', color: r.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700 }}>{u.initials}</div>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:14, fontWeight:600, color:'#1e3a2e', fontFamily:'Georgia, serif' }}>{u.name}</div>
+              <div style={{ fontSize:14, fontWeight:600, color:'#1a3a2a', fontFamily:'Georgia, serif' }}>{u.name}</div>
               <div style={{ fontSize:11, color:'#8a9c86' }}>{u.email}</div>
             </div>
             <span style={{ fontSize:11, fontWeight:600, color:r.color, background:r.color+'20', borderRadius:20, padding:'3px 10px' }}>{r.label}</span>
           </div>
         );
       })}
-      <button style={{ width:'100%', marginTop:8, padding:'13px', background:'#eef2ea', border:'1.5px dashed #cbdcc8', borderRadius:14, fontSize:13, fontWeight:600, color:'#2b5a3e', cursor:'pointer' }}>+ Adicionar utilizador</button>
+      <button style={{ width:'100%', marginTop:8, padding:'13px', background:'#eaf6e8', border:'1.5px dashed #c8dbc8', borderRadius:14, fontSize:13, fontWeight:600, color:'#1a5a3a', cursor:'pointer' }}>+ Adicionar utilizador</button>
     </Screen>
   );
 }
@@ -867,21 +877,21 @@ function SettingsScreen({ lang, setLang, largeFont, setLargeFont, highContrast, 
 
   return (
     <Screen title="Definições" subtitle="Acessibilidade e preferências · Mayenge">
-      <div style={{ background:'#ffffff', border:'1.5px solid #e0e6dc', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
+      <div style={{ background:'#ffffff', border:'1.5px solid #d0e0d0', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
         {[
           { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
           { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: toggleHC },
           { label: 'Modo offline', sub: 'Em desenvolvimento – Acesso sem internet em breve', action: () => {} },
         ].map((item,i,arr) => (
-          <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom: i<arr.length-1 ? '1px solid #f0f4f0' : 'none', cursor:'pointer' }}
-            onMouseEnter={e=>e.currentTarget.style.background='#fefce8'}
+          <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom: i<arr.length-1 ? '1px solid #eaf0e8' : 'none', cursor:'pointer' }}
+            onMouseEnter={e=>e.currentTarget.style.background='#fafdf8'}
             onMouseLeave={e=>e.currentTarget.style.background='transparent'}
             onClick={item.action}>
             <div>
-              <div style={{ fontSize:13, fontWeight:600, color:'#1e3a2e' }}>{item.label}</div>
+              <div style={{ fontSize:13, fontWeight:600, color:'#1a3a2a' }}>{item.label}</div>
               <div style={{ fontSize:11, color:'#8a9c86', marginTop:2 }}>{item.sub}</div>
             </div>
-            <span style={{ color:'#cbdcc8', fontSize:14 }}>›</span>
+            <span style={{ color:'#c8dbc8', fontSize:14 }}>›</span>
           </div>
         ))}
       </div>
@@ -918,23 +928,23 @@ function HelpBot() {
   return (
     <>
       <button onClick={() => setOpen(true)}
-        style={{ position:'fixed', bottom: 80, right: 20, width:52, height:52, borderRadius:'50%', background:'#2b7a4b', color:'#fff', fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.15)', cursor:'pointer', zIndex:1000 }}>
+        style={{ position:'fixed', bottom: 80, right: 20, width:52, height:52, borderRadius:'50%', background:'#1a6b4a', color:'#fff', fontSize:24, border:'none', boxShadow:'0 4px 12px rgba(0,0,0,0.15)', cursor:'pointer', zIndex:1000 }}>
         🌱
       </button>
       {open && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:2000 }} onClick={() => setOpen(false)}>
-          <div style={{ background:'#ffffff', borderRadius:20, padding:'24px', maxWidth:400, width:'90%', maxHeight:'80vh', overflowY:'auto', border:'1px solid #e0e6dc' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontSize:20, fontFamily:'Lora, Georgia, serif', marginBottom:12, color:'#1e3a2e' }}>{topics[topic].title}</h2>
+          <div style={{ background:'#ffffff', borderRadius:20, padding:'24px', maxWidth:400, width:'90%', maxHeight:'80vh', overflowY:'auto', border:'1px solid #d0e0d0' }} onClick={e => e.stopPropagation()}>
+            <h2 style={{ fontSize:20, fontFamily:'Lora, Georgia, serif', marginBottom:12, color:'#1a3a2a' }}>{topics[topic].title}</h2>
             <p style={{ fontSize:14, lineHeight:1.7, marginBottom:20, color:'#4a6b4a' }}>{topics[topic].text}</p>
-            <button onClick={() => speak(topics[topic].text)} style={{ marginBottom:12, padding:'8px 14px', background:'#2b7a4b', color:'#fff', border:'none', borderRadius:8, cursor:'pointer' }}>🔊 Ouvir explicação</button>
+            <button onClick={() => speak(topics[topic].text)} style={{ marginBottom:12, padding:'8px 14px', background:'#1a6b4a', color:'#fff', border:'none', borderRadius:8, cursor:'pointer' }}>🔊 Ouvir explicação</button>
             <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
               {Object.keys(topics).map(key => (
-                <button key={key} onClick={() => setTopic(key)} style={{ padding:'6px 10px', background: topic===key ? '#2b7a4b' : '#eef2ea', color: topic===key ? '#fff' : '#1e3a2e', border:'1px solid #dde0dc', borderRadius:6, fontSize:11, cursor:'pointer' }}>
+                <button key={key} onClick={() => setTopic(key)} style={{ padding:'6px 10px', background: topic===key ? '#1a6b4a' : '#eaf6e8', color: topic===key ? '#fff' : '#1a3a2a', border:'1px solid #d0e0d0', borderRadius:6, fontSize:11, cursor:'pointer' }}>
                   {key==='welcome'?'Início':key==='diagnose'?'Autodiagnóstico':key==='identify'?'Identificar':key==='plants'?'Plantas':key==='treatments'?'Tratamentos':key==='settings'?'Definições':''}
                 </button>
               ))}
             </div>
-            <button onClick={() => setOpen(false)} style={{ marginTop:16, padding:'8px 14px', background:'#eef2ea', border:'1px solid #cbdcc8', borderRadius:8, cursor:'pointer', width:'100%', color:'#2b5a3e' }}>Fechar</button>
+            <button onClick={() => setOpen(false)} style={{ marginTop:16, padding:'8px 14px', background:'#eaf6e8', border:'1px solid #c8dbc8', borderRadius:8, cursor:'pointer', width:'100%', color:'#1a5a3a' }}>Fechar</button>
           </div>
         </div>
       )}
@@ -959,13 +969,13 @@ function PlantRemedyCard({ remedy }) {
   }, [remedy.plantName]);
 
   return (
-    <div style={{ background:'#ffffff', border:'1.5px solid #e0e6dc', borderRadius:14, padding:'16px', marginBottom:10, display:'flex', gap:16, alignItems:'flex-start' }}>
+    <div style={{ background:'#ffffff', border:'1.5px solid #d0e0d0', borderRadius:14, padding:'16px', marginBottom:10, display:'flex', gap:16, alignItems:'flex-start' }}>
       <div style={{ width:80, height:80, borderRadius:12, background:'#dcfce7', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, overflow:'hidden' }}>
         {imageUrl ? <img src={imageUrl} alt={remedy.plantName} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> :
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='36' height='36'%3E%3Cpath fill='%232b7a4b' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E" alt="Planta" style={{ width:40, height:40 }} />}
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='36' height='36'%3E%3Cpath fill='%231a6b4a' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E" alt="Planta" style={{ width:40, height:40 }} />}
       </div>
       <div style={{ flex:1 }}>
-        <h3 style={{ fontSize:20, fontWeight:700, color:'#1e3a2e', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {remedy.plantName}</h3>
+        <h3 style={{ fontSize:20, fontWeight:700, color:'#1a3a2a', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {remedy.plantName}</h3>
         <p style={{ fontSize:16, color:'#4a6b4a', marginTop:4 }}><strong>Preparo:</strong> {remedy.preparation}</p>
         <p style={{ fontSize:16, color:'#4a6b4a' }}><strong>Dose:</strong> {remedy.dosage}</p>
         <p style={{ fontSize:16, color:'#4a6b4a' }}><strong>Cuidados:</strong> {remedy.precautions}</p>
@@ -981,7 +991,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
 
   const renderScreen = () => {
     if (!canAccess(role, active)) {
-      return <div style={{ textAlign:'center', padding:'48px 20px' }}><div style={{ fontSize:48 }}>🔒</div><h2 style={{ fontSize:18, fontWeight:700, color:'#1e3a2e', fontFamily:'Georgia, serif' }}>Acesso restrito</h2><p style={{ fontSize:13, color:'#4a6b4a' }}>Esta secção não está disponível para o perfil de <strong>{r.label}</strong>.</p></div>;
+      return <div style={{ textAlign:'center', padding:'48px 20px' }}><div style={{ fontSize:48 }}>🔒</div><h2 style={{ fontSize:18, fontWeight:700, color:'#1a3a2a', fontFamily:'Georgia, serif' }}>Acesso restrito</h2><p style={{ fontSize:13, color:'#4a6b4a' }}>Esta secção não está disponível para o perfil de <strong>{r.label}</strong>.</p></div>;
     }
     switch(active) {
       case 'home':       return <HomeScreen role={role} onNavigate={onNavigate}/>;
@@ -1002,7 +1012,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
      <style>{`
   @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; background:#e8f2e3; color:#1e3a2e; }
+  body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; background:#e0f4e8; color:#1a3a2a; }
   h1,h2,h3 { font-family:'Lora', Georgia, serif; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
   @keyframes slideIn { from { transform:translateX(-100%); } to { transform:translateX(0); } }
@@ -1031,30 +1041,30 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
   .large-font * { font-size: 1.12em !important; line-height: 1.7 !important; }
 `}</style>
 
-      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f4faf2', minHeight:'100vh', borderRadius:24, border:'1px solid #e0e6dc', overflow:'hidden', position:'relative', boxShadow:'0 8px 30px rgba(0,0,0,0.04)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
+      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#f0faf4', minHeight:'100vh', borderRadius:24, border:'1px solid #d0e0d0', overflow:'hidden', position:'relative', boxShadow:'0 8px 30px rgba(0,0,0,0.04)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
 
         {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.3)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
 
-        <div ref={sideRef} style={{ position:'absolute', top:0, left:0, bottom:0, width:260, background:'#ffffff', borderRight:'1px solid #e0e6dc', zIndex:50, transform: sideOpen ? 'translateX(0)' : 'translateX(-100%)', transition:'transform 0.28s cubic-bezier(0.16,1,0.3,1)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
-          <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #e0e6dc' }}>
+        <div ref={sideRef} style={{ position:'absolute', top:0, left:0, bottom:0, width:260, background:'#ffffff', borderRight:'1px solid #d0e0d0', zIndex:50, transform: sideOpen ? 'translateX(0)' : 'translateX(-100%)', transition:'transform 0.28s cubic-bezier(0.16,1,0.3,1)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
+          <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #eaf0e8' }}>
             <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
               <div style={{ width:36, height:36, borderRadius:10, background:'#2b6e4e', color:'#a0e8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>✦</div>
-              <div><div style={{ fontSize:16, fontWeight:700, color:'#1e3a2e', fontFamily:'Lora, Georgia, serif' }}>Botanica</div><div style={{ fontSize:10, color:'#8a9c86' }}>Comunidade Ispk</div></div>
+              <div><div style={{ fontSize:16, fontWeight:700, color:'#1a3a2a', fontFamily:'Lora, Georgia, serif' }}>Botanica</div><div style={{ fontSize:10, color:'#8a9c86' }}>Comunidade Ispk</div></div>
             </div>
             {isAuthenticated ? (
               <>
                 <p style={{ fontSize:10, fontWeight:700, color:'#8a9c86', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Perfil ativo</p>
                 <div style={{ display:'flex', gap:4, marginBottom:10 }}>
                   {Object.entries(ROLES).map(([id, rd]) => (
-                    <button key={id} onClick={() => { setRole(id); if(!canAccess(id,active)) setActive('home'); }} style={{ flex:1, padding:'7px 4px', borderRadius:10, border:'1.5px solid', fontSize:10, fontWeight:700, cursor:'pointer', borderColor: role===id ? rd.color : '#e0e6dc', background: role===id ? rd.color : 'transparent', color: role===id ? '#fff' : '#8a9c86', transition:'all 0.15s' }}>
+                    <button key={id} onClick={() => { setRole(id); if(!canAccess(id,active)) setActive('home'); }} style={{ flex:1, padding:'7px 4px', borderRadius:10, border:'1.5px solid', fontSize:10, fontWeight:700, cursor:'pointer', borderColor: role===id ? rd.color : '#d0e0d0', background: role===id ? rd.color : 'transparent', color: role===id ? '#fff' : '#8a9c86', transition:'all 0.15s' }}>
                       {id==='admin'?'🛡️':id==='tecnico'?'🌿':'🫀'}<br/><span style={{ fontSize:9 }}>{id==='admin'?'Admin':id==='tecnico'?'Técnico':'Paciente'}</span>
                     </button>
                   ))}
                 </div>
-                <button onClick={onLogout} style={{ background:'#eef2ea', border:'1px solid #cbdcc8', borderRadius:8, padding:'5px 10px', fontSize:10, cursor:'pointer', width:'100%', color:'#2b5a3e' }}>🚪 Sair da conta</button>
+                <button onClick={onLogout} style={{ background:'#eaf6e8', border:'1px solid #c8dbc8', borderRadius:8, padding:'5px 10px', fontSize:10, cursor:'pointer', width:'100%', color:'#1a5a3a' }}>🚪 Sair da conta</button>
               </>
             ) : (
-              <button onClick={() => setRole('admin')} style={{ marginTop:10, padding:'8px 12px', background:'#2b7a4b', color:'#fff', border:'none', borderRadius:10, fontSize:12, fontWeight:600, cursor:'pointer', width:'100%' }}>Entrar como Admin/Técnico</button>
+              <button onClick={() => setRole('admin')} style={{ marginTop:10, padding:'8px 12px', background:'#1a6b4a', color:'#fff', border:'none', borderRadius:10, fontSize:12, fontWeight:600, cursor:'pointer', width:'100%' }}>Entrar como Admin/Técnico</button>
             )}
           </div>
           <div style={{ flex:1, padding:'10px 0', overflowY:'auto' }}>
@@ -1064,22 +1074,22 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
                 {group.items.map(item => {
                   const isActive = active === item.id;
                   return (
-                    <div key={item.id} onClick={() => onNavigate(item.id)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 20px', cursor:'pointer', background: isActive ? '#fefce8' : 'transparent', borderLeft: isActive ? '3px solid #2b7a4b' : '3px solid transparent', transition:'all 0.12s' }}>
-                      <span style={{ fontSize:18, color: isActive ? '#2b7a4b' : '#8a9c86' }}>{item.icon}</span>
-                      <div style={{ flex:1 }}><div style={{ fontSize:14, fontWeight: isActive ? 600 : 400, color: isActive ? '#1e3a2e' : '#4a6b4a' }}>{lang === 'ki' ? item.labelK : item.label}</div></div>
+                    <div key={item.id} onClick={() => onNavigate(item.id)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 20px', cursor:'pointer', background: isActive ? '#fafdf8' : 'transparent', borderLeft: isActive ? '3px solid #1a6b4a' : '3px solid transparent', transition:'all 0.12s' }}>
+                      <span style={{ fontSize:18, color: isActive ? '#1a6b4a' : '#8a9c86' }}>{item.icon}</span>
+                      <div style={{ flex:1 }}><div style={{ fontSize:14, fontWeight: isActive ? 600 : 400, color: isActive ? '#1a3a2a' : '#4a6b4a' }}>{lang === 'ki' ? item.labelK : item.label}</div></div>
                     </div>
                   );
                 })}
               </div>
             ))}
           </div>
-          <div style={{ padding:'14px 20px', borderTop:'1px solid #e0e6dc', fontSize:11, color:'#8a9c86', textAlign:'center' }}><div style={{ fontWeight:600, color:'#1e3a2e', marginBottom:2 }}>Botanica v1.0</div>ISPK · Engenharia Informática · 2026</div>
+          <div style={{ padding:'14px 20px', borderTop:'1px solid #eaf0e8', fontSize:11, color:'#8a9c86', textAlign:'center' }}><div style={{ fontWeight:600, color:'#1a3a2a', marginBottom:2 }}>Botanica v1.0</div>ISPK · Engenharia Informática · 2026</div>
         </div>
 
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'#ffffff', borderBottom:'1px solid #e0e6dc', position:'sticky', top:0, zIndex:30 }}>
-          {active !== 'home' && <button onClick={goBack} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #e0e6dc', background:'#f4faf2', cursor:'pointer', fontSize:18, color:'#2b5a3e', marginRight:8 }}>←</button>}
-          <button onClick={()=>setSideOpen(o=>!o)} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #e0e6dc', background:'#f4faf2', cursor:'pointer', fontSize:18, color:'#2b5a3e' }}>☰</button>
-          <div style={{ display:'flex', alignItems:'center', gap:8 }}><div style={{ width:8, height:8, borderRadius:'50%', background:'#2b7a4b' }}/><span style={{ fontSize:14, fontWeight:700, color:'#1e3a2e', fontFamily:'Lora, Georgia, serif' }}>Botanica</span></div>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'#ffffff', borderBottom:'1px solid #eaf0e8', position:'sticky', top:0, zIndex:30 }}>
+          {active !== 'home' && <button onClick={goBack} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #d0e0d0', background:'#f0faf4', cursor:'pointer', fontSize:18, color:'#1a5a3a', marginRight:8 }}>←</button>}
+          <button onClick={()=>setSideOpen(o=>!o)} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #d0e0d0', background:'#f0faf4', cursor:'pointer', fontSize:18, color:'#1a5a3a' }}>☰</button>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}><div style={{ width:8, height:8, borderRadius:'50%', background:'#1a6b4a' }}/><span style={{ fontSize:14, fontWeight:700, color:'#1a3a2a', fontFamily:'Lora, Georgia, serif' }}>Botanica</span></div>
           <div style={{ width:38, height:38, borderRadius:10, background: r.color+'20', color: r.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700 }}>{role==='admin'?'A':role==='tecnico'?'T':'P'}</div>
         </div>
 
@@ -1087,7 +1097,7 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
           {renderScreen()}
         </div>
 
-        <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(255,255,255,0.96)', backdropFilter:'blur(12px)', borderTop:'1px solid #e0e6dc', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px', zIndex:20 }}>
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(255,255,255,0.96)', backdropFilter:'blur(12px)', borderTop:'1px solid #eaf0e8', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px', zIndex:20 }}>
           {(() => {
             const tabs = ['home', 'plants', 'diagnose', 'identify'];
             if (role === 'paciente') tabs.push('settings');
@@ -1099,8 +1109,8 @@ function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, g
             const isActive = active === id;
             return (
               <button key={id} onClick={() => onNavigate(id)} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
-                <span style={{ fontSize:24, color: isActive ? '#2b7a4b' : '#8a9c86' }}>{item.icon}</span>
-                <span style={{ fontSize:11, color: isActive ? '#1e3a2e' : '#6a7c68', fontWeight: isActive ? 700 : 500 }}>{lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}</span>
+                <span style={{ fontSize:24, color: isActive ? '#1a6b4a' : '#8a9c86' }}>{item.icon}</span>
+                <span style={{ fontSize:11, color: isActive ? '#1a3a2a' : '#6a7c68', fontWeight: isActive ? 700 : 500 }}>{lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}</span>
               </button>
             );
           })}
@@ -1156,12 +1166,12 @@ function BotanicaApp() {
 
   if (!isAuthenticated && (role === 'admin' || role === 'tecnico')) {
     return (
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#e8f2e3' }}>
+      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#e0f4e8' }}>
         <div style={{ maxWidth:400, width:'100%', padding:'2rem' }}>
-          <h2 style={{ fontFamily:'Lora, Georgia, serif', textAlign:'center', marginBottom:'2rem', color:'#1e3a2e' }}>🌿 Comunidade Botânica Ispk</h2>
+          <h2 style={{ fontFamily:'Lora, Georgia, serif', textAlign:'center', marginBottom:'2rem', color:'#1a3a2a' }}>🌿 Comunidade Botânica Ispk</h2>
           <LoginForm onLogin={handleLogin} />
           <div style={{ textAlign:'center', marginTop:'1rem' }}>
-            <button onClick={() => { setRole('paciente'); setActive('home'); }} style={{ background:'none', border:'none', color:'#2b7a4b', cursor:'pointer', fontSize:14 }}>Continuar como visitante (paciente)</button>
+            <button onClick={() => { setRole('paciente'); setActive('home'); }} style={{ background:'none', border:'none', color:'#1a6b4a', cursor:'pointer', fontSize:14 }}>Continuar como visitante (paciente)</button>
           </div>
         </div>
       </div>
@@ -1181,3 +1191,4 @@ function BotanicaApp() {
 export default function App() {
   return (<AuthProvider><BotanicaApp /></AuthProvider>);
 }
+```
