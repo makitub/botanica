@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginForm from './components/LoginForm';
 import { jsPDF } from "jspdf";
+import { supabase } from './supabaseClient';
 
 /* ─── CONSTANTS ─────────────────────────────────────────────────────────── */
 const ROLES = {
@@ -31,7 +32,7 @@ const GROUPS = {
   system: 'Sistema',
 };
 
-const PLANTS = [
+const FALLBACK_PLANTS = [
   { id:1,  name:'Moringa',            sci:'Moringa oleifera',        use:'Nutritivo, Imunidade',       kimbundu:'Mukenga',  region:'Luanda',  confidence:97, treatments:14, color:'#2d7a4f' },
   { id:2,  name:'Boldo',              sci:'Peumus boldus',           use:'Digestivo, Fígado',          kimbundu:'Ntombo',   region:'Huambo',  confidence:94, treatments:8,  color:'#5a7a2d' },
   { id:3,  name:'Capim-limão',        sci:'Cymbopogon citratus',    use:'Ansiolítico, Febre',         kimbundu:'Nkasa',    region:'Malanje', confidence:91, treatments:11, color:'#7a6b2d' },
@@ -64,7 +65,7 @@ const PLANTS = [
   { id:30, name:'Copaíba',           sci:'Copaifera langsdorffii', use:'Cicatrizante, Anti‑inflamatório',kimbundu:'Copaíba',region:'Cabinda', confidence:92, treatments:12, color:'#2e8b57' },
 ];
 
-const TREATMENTS = [
+const FALLBACK_TREATMENTS = [
   { id:1, name:'Chá de Moringa para febre',      plant:'Moringa',     elder:'Ancião Nkosi, 82 anos', region:'Zango 0',  tags:['Febre','Crianças'] },
   { id:2, name:'Cataplasma de Boldo digestivo',  plant:'Boldo',       elder:'Anciã Luisa, 74 anos',  region:'Rangel',   tags:['Digestão'] },
   { id:3, name:'Infusão de capim-limão',         plant:'Capim-limão', elder:'Ancião Mateus, 91 anos',region:'Cazenga',  tags:['Ansiedade','Sono'] },
@@ -76,6 +77,50 @@ const canAccess = (role, id) => {
   const item = MENU.find(m => m.id === id);
   return item ? item.roles.includes(role) : false;
 };
+
+/* ─── DATA HOOK ─────────────────────────────────────────────────────────── */
+function useBotanicaData() {
+  const [plants, setPlants] = useState(FALLBACK_PLANTS);
+  const [treatments, setTreatments] = useState(FALLBACK_TREATMENTS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchData() {
+      setLoading(true);
+      setError(null);
+      try {
+        const [plantsRes, treatmentsRes] = await Promise.all([
+          supabase.from('plants').select('*').order('name'),
+          supabase.from('treatments').select('*').order('name'),
+        ]);
+
+        if (cancelled) return;
+
+        if (plantsRes.error) throw plantsRes.error;
+        if (treatmentsRes.error) throw treatmentsRes.error;
+
+        if (plantsRes.data && plantsRes.data.length > 0) setPlants(plantsRes.data);
+        if (treatmentsRes.data && treatmentsRes.data.length > 0) setTreatments(treatmentsRes.data);
+      } catch (err) {
+        if (!cancelled) {
+          console.warn('Supabase fetch failed, using fallback data:', err.message);
+          setError(err.message);
+          // Keep fallback data already set in state
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchData();
+    return () => { cancelled = true; };
+  }, []);
+
+  return { plants, treatments, loading, error };
+}
 
 async function getProvinceFromLatLng(lat, lng) {
   const ANGOLA_PROVINCES = [
@@ -494,7 +539,7 @@ function IdentifyScreen() {
 }
 
 /* ─── OTHER SCREENS ─────────────────────────────────────────────────────── */
-function HomeScreen({ role, onNavigate }) {
+function HomeScreen({ role, onNavigate, plants }) {
   const r = ROLES[role];
   const greeting = new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite';
   const quickActions = MENU.filter(m => m.roles.includes(role) && m.id !== 'home' && m.id !== 'settings').slice(0,4);
@@ -525,7 +570,7 @@ function HomeScreen({ role, onNavigate }) {
         </div>
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
-        {[{ val: PLANTS.length, label: 'Plantas', sub: 'catalogadas (em expansão)' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
+        {[{ val: plants.length, label: 'Plantas', sub: 'catalogadas (em expansão)' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
           <div key={s.label} style={{ background:'#c8e4d4', borderRadius:14, padding:'14px 12px', textAlign:'center' }}>
             <div style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{s.val}</div>
             <div style={{ fontSize:11, fontWeight:600, color:'#3d6b4f', marginTop:1 }}>{s.label}</div>
@@ -612,10 +657,10 @@ function PlantDetailScreen({ plant, onBack }) {
   );
 }
 
-function PlantsScreen() {
+function PlantsScreen({ plants }) {
   const [filter, setFilter] = useState('');
   const [selectedPlant, setSelectedPlant] = useState(null);
-  const filtered = PLANTS.filter(p =>
+  const filtered = plants.filter(p =>
     p.name.toLowerCase().includes(filter.toLowerCase()) ||
     p.kimbundu.toLowerCase().includes(filter.toLowerCase()) ||
     p.sci.toLowerCase().includes(filter.toLowerCase())
@@ -655,11 +700,11 @@ function PlantsScreen() {
   );
 }
 
-function TreatmentsScreen() {
+function TreatmentsScreen({ treatments }) {
   return (
     <Screen title="Tratamentos" subtitle="Saberes ancestrais preservados · Buanga">
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-        {TREATMENTS.map((t,i) => (
+        {treatments.map((t,i) => (
           <div key={i} style={{
             background:'#d4ecdf', border:'1.5px solid #a0c8b0', borderRadius:14,
             padding:'16px 18px', marginBottom:10, cursor:'pointer',
@@ -952,25 +997,34 @@ function PlantRemedyCard({ remedy }) {
   );
 }
 
-function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout, onNavigate }) {
+function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout, onNavigate, plants, treatments, dataLoading }) {
   const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({ groupId, groupLabel, items: MENU.filter(m => m.group === groupId && m.roles.includes(role)) })).filter(g => g.items.length > 0);
   const r = ROLES[role];
 
   const renderScreen = () => {
+    if (dataLoading) {
+      return (
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'60px 20px', gap:16 }}>
+          <div style={{ width:48, height:48, borderRadius:'50%', border:'3px solid #a0d8b8', borderTopColor:'#1a9a60', animation:'spin 0.8s linear infinite' }} />
+          <p style={{ fontSize:14, color:'#6b9a74', fontFamily:'Georgia, serif' }}>A carregar dados...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      );
+    }
     if (!canAccess(role, active)) {
       return <div style={{ textAlign:'center', padding:'48px 20px' }}><div style={{ fontSize:48 }}>🔒</div><h2 style={{ fontSize:18, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>Acesso restrito</h2><p style={{ fontSize:13, color:'#6b7c6e' }}>Esta secção não está disponível para o perfil de <strong>{r.label}</strong>.</p></div>;
     }
     switch(active) {
-      case 'home':       return <HomeScreen role={role} onNavigate={onNavigate}/>;
+      case 'home':       return <HomeScreen role={role} onNavigate={onNavigate} plants={plants}/>;
       case 'diagnose':   return <DiagnoseScreen/>;
-      case 'plants':     return <PlantsScreen/>;
-      case 'treatments': return <TreatmentsScreen/>;
+      case 'plants':     return <PlantsScreen plants={plants}/>;
+      case 'treatments': return <TreatmentsScreen treatments={treatments}/>;
       case 'identify':   return <IdentifyScreen/>;
       case 'register':   return <RegisterScreen/>;
       case 'reports':    return <ReportsScreen/>;
       case 'users':      return <UsersScreen/>;
       case 'settings':   return <SettingsScreen lang={lang} setLang={setLang} largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast} />;
-      default:           return <HomeScreen role={role} onNavigate={onNavigate}/>;
+      default:           return <HomeScreen role={role} onNavigate={onNavigate} plants={plants}/>;
     }
   };
 
@@ -1099,6 +1153,8 @@ function BotanicaApp() {
   const [largeFont, setLargeFont] = useState(false);
   const sideRef = useRef(null);
 
+  const { plants, treatments, loading: dataLoading } = useBotanicaData();
+
   useEffect(() => { if (window.speechSynthesis) window.speechSynthesis.getVoices(); }, []);
 
   const goBack = () => window.history.back();
@@ -1151,6 +1207,7 @@ function BotanicaApp() {
       sideOpen={sideOpen} setSideOpen={setSideOpen} lang={lang} setLang={setLang}
       largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast}
       sideRef={sideRef} isAuthenticated={isAuthenticated} onLogout={handleLogout} onNavigate={navigate}
+      plants={plants} treatments={treatments} dataLoading={dataLoading}
     />
   );
 }
