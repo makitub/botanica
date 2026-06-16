@@ -5,7 +5,7 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [currentRole, setCurrentRole] = useState('paciente');
+  const [role, setRole] = useState(null); // 'admin', 'tecnico', ou null (visitante)
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId) => {
@@ -16,10 +16,10 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .single();
       if (error) throw error;
-      return data?.role || 'paciente';
+      return data?.role || null;
     } catch (err) {
       console.warn('Erro ao buscar perfil:', err.message);
-      return 'paciente';
+      return null;
     }
   };
 
@@ -28,10 +28,10 @@ export const AuthProvider = ({ children }) => {
       const user = session?.user ?? null;
       setUser(user);
       if (user) {
-        const role = await fetchProfile(user.id);
-        setCurrentRole(role);
+        const userRole = await fetchProfile(user.id);
+        setRole(userRole);
       } else {
-        setCurrentRole('paciente');
+        setRole(null);
       }
       setLoading(false);
     });
@@ -41,10 +41,10 @@ export const AuthProvider = ({ children }) => {
         const user = session?.user ?? null;
         setUser(user);
         if (user) {
-          const role = await fetchProfile(user.id);
-          setCurrentRole(role);
+          const userRole = await fetchProfile(user.id);
+          setRole(userRole);
         } else {
-          setCurrentRole('paciente');
+          setRole(null);
         }
         setLoading(false);
       }
@@ -73,24 +73,18 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     isAuthenticated: !!user,
-    currentRole,
+    role, // 'admin', 'tecnico', ou null
     login,
     signUp,
     logout,
     loading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
