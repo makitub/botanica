@@ -1,1217 +1,466 @@
 // src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext';
 import LoginForm from './components/LoginForm';
-import { jsPDF } from "jspdf";
-import { supabase } from './supabaseClient';
+import { MENU, getPublicMenu, getPrivateMenuByRole } from './utils/permissions';
 
-/* ─── CONSTANTS ─────────────────────────────────────────────────────────── */
-const ROLES = {
-  admin:   { id:'admin',   label:'Administrador',    labelK:'Nkuluntu',         color:'#0d5c3a', bg:'#e6f4ee', accent:'#1a9a60' },
-  tecnico: { id:'tecnico', label:'Técnico de Campo', labelK:'Mukanda wa Nsi',   color:'#7c4a1e', bg:'#f5ede3', accent:'#c87941' },
-  paciente:{ id:'paciente',label:'Paciente',          labelK:'Muntu wa Buanga',  color:'#1a4a7c', bg:'#e3eef5', accent:'#3a82c4' },
-};
+// Páginas (substitua pelos imports reais dos seus componentes)
+import IdentifyScreen from './pages/IdentifyScreen';
+import PlantsScreen from './pages/PlantsScreen';
+import DiagnoseScreen from './pages/DiagnoseScreen';
+import AdminDashboard from './components/AdminDashboard';
+import TecnicoDashboard from './components/TecnicoDashboard';
+import RegisterScreen from './pages/RegisterScreen';
+import MediaScreen from './pages/MediaScreen';
+import GeoLocationScreen from './pages/GeoLocationScreen';
+import ReportsScreen from './pages/ReportsScreen';
+import UsersScreen from './pages/UsersScreen';
+import SettingsScreen from './pages/SettingsScreen';
 
-const MENU = [
-  { id:'home',      label:'Início',            labelK:'Yibu',             icon:'⌂',  roles:['admin','tecnico','paciente'], group:'main'   },
-  { id:'diagnose',  label:'Autodiagnóstico',   labelK:'Diangula Mwini',   icon:'♡',  roles:['admin','tecnico','paciente'], group:'main', highlight:true },
-  { id:'plants',    label:'Plantas Medicinais',labelK:'Miti ya Buanga',   icon:'✦',  roles:['admin','tecnico','paciente'], group:'main'   },
-  { id:'treatments',label:'Tratamentos',       labelK:'Buanga',           icon:'❋',  roles:['admin','tecnico','paciente'], group:'main'   },
-  { id:'identify',  label:'Identificar Planta',labelK:'Zibula Muti',      icon:'◎',  roles:['admin','tecnico','paciente'], group:'main'   },
-  { id:'register',  label:'Registar Saber',    labelK:'Sonika Kijiji',    icon:'✎',  roles:['admin','tecnico'],            group:'field'  },
-  { id:'media',     label:'Multimédia',        labelK:'Mambu',            icon:'◉',  roles:['admin','tecnico'],            group:'field'  },
-  { id:'reports',   label:'Relatórios',        labelK:'Mavovo',           icon:'▦',  roles:['admin'],                      group:'admin'  },
-  { id:'users',     label:'Utilizadores',      labelK:'Antu',             icon:'◈',  roles:['admin'],                      group:'admin'  },
-  { id:'settings',  label:'Definições',        labelK:'Mayenge',          icon:'⚙',  roles:['admin','tecnico','paciente'], group:'system' },
-];
+// Componente de ecrã partilhado (se ainda não existir, crie um ficheiro separado)
+import Screen from './components/Screen';
 
-const GROUPS = {
-  main:   'Principal',
-  field:  'Campo',
-  admin:  'Administração',
-  system: 'Sistema',
-};
+// Estilos globais (já existentes no index.css, mas mantemos para consistência)
+import './index.css';
 
-const FALLBACK_PLANTS = [
-  { id:1,  name:'Moringa',            sci:'Moringa oleifera',        use:'Nutritivo, Imunidade',       kimbundu:'Mukenga',  region:'Luanda',  confidence:97, treatments:14, color:'#2d7a4f' },
-  { id:2,  name:'Boldo',              sci:'Peumus boldus',           use:'Digestivo, Fígado',          kimbundu:'Ntombo',   region:'Huambo',  confidence:94, treatments:8,  color:'#5a7a2d' },
-  { id:3,  name:'Capim-limão',        sci:'Cymbopogon citratus',    use:'Ansiolítico, Febre',         kimbundu:'Nkasa',    region:'Malanje', confidence:91, treatments:11, color:'#7a6b2d' },
-  { id:4,  name:'Quiabento',          sci:'Abelmoschus esculentus', use:'Anti-inflamatório',          kimbundu:'Kibondo',  region:'Cabinda', confidence:88, treatments:6,  color:'#2d5a7a' },
-  { id:5,  name:'Mulemba',            sci:'Ficus thonningii',       use:'Malária, Dor',               kimbundu:'Mulemba',  region:'Bié',     confidence:96, treatments:19, color:'#7a2d5a' },
-  { id:6,  name:'Nkasa',              sci:'Erythrophleum suaveol.', use:'Antibacteriano',             kimbundu:'Nkasa',    region:'Uíge',    confidence:82, treatments:5,  color:'#4a2d7a' },
-  { id:7,  name:'Gengibre',           sci:'Zingiber officinale',    use:'Anti‑inflamatório, Dor',     kimbundu:'Gengibre', region:'Luanda',  confidence:90, treatments:20, color:'#b8860b' },
-  { id:8,  name:'Alho',               sci:'Allium sativum',         use:'Antibiótico, Coração',       kimbundu:'Alho',     region:'Huíla',   confidence:95, treatments:30, color:'#8b7355' },
-  { id:9,  name:'Cebola',             sci:'Allium cepa',            use:'Expectorante, Diurético',    kimbundu:'Cebola',   region:'Benguela',confidence:88, treatments:12, color:'#d2b48c' },
-  { id:10, name:'Eucalipto',          sci:'Eucalyptus globulus',    use:'Respiratório, Febre',        kimbundu:'Eucalipto',region:'Huambo',  confidence:92, treatments:18, color:'#4682b4' },
-  { id:11, name:'Macela',             sci:'Achyrocline satureioides',use:'Digestivo, Calmante',      kimbundu:'Macela',   region:'Moxico',  confidence:85, treatments:7,  color:'#ffd700' },
-  { id:12, name:'Erva‑cidreira',      sci:'Melissa officinalis',    use:'Calmante, Sono',             kimbundu:'Cidreira', region:'Cuanza Sul',confidence:93, treatments:10, color:'#98fb98' },
-  { id:13, name:'Hortelã',            sci:'Mentha spicata',         use:'Digestivo, Náusea',          kimbundu:'Hortelã',  region:'Lunda Norte',confidence:89, treatments:9,  color:'#3cb371' },
-  { id:14, name:'Alecrim',            sci:'Rosmarinus officinalis', use:'Memória, Circulação',        kimbundu:'Alecrim',  region:'Namibe',  confidence:86, treatments:6,  color:'#6b8e23' },
-  { id:15, name:'Babosa',             sci:'Aloe vera',              use:'Queimaduras, Pele',          kimbundu:'Babosa',   region:'Cunene',  confidence:97, treatments:25, color:'#228b22' },
-  { id:16, name:'Nim',                sci:'Azadirachta indica',     use:'Antiparasitário, Pele',      kimbundu:'Nim',      region:'Cuando Cubango',confidence:83, treatments:4, color:'#556b2f' },
-  { id:17, name:'Jambolão',           sci:'Syzygium cumini',        use:'Diabetes, Inflamação',       kimbundu:'Jambolão', region:'Zaire',  confidence:80, treatments:3,  color:'#8b0000' },
-  { id:18, name:'Cajueiro',           sci:'Anacardium occidentale', use:'Anti‑inflamatório, Cicatrizante', kimbundu:'Caju',region:'Bengo', confidence:91, treatments:11, color:'#cd853f' },
-  { id:19, name:'Embaúba',            sci:'Cecropia pachystachya',  use:'Pressão alta, Diurético',    kimbundu:'Embaúba',  region:'Cabinda', confidence:78, treatments:4,  color:'#8fbc8f' },
-  { id:20, name:'Picão',              sci:'Bidens pilosa',          use:'Hepatite, Icterícia',        kimbundu:'Picão',    region:'Malanje', confidence:82, treatments:6,  color:'#daa520' },
-  { id:21, name:'Carqueja',           sci:'Baccharis trimera',      use:'Digestivo, Fígado',          kimbundu:'Carqueja', region:'Bié',    confidence:87, treatments:9,  color:'#bdb76b' },
-  { id:22, name:'Quebra‑pedra',       sci:'Phyllanthus niruri',     use:'Cálculo renal, Fígado',      kimbundu:'Quebra‑pedra',region:'Huíla',confidence:90, treatments:15, color:'#3cb371' },
-  { id:23, name:'Mastruz',            sci:'Chenopodium ambrosioides',use:'Vermífugo, Tosse',         kimbundu:'Mastruz',  region:'Luanda',  confidence:88, treatments:10, color:'#8b4513' },
-  { id:24, name:'Guabiroba',          sci:'Campomanesia xanthocarpa',use:'Anti‑inflamatório, Vitamina',kimbundu:'Guabiroba',region:'Cuanza Norte',confidence:76, treatments:4, color:'#f4a460' },
-  { id:25, name:'Pau‑ferro',          sci:'Libidibia ferrea',       use:'Cicatrizante, Tónico',       kimbundu:'Pau‑ferro',region:'Namibe',  confidence:81, treatments:5,  color:'#a0522d' },
-  { id:26, name:'Sucupira',           sci:'Pterodon emarginatus',   use:'Reumatismo, Dor',            kimbundu:'Sucupira', region:'Moxico',  confidence:79, treatments:7,  color:'#8b6508' },
-  { id:27, name:'Ipê‑roxo',           sci:'Handroanthus impetiginosus',use:'Anti‑inflamatório, Câncer',kimbundu:'Ipê',     region:'Bié',     confidence:84, treatments:6,  color:'#800080' },
-  { id:28, name:'Unha‑de‑gato',       sci:'Uncaria tomentosa',      use:'Imunidade, Inflamação',      kimbundu:'Unha‑de‑gato',region:'Lunda Sul',confidence:86, treatments:8, color:'#dc143c' },
-  { id:29, name:'Jatobá',             sci:'Hymenaea courbaril',     use:'Fortificante, Pulmão',       kimbundu:'Jatobá',   region:'Zaire',  confidence:83, treatments:5,  color:'#b22222' },
-  { id:30, name:'Copaíba',           sci:'Copaifera langsdorffii', use:'Cicatrizante, Anti‑inflamatório',kimbundu:'Copaíba',region:'Cabinda', confidence:92, treatments:12, color:'#2e8b57' },
-];
+// ─────────────────────────────────────────────────────────────
+// COMPONENTES AUXILIARES (Header, SideMenu, BottomNav, LoginModal)
+// ─────────────────────────────────────────────────────────────
 
-const FALLBACK_TREATMENTS = [
-  { id:1, name:'Chá de Moringa para febre',      plant:'Moringa',     elder:'Ancião Nkosi, 82 anos', region:'Zango 0',  tags:['Febre','Crianças'] },
-  { id:2, name:'Cataplasma de Boldo digestivo',  plant:'Boldo',       elder:'Anciã Luisa, 74 anos',  region:'Rangel',   tags:['Digestão'] },
-  { id:3, name:'Infusão de capim-limão',         plant:'Capim-limão', elder:'Ancião Mateus, 91 anos',region:'Cazenga',  tags:['Ansiedade','Sono'] },
-  { id:4, name:'Decocção de Mulemba',            plant:'Mulemba',     elder:'Anciã Maria, 78 anos',  region:'Viana',    tags:['Malária'] },
-];
+function Header({ isAuthenticated, role, onLogout, onLoginClick, onToggleSideMenu }) {
+  const roleLabel = role === 'admin' ? 'Admin' : role === 'tecnico' ? 'Técnico' : '';
 
-/* ─── HELPERS ───────────────────────────────────────────────────────────── */
-const canAccess = (role, id) => {
-  const item = MENU.find(m => m.id === id);
-  return item ? item.roles.includes(role) : false;
-};
-
-/* ─── DATA HOOK ─────────────────────────────────────────────────────────── */
-function useBotanicaData() {
-  const [plants, setPlants] = useState(FALLBACK_PLANTS);
-  const [treatments, setTreatments] = useState(FALLBACK_TREATMENTS);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-      try {
-        const [plantsRes, treatmentsRes] = await Promise.all([
-          supabase.from('plants').select('*').order('name'),
-          supabase.from('treatments').select('*').order('name'),
-        ]);
-
-        if (cancelled) return;
-
-        if (plantsRes.error) throw plantsRes.error;
-        if (treatmentsRes.error) throw treatmentsRes.error;
-
-        if (plantsRes.data && plantsRes.data.length > 0) setPlants(plantsRes.data);
-        if (treatmentsRes.data && treatmentsRes.data.length > 0) setTreatments(treatmentsRes.data);
-      } catch (err) {
-        if (!cancelled) {
-          console.warn('Supabase fetch failed, using fallback data:', err.message);
-          setError(err.message);
-          // Keep fallback data already set in state
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    fetchData();
-    return () => { cancelled = true; };
-  }, []);
-
-  return { plants, treatments, loading, error };
-}
-
-async function getProvinceFromLatLng(lat, lng) {
-  const ANGOLA_PROVINCES = [
-    'Bengo','Benguela','Bié','Cabinda','Cuando Cubango','Cuanza Norte','Cuanza Sul',
-    'Cunene','Huambo','Huíla','Luanda','Lunda Norte','Lunda Sul','Malanje','Moxico',
-    'Namibe','Uíge','Zaire'
-  ];
-  try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=8&addressdetails=1&accept-language=pt`);
-    const data = await res.json();
-    const address = data.address;
-    const province = address.state || address.province || address.region || '';
-    const match = ANGOLA_PROVINCES.find(p => province.toLowerCase().includes(p.toLowerCase()));
-    return match || province || 'Luanda';  // fallback Luanda em vez de 'Desconhecida'
-  } catch {
-    return 'Luanda';
-  }
-}
-
-/* ─── REUSABLE COMPONENTS ───────────────────────────────────────────────── */
-function Screen({ children, title, subtitle }) {
   return (
-    <div style={{ animation:'fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both', width:'100%', maxWidth:480, margin:'0 auto' }}>
-      {(title || subtitle) && (
-        <div style={{ marginBottom: 28 }}>
-          {title && (
-            <h1 style={{
-              fontSize: 28, fontWeight: 700, color: '#0f1a12',
-              letterSpacing: '-0.02em', fontFamily: 'Lora, Georgia, serif'
-            }}>{title}</h1>
-          )}
-          {subtitle && (
-            <p style={{ fontSize: 18, color: '#6b7c6e', marginTop: 4, lineHeight: 1.6 }}>
-              {subtitle}
-            </p>
-          )}
+    <header style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '12px 18px',
+      background: '#c8e4d4',
+      borderBottom: '1px solid #8ebfaa',
+      position: 'sticky',
+      top: 0,
+      zIndex: 30,
+    }}>
+      <button
+        onClick={onToggleSideMenu}
+        style={{
+          background: 'none',
+          border: 'none',
+          fontSize: 24,
+          cursor: 'pointer',
+          color: '#1a6b4a',
+        }}
+        aria-label="Abrir menu"
+      >
+        ☰
+      </button>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: '#0f1a12', fontFamily: 'Lora, Georgia, serif' }}>
+          🌿 Botanica
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {isAuthenticated ? (
+          <>
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#1a6b4a' }}>
+              {roleLabel}
+            </span>
+            <button
+              onClick={onLogout}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: 20,
+                cursor: 'pointer',
+                color: '#c0392b',
+              }}
+              title="Sair"
+            >
+              🚪
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={onLoginClick}
+            style={{
+              padding: '6px 16px',
+              background: '#1a9a60',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 20,
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
+            }}
+          >
+            Entrar
+          </button>
+        )}
+      </div>
+    </header>
+  );
+}
+
+function SideMenu({ open, onClose, groups, activeId, onNavigate }) {
+  if (!open) return null;
+
+  return (
+    <>
+      {/* Overlay */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.4)',
+          zIndex: 40,
+        }}
+        onClick={onClose}
+      />
+      {/* Menu */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: 280,
+          background: '#fff',
+          zIndex: 50,
+          padding: '20px 0',
+          boxShadow: '2px 0 12px rgba(0,0,0,0.1)',
+          overflowY: 'auto',
+          transform: open ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.25s ease',
+        }}
+      >
+        <div style={{ padding: '0 20px 16px', borderBottom: '1px solid #e8ede9' }}>
+          <h2 style={{ fontFamily: 'Lora, serif', color: '#1a6b4a' }}>🌿 Botanica</h2>
+          <p style={{ fontSize: 12, color: '#6b7c6e' }}>Comunidade Ispk</p>
         </div>
-      )}
-      {children}
+
+        {groups.map((group, idx) => (
+          <div key={idx} style={{ marginTop: 16 }}>
+            <p style={{
+              padding: '0 20px',
+              fontSize: 10,
+              fontWeight: 700,
+              color: '#9aa89c',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: 4,
+            }}>
+              {group.label}
+            </p>
+            {group.items.map((item) => {
+              const isActive = activeId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    onNavigate(item.id);
+                    onClose();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '10px 20px',
+                    cursor: 'pointer',
+                    background: isActive ? '#e6f7ee' : 'transparent',
+                    borderLeft: isActive ? '3px solid #1a9a60' : '3px solid transparent',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <span style={{ fontSize: 20, color: isActive ? '#0f8b4a' : '#6b5d4f' }}>
+                    {item.icon}
+                  </span>
+                  <span style={{
+                    fontSize: 14,
+                    fontWeight: isActive ? 600 : 400,
+                    color: isActive ? '#0f8b4a' : '#2a2a1d',
+                  }}>
+                    {item.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+
+        <div style={{
+          padding: '16px 20px',
+          borderTop: '1px solid #e8ede9',
+          fontSize: 11,
+          color: '#b0bab2',
+          textAlign: 'center',
+          marginTop: 20,
+        }}>
+          Botanica v1.0 · ISPK
+        </div>
+      </div>
+    </>
+  );
+}
+
+function BottomNav({ items, activeId, onNavigate }) {
+  return (
+    <div style={{
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      background: 'rgba(220,245,232,0.97)',
+      backdropFilter: 'blur(12px)',
+      borderTop: '1.5px solid #a0d8b8',
+      display: 'grid',
+      gridTemplateColumns: `repeat(${items.length}, 1fr)`,
+      padding: '8px 0 10px',
+      zIndex: 20,
+    }}>
+      {items.map((item) => {
+        const isActive = activeId === item.id;
+        return (
+          <button
+            key={item.id}
+            onClick={() => onNavigate(item.id)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px 0',
+            }}
+          >
+            <span style={{
+              fontSize: 24,
+              color: isActive ? '#0f8b4a' : '#8b7d6b',
+            }}>
+              {item.icon}
+            </span>
+            <span style={{
+              fontSize: 10,
+              fontWeight: isActive ? 700 : 500,
+              color: isActive ? '#0f8b4a' : '#6b5d4f',
+            }}>
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function PlantCard({ plant, onClick }) {
-  const [hov, setHov] = useState(false);
-  const leafSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='${encodeURIComponent(plant.color)}' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E`;
+function LoginModal({ onClose }) {
+  const { login, signUp } = useAuth();
+
+  const handleLogin = async (email, password) => {
+    await login(email, password);
+    onClose();
+  };
+
+  const handleSignUp = async (email, password) => {
+    await signUp(email, password);
+    alert('Conta criada! Faça login.');
+    onClose();
+  };
 
   return (
     <div
-      onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
       style={{
-        background: hov ? '#c8e4d4' : '#d4ecdf',
-        border: `1.5px solid ${hov ? plant.color + '66' : '#a0c8b0'}`,
-        borderRadius: 16,
-        padding: '14px 16px',
-        cursor: 'pointer',
-        transition: 'all 0.18s ease',
-        boxShadow: hov ? `0 6px 20px ${plant.color}18` : 'none',
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.5)',
         display: 'flex',
-        gap: 14,
-        alignItems: 'flex-start',
-        width: '100%',
-        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
       }}
+      onClick={onClose}
     >
+      <div
+        style={{
+          background: '#fff',
+          borderRadius: 24,
+          padding: '24px',
+          maxWidth: 400,
+          width: '90%',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <LoginForm onLogin={handleLogin} onSignUp={handleSignUp} onCancel={onClose} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// APP PRINCIPAL
+// ─────────────────────────────────────────────────────────────
+
+function App() {
+  const { isAuthenticated, role, logout, loading: authLoading } = useAuth();
+  const [activeId, setActiveId] = useState('identificacao-planta');
+  const [showLogin, setShowLogin] = useState(false);
+  const [sideOpen, setSideOpen] = useState(false);
+
+  // Se ainda estiver a carregar a autenticação, mostra um indicador
+  if (authLoading) {
+    return (
       <div style={{
-        width: 48, height: 48, borderRadius: 13,
-        background: plant.color + '18',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0, marginTop: 2
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: '#edf8f2',
       }}>
-        <img src={leafSvg} alt="" style={{ width: 30, height: 30 }} />
+        <p style={{ fontFamily: 'Lora, serif', color: '#1a6b4a' }}>A carregar...</p>
       </div>
-      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#0a1a0d', fontFamily: 'Georgia, serif', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.name}</div>
-        <div style={{ fontSize: 11, color: '#3a4a3c', fontStyle: 'italic', marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.sci}</div>
-        <div style={{ fontSize: 12, color: '#3a4a3c', marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{plant.use}</div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: '#5a5a4a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-            <span style={{ color: plant.color, fontWeight: 600 }}>{plant.kimbundu}</span> · {plant.region}
-          </span>
-          <span style={{ fontSize: 11, color: '#5a5a4a', flexShrink: 0, whiteSpace: 'nowrap' }}>{plant.treatments} trat.</span>
-        </div>
-      </div>
-    </div>
+    );
+  }
+
+  // Obter itens do menu com base no papel e autenticação
+  const publicItems = getPublicMenu();
+  const privateItems = isAuthenticated ? getPrivateMenuByRole(role) : [];
+  const allMenuItems = [...publicItems, ...privateItems];
+
+  // Agrupar para o menu lateral
+  const menuGroups = [
+    { label: 'Público', items: publicItems },
+    ...(isAuthenticated && privateItems.length > 0
+      ? [{ label: 'Privado', items: privateItems }]
+      : []),
+  ];
+
+  // Itens para a bottom nav (apenas os principais)
+  const bottomNavItems = allMenuItems.filter(item =>
+    ['identificacao-planta', 'consultas', 'autodiagnostico', 'dashboard', 'configuracoes'].includes(item.id)
   );
-}
 
-function Tag({ label, color = '#0f8b4a' }) {
-  return (
-    <span style={{
-      fontSize: 10, fontWeight: 600, color,
-      background: color + '18', borderRadius: 20,
-      padding: '2px 8px', letterSpacing: '0.02em'
-    }}>{label}</span>
-  );
-}
+  // Navegação
+  const navigate = (id) => {
+    const item = MENU.find(m => m.id === id);
+    if (!item) return;
 
-function Disclaimer() {
-  return (
-    <div style={{
-      background: '#fdf8e8', border: '1px solid #f0e060', borderRadius: 12,
-      padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 20
-    }}>
-      <span style={{ fontSize: 16 }}>⚠️</span>
-      <p style={{ fontSize: 11, color: '#7a6520', lineHeight: 1.6, margin: 0 }}>
-        <strong>Aviso:</strong> As sugestões são informativas e não substituem consulta médica hospitalar.
-        Em caso de urgência, dirija-se ao hospital mais próximo imediatamente.
-      </p>
-    </div>
-  );
-}
-
-function SpeakButton({ text, label = 'Ouvir' }) {
-  const speak = () => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-PT';
-    utterance.rate = 0.8;
-    window.speechSynthesis.speak(utterance);
-  };
-  return (
-    <button onClick={speak} style={{
-      background:'none', border:'1px solid #1a9a60', borderRadius:8,
-      padding:'2px 8px', fontSize:11, color:'#1a9a60', cursor:'pointer',
-      marginLeft:8
-    }} title="Ouvir descrição">
-      🔊 {label}
-    </button>
-  );
-}
-
-/* ─── SCREEN: Chatbot Autodiagnóstico ──────────────────────────────────── */
-function DiagnoseScreen() {
-  const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem('diagnose_messages');
-    return saved ? JSON.parse(saved) : [
-      { role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }
-    ];
-  });
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [province, setProvince] = useState('');
-
-  useEffect(() => {
-    localStorage.setItem('diagnose_messages', JSON.stringify(messages));
-  }, [messages]);
-
-  useEffect(() => {
-    (async () => {
-      let prov = 'Luanda';
-      if (navigator.geolocation) {
-        try {
-          const pos = await new Promise((resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000, maximumAge: 300000 })
-          );
-          prov = await getProvinceFromLatLng(pos.coords.latitude, pos.coords.longitude);
-        } catch (geoErr) { console.warn('GPS error:', geoErr); }
-      }
-      setProvince(prov);
-    })();
-  }, []);
-
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    const newUserMsg = { role: 'user', content: input };
-    const updatedMessages = [...messages, newUserMsg];
-    setMessages(updatedMessages);
-    setInput('');
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: updatedMessages, province, language: 'pt' })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro no chatbot');
-      const reply = data.reply;
-      const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
-      const match = reply.match(jsonBlockRegex);
-      let displayText = reply;
-      let resultData = null;
-      if (match) {
-        displayText = reply.replace(jsonBlockRegex, '').trim();
-        try { resultData = JSON.parse(match[1]); } catch (jsonErr) { console.warn('Failed to parse assistant JSON:', jsonErr); displayText = reply; }
-      }
-      if (displayText) setMessages(prev => [...prev, { role: 'assistant', content: displayText }]);
-      if (resultData && resultData.triage) {
-        setMessages(prev => [...prev, { role: 'assistant', type: 'result', content: resultData }]);
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(14);
-    doc.text("Comunidade Botânica Ispk - Autodiagnóstico", 10, 15);
-    doc.setFontSize(10);
-    doc.text(`Data: ${new Date().toLocaleString()}`, 10, 22);
-    doc.text(`Província: ${province}`, 10, 28);
-    let y = 40;
-    messages.forEach((msg) => {
-      const prefix = msg.role === 'user' ? 'Utente' : 'Ndembo';
-      const text = msg.type === 'result' ? `${prefix}: [Recomendação final com triagem e remédios]` : `${prefix}: ${msg.content}`;
-      const lines = doc.splitTextToSize(text, 180);
-      if (y + lines.length * 6 > 280) { doc.addPage(); y = 20; }
-      doc.setFontSize(10);
-      doc.text(lines, 10, y);
-      y += lines.length * 6 + 4;
-    });
-    doc.save(`autodiagnostico_${new Date().toISOString().slice(0,10)}.pdf`);
-  };
-
-  const clearHistory = () => {
-    if (window.confirm('Apagar toda a conversa?')) {
-      setMessages([{ role: 'assistant', content: 'Olá! Eu sou o Ndembo, o teu curandeiro virtual. Conta-me como te sentes hoje. Podes falar em português ou Kimbundu.' }]);
-      localStorage.removeItem('diagnose_messages');
-    }
-  };
-
-  return (
-    <Screen>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12, gap:8 }}>
-        <h1 style={{ fontSize:22, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif', flex:1, lineHeight:1.3 }}>🩺 Autodiagnóstico com IA</h1>
-        <div style={{ display:'flex', gap:8, flexShrink:0 }}>
-          <button onClick={clearHistory} style={{ background:'#f4f7f5', border:'1px solid #d4e0d8', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Apagar conversa">🗑️</button>
-          <button onClick={exportPDF} style={{ background:'#0f8b4a', color:'#fff', border:'none', borderRadius:8, padding:'4px 10px', fontSize:12, cursor:'pointer' }} title="Exportar PDF">📄 PDF</button>
-        </div>
-      </div>
-      <p style={{ fontSize:14, color:'#3a4a3c', marginTop:4, marginBottom:16 }}>Conversa com o Ndembo — ele vai ajudar-te.</p>
-      <Disclaimer />
-      <div style={{ background:'#b8d8c4', borderRadius:16, border:'1px solid #8ebfaa', padding:'12px', minHeight:260, maxHeight:360, overflowY:'auto', overflowX:'hidden', marginBottom:12, width:'100%' }}>
-        {messages.map((msg, idx) => {
-          const isUser = msg.role === 'user';
-          if (msg.type === 'result') {
-            const { triage, urgentMessage, remedies } = msg.content;
-            return (
-              <div key={idx} style={{ marginBottom:12 }}>
-                {triage === 'red' && (<div style={{ background:'#fee2e2', border:'1.5px solid #fca5a5', borderRadius:14, padding:'14px', marginBottom:12, color:'#dc2626' }}>🚨 <strong>Urgência:</strong> {urgentMessage || 'Procure atendimento hospitalar imediatamente!'}</div>)}
-                {triage === 'yellow' && (<div style={{ background:'#fffbeb', border:'1.5px solid #d97706', borderRadius:14, padding:'14px', marginBottom:12, color:'#92400e' }}>⚠️ <strong>Atenção:</strong> {urgentMessage || 'Consulte um profissional se os sintomas piorarem.'}</div>)}
-                {triage === 'green' && (<div style={{ background:'#d1fae5', border:'1.5px solid #6ee7b7', borderRadius:14, padding:'14px', marginBottom:12, color:'#065f46' }}>✅ <strong>Situação estável:</strong> Siga as sugestões abaixo.</div>)}
-                {remedies && remedies.map((r, idx2) => (<PlantRemedyCard key={idx2} remedy={r} />))}
-              </div>
-            );
-          }
-          return (
-            <div key={idx} style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:16, flexDirection: isUser ? 'row-reverse' : 'row' }}>
-              <div style={{ width:32, height:32, borderRadius:'50%', background: isUser ? '#0f8b4a' : '#a0d8b8', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0 }}>
-                {isUser ? '🎤' : '🌿'}
-              </div>
-              <div style={{
-                maxWidth:'75%', padding:'10px 14px', borderRadius:16,
-                background: isUser ? '#0f8b4a' : '#e6f7ee',
-                color: isUser ? '#fff' : '#0a1a0d',
-                fontSize:16, lineHeight:1.7, whiteSpace:'pre-wrap', wordBreak:'break-word',
-                borderBottomRightRadius: isUser ? 4 : 16,
-                borderBottomLeftRadius: isUser ? 16 : 4,
-                boxShadow: isUser ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'
-              }}>
-                {msg.content}
-              </div>
-              {!isUser && (
-                <button onClick={() => { const utterance = new SpeechSynthesisUtterance(msg.content); utterance.lang = 'pt-PT'; utterance.rate = 0.9; window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance); }}
-                  style={{ background:'none', border:'none', cursor:'pointer', fontSize:14, marginTop:4, color:'#0f8b4a' }} title="Ouvir mensagem">🔊</button>
-              )}
-            </div>
-          );
-        })}
-        {loading && <div style={{ textAlign:'center', color:'#6b9a74', padding:8 }}>Ndembo está a pensar...</div>}
-        {error && <div style={{ color:'#dc2626', fontSize:12, padding:8 }}>{error}</div>}
-      </div>
-      <div style={{ display:'flex', gap:8, width:'100%' }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Descreve os teus sintomas..."
-          style={{ flex:1, padding:'12px 14px', fontSize:15, border:'1.5px solid #8ebfaa', borderRadius:14, background:'#b8d8c4', color:'#0f1a12', fontFamily:'Georgia, serif', outline:'none', minWidth:0 }}
-        />
-        <button onClick={sendMessage} disabled={loading || !input.trim()}
-          style={{ padding:'12px 18px', background: input.trim() ? '#0f8b4a' : '#c8d8cc', color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer', fontSize:15, flexShrink:0 }}>
-          Enviar
-        </button>
-      </div>
-    </Screen>
-  );
-}
-
-/* ─── SCREEN: Identificar Planta (real API) ────────────────────────────── */
-function IdentifyScreen() {
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const [imageBase64, setImageBase64] = useState(null);
-  const [imageMime, setImageMime] = useState('image/jpeg');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
-
-  const lastRequestTime = useRef(0);
-  const MIN_INTERVAL = 2000;
-
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImageMime(file.type);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const img = new Image();
-      img.onload = () => {
-        const maxSize = 800;
-        let width = img.width;
-        let height = img.height;
-        if (width > maxSize || height > maxSize) {
-          if (width > height) { height = Math.round((height * maxSize) / width); width = maxSize; }
-          else { width = Math.round((width * maxSize) / height); height = maxSize; }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        const base64 = dataUrl.split(',')[1];
-        setImageBase64(base64);
-        setPreviewUrl(dataUrl);
-        setResult(null);
-        setError('');
-      };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const analyze = async () => {
-    const now = Date.now();
-    if (now - lastRequestTime.current < MIN_INTERVAL) {
-      setError('Aguarde um pouco antes de identificar outra planta.');
+    // Se for privado e não autenticado, pede login
+    if (!item.public && !isAuthenticated) {
+      setShowLogin(true);
       return;
     }
-    lastRequestTime.current = now;
-    if (!imageBase64) return;
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/gemini-plant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64, imageMime })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro na identificação');
-      setResult(data);
-    } catch (err) { setError(err.message); }
-    finally { setLoading(false); }
+
+    // Se for privado e o papel não estiver autorizado
+    if (!item.public && !item.allowedRoles.includes(role)) {
+      alert('Não tem permissão para aceder a esta página.');
+      return;
+    }
+
+    setActiveId(id);
+    setSideOpen(false);
+  };
+
+  // Renderizar a página correta
+  const renderPage = () => {
+    // Se a página activa for privada e o utilizador não tiver permissão,
+    // redireciona para a primeira página pública
+    const currentItem = MENU.find(m => m.id === activeId);
+    if (currentItem && !currentItem.public && (!isAuthenticated || !currentItem.allowedRoles.includes(role))) {
+      setActiveId('identificacao-planta');
+      return <IdentifyScreen />;
+    }
+
+    switch (activeId) {
+      case 'identificacao-planta': return <IdentifyScreen />;
+      case 'consultas': return <PlantsScreen />;
+      case 'autodiagnostico': return <DiagnoseScreen />;
+      case 'dashboard':
+        if (role === 'admin') return <AdminDashboard />;
+        if (role === 'tecnico') return <TecnicoDashboard />;
+        // Se não houver papel (visitante) mas chegou aqui, redireciona
+        setActiveId('identificacao-planta');
+        return <IdentifyScreen />;
+      case 'registro-tratamentos': return <RegisterScreen />;
+      case 'captura-midia': return <MediaScreen />;
+      case 'geolocalizacao': return <GeoLocationScreen />;
+      case 'relatorios': return <ReportsScreen />;
+      case 'gestao-utilizadores': return <UsersScreen />;
+      case 'configuracoes': return <SettingsScreen />;
+      default: return <IdentifyScreen />;
+    }
   };
 
   return (
-    <Screen>
-      <h1 style={{ fontSize:28, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>🌿 Identificar Plantas</h1>
-      <p style={{ fontSize:16, color:'#3a4a3c', marginTop:4, marginBottom:20 }}>Tire uma foto de folhas, flores ou frutos para identificação automática</p>
-      {!previewUrl ? (
-        <label style={{ display:'block', border:'2px dashed #a0d8b8', borderRadius:16, padding:'40px 20px', textAlign:'center', cursor:'pointer', background:'#f4faf6', marginBottom:16 }}>
-          <input type="file" accept="image/*" onChange={handleFile} style={{ display:'none' }} />
-          <span style={{ fontSize:32 }}>📸</span><br/>
-          <span style={{ fontSize:14, fontWeight:600, color:'#1a6b4a' }}>Clique para escolher uma foto</span>
-          <p style={{ fontSize:11, color:'#6b9a74' }}>JPG, PNG (até 5MB)</p>
-        </label>
-      ) : (
-        <div style={{ textAlign:'center', marginBottom:16 }}>
-          <img src={previewUrl} alt="Preview" style={{ maxHeight:240, borderRadius:14, border:'1px solid #d4e0d8' }} />
-          <button type="button" onClick={() => { setPreviewUrl(null); setImageBase64(null); setResult(null); }} style={{ marginLeft:8, background:'#fff', border:'1px solid #d4e0d8', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
-            ✕ Remover
-          </button>
+    <>
+      {/* Modal de login */}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+
+      {/* Estrutura da aplicação */}
+      <div style={{
+        width: '100%',
+        maxWidth: 480,
+        margin: '0 auto',
+        background: '#edf8f2',
+        minHeight: '100vh',
+        borderRadius: 24,
+        overflow: 'hidden',
+        position: 'relative',
+        boxShadow: '0 20px 60px rgba(26,154,96,0.30), 0 0 0 4px rgba(26,154,96,0.12)',
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: "'DM Sans', sans-serif",
+      }}>
+        {/* Menu lateral */}
+        <SideMenu
+          open={sideOpen}
+          onClose={() => setSideOpen(false)}
+          groups={menuGroups}
+          activeId={activeId}
+          onNavigate={navigate}
+        />
+
+        {/* Cabeçalho */}
+        <Header
+          isAuthenticated={isAuthenticated}
+          role={role}
+          onLogout={() => {
+            logout();
+            setActiveId('identificacao-planta');
+          }}
+          onLoginClick={() => setShowLogin(true)}
+          onToggleSideMenu={() => setSideOpen(!sideOpen)}
+        />
+
+        {/* Conteúdo principal */}
+        <div style={{
+          flex: 1,
+          padding: '20px 16px 90px',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          background: '#edf8f2',
+        }}>
+          {renderPage()}
         </div>
-      )}
-      {previewUrl && !result && (
-        <button onClick={analyze} disabled={loading} style={{ width:'100%', padding:'14px', background: loading ? '#c8d8cc' : '#1a9a60', color:'#fff', border:'none', borderRadius:14, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }}>
-          {loading ? 'Analisando...' : '🔍 Identificar planta'}
-        </button>
-      )}
-      {loading && <p style={{ textAlign:'center', color:'#6b9a74', marginTop:12 }}>Processando imagem com IA...</p>}
-      {error && <div style={{ color:'#c0392b', marginTop:16, fontSize:12, background:'#fee2e2', padding:12, borderRadius:12 }}>{error}</div>}
-      {result && !result.erro && (
-        <div style={{ marginTop:20, border:'1.5px solid #e8ede9', borderRadius:14, overflow:'hidden' }}>
-          <div style={{ background:'#1a6b4a', color:'#fff', padding:'16px 20px', fontFamily:'Georgia, serif' }}>
-            <div style={{ fontSize:18, fontWeight:700 }}>{result.nome_popular}</div>
-            <div style={{ fontSize:12, fontStyle:'italic', opacity:0.9 }}>{result.nome_cientifico}</div>
-          </div>
-          <div style={{ padding:'16px 20px' }}>
-            <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Características:</strong> {result.caracteristicas}</p>
-            <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Usos medicinais:</strong> {result.usos_medicinais}</p>
-            <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Preparação:</strong> {result.preparacao}</p>
-            <p style={{ fontSize:12, color:'#6b7c6e' }}><strong>Dose:</strong> {result.dose_recomendada}</p>
-            {result.quem_pode_usar && (<div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:8 }}>{result.quem_pode_usar.map((g,i)=><span key={i} style={{ background:'#d8f3dc', color:'#1b4332', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{g}</span>)}</div>)}
-            {result.contraindicacoes && (<div style={{ display:'flex', gap:4, flexWrap:'wrap', marginTop:6 }}>{result.contraindicacoes.map((c,i)=><span key={i} style={{ background:'#fde8d8', color:'#7f3d1b', fontSize:10, padding:'2px 8px', borderRadius:20 }}>{c}</span>)}</div>)}
-          </div>
-        </div>
-      )}
-      {result?.erro && <p style={{ color:'#c0392b', marginTop:12 }}>{result.erro}</p>}
-    </Screen>
-  );
-}
 
-/* ─── OTHER SCREENS ─────────────────────────────────────────────────────── */
-function HomeScreen({ role, onNavigate, plants }) {
-  const r = ROLES[role];
-  const greeting = new Date().getHours() < 12 ? 'Bom dia' : new Date().getHours() < 18 ? 'Boa tarde' : 'Boa noite';
-  const quickActions = MENU.filter(m => m.roles.includes(role) && m.id !== 'home' && m.id !== 'settings').slice(0,4);
-
-  return (
-    <Screen>
-      <div style={{ background: `linear-gradient(135deg, ${r.color}ee 0%, ${r.color}cc 100%)`, borderRadius: 20, padding:'24px 28px', marginBottom:24, color:'#fff', position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', right:-20, top:-20, width:120, height:120, borderRadius:'50%', background:'rgba(255,255,255,0.07)' }}/>
-        <div style={{ position:'absolute', right:20, bottom:-30, width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,0.05)' }}/>
-        <p style={{ fontSize:13, opacity:0.8, marginBottom:4 }}>{greeting} · <span style={{ fontStyle:'italic', opacity:0.7 }}>{r.labelK}</span></p>
-        <h2 style={{ fontSize:20, fontWeight:700, marginBottom:8, fontFamily:'Georgia, serif', letterSpacing:'-0.02em' }}>Bem-vindo ao Botanica</h2>
-        <p style={{ fontSize:12, opacity:0.8, lineHeight:1.6, maxWidth:260 }}>O saber ancestral angolano ao serviço da saúde de todos.</p>
-        <div style={{ marginTop:14, display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.18)', borderRadius:20, padding:'5px 12px', fontSize:11, backdropFilter:'blur(4px)' }}>
-        <span style={{
-  display:'inline-block',
-  width:24, height:24, borderRadius:'50%',
-  backgroundColor: r.color,
-  color:'#fff',
-  textAlign:'center',
-  lineHeight:'24px',
-  fontSize:14,
-  fontWeight:700,
-  marginRight:4
-}}>
-  {r.id==='admin'?'A':r.id==='tecnico'?'T':'P'}
-</span>
-          <span>{r.label}</span>
-        </div>
-      </div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 }}>
-        {[{ val: plants.length, label: 'Plantas', sub: 'catalogadas (em expansão)' },{ val:'318', label:'Tratamentos', sub:'registados' },{ val:'21',  label:'Províncias', sub:'cobertas' }].map(s => (
-          <div key={s.label} style={{ background:'#c8e4d4', borderRadius:14, padding:'14px 12px', textAlign:'center' }}>
-            <div style={{ fontSize:22, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{s.val}</div>
-            <div style={{ fontSize:11, fontWeight:600, color:'#3d6b4f', marginTop:1 }}>{s.label}</div>
-            <div style={{ fontSize:10, color:'#9aa89c' }}>{s.sub}</div>
-          </div>
-        ))}
-      </div>
-      <p style={{ fontSize:11, fontWeight:700, color:'#9aa89c', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Acesso rápido</p>
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-        {quickActions.map(item => (
-          <button key={item.id} onClick={() => onNavigate(item.id)} style={{ background:'#d4ecdf', border:'1.5px solid #a0c8b0', borderRadius:14, padding:'14px 16px', cursor:'pointer', textAlign:'left', transition:'all 0.15s ease', display:'flex', alignItems:'center', gap:10 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor='#1a9a60'; e.currentTarget.style.background='#c0dece'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor='#a0c8b0'; e.currentTarget.style.background='#d4ecdf'; }}>
-            <span style={{ fontSize:20 }}>{item.icon}</span>
-            <div>
-              <div style={{ fontSize:13, fontWeight:600, color:'#0f1a12' }}>{item.label}</div>
-              <div style={{ fontSize:10, color:'#9aa89c' }}>{item.labelK}</div>
-            </div>
-          </button>
-        ))}
-      </div>
-    </Screen>
-  );
-}
-
-function PlantDetailScreen({ plant, onBack }) {
-  const leafSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='${encodeURIComponent(plant.color)}' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E`;
-  const conf = plant.confidence;
-  const confColor = conf >= 90 ? '#1a9a60' : conf >= 80 ? '#c87941' : '#c0392b';
-
-  const infoRow = (label, value, accent) => (
-    <div style={{ background:'#183d28', borderRadius:12, padding:'12px 16px', marginBottom:10 }}>
-      <div style={{ fontSize:10, fontWeight:700, color:'#6acea0', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:4 }}>{label}</div>
-      <div style={{ fontSize:15, fontWeight:600, color: accent || '#d4f0e2', fontFamily:'Georgia, serif' }}>{value}</div>
-    </div>
-  );
-
-  return (
-    <div style={{ animation:'fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both' }}>
-      {/* Back button */}
-      <button onClick={onBack} style={{ display:'flex', alignItems:'center', gap:6, background:'none', border:'none', cursor:'pointer', color:'#1a9a60', fontSize:14, fontWeight:600, marginBottom:18, padding:0 }}>
-        ← Voltar às plantas
-      </button>
-
-      {/* Hero card */}
-      <div style={{ background:`linear-gradient(135deg, ${plant.color}ee 0%, ${plant.color}aa 100%)`, borderRadius:20, padding:'24px 20px', marginBottom:20, color:'#fff', display:'flex', gap:18, alignItems:'center' }}>
-        <div style={{ width:72, height:72, borderRadius:18, background:'rgba(255,255,255,0.18)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-          <img src={leafSvg} alt="" style={{ width:46, height:46 }} />
-        </div>
-        <div>
-          <h2 style={{ fontSize:26, fontWeight:700, fontFamily:'Lora, Georgia, serif', marginBottom:4 }}>{plant.name}</h2>
-          <div style={{ fontSize:13, fontStyle:'italic', opacity:0.85, marginBottom:6 }}>{plant.sci}</div>
-          <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.22)', borderRadius:20, padding:'4px 12px', fontSize:11, fontWeight:600, backdropFilter:'blur(4px)' }}>
-            📍 {plant.region}
-          </div>
-        </div>
-      </div>
-
-      {/* Confidence badge */}
-      <div style={{ background:'#112a1c', borderRadius:14, padding:'14px 16px', marginBottom:14, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <span style={{ fontSize:12, color:'#6acea0', fontWeight:600 }}>Confiança de identificação</span>
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <div style={{ width:100, height:8, borderRadius:4, background:'#1f4a32', overflow:'hidden' }}>
-            <div style={{ width:`${conf}%`, height:'100%', borderRadius:4, background: confColor, transition:'width 0.5s' }} />
-          </div>
-          <span style={{ fontSize:14, fontWeight:700, color: confColor }}>{conf}%</span>
-        </div>
-      </div>
-
-      {/* Info rows */}
-      {infoRow('Usos medicinais', plant.use)}
-      {infoRow('Nome em Kimbundu', plant.kimbundu, '#a8e6c8')}
-      {infoRow('Região de origem', plant.region)}
-      {infoRow('Tratamentos registados', `${plant.treatments} tratamentos documentados pelos anciãos`)}
-
-      {/* Disclaimer */}
-      <div style={{ background:'#1e3a28', border:'1px solid #2d6040', borderRadius:12, padding:'12px 14px', display:'flex', gap:10, alignItems:'flex-start', marginTop:4 }}>
-        <span style={{ fontSize:15 }}>⚠️</span>
-        <p style={{ fontSize:11, color:'#7fbf9a', lineHeight:1.6, margin:0 }}>
-          <strong style={{ color:'#a8d8b8' }}>Aviso:</strong> Esta informação é de carácter educativo e cultural. Não substitui consulta médica. Em caso de urgência, dirija-se ao hospital mais próximo.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function PlantsScreen({ plants }) {
-  const [filter, setFilter] = useState('');
-  const [selectedPlant, setSelectedPlant] = useState(null);
-  const filtered = plants.filter(p =>
-    p.name.toLowerCase().includes(filter.toLowerCase()) ||
-    p.kimbundu.toLowerCase().includes(filter.toLowerCase()) ||
-    p.sci.toLowerCase().includes(filter.toLowerCase())
-  );
-
-  if (selectedPlant) {
-    return (
-      <Screen>
-        <PlantDetailScreen plant={selectedPlant} onBack={() => setSelectedPlant(null)} />
-      </Screen>
-    );
-  }
-
-  return (
-    <Screen title="Plantas Medicinais" subtitle="Catálogo de medicina natural angolana · Miti ya Buanga">
-      <div style={{ display:'flex', alignItems:'center', gap:10, background:'#b8d8c4', borderRadius:12, padding:'10px 14px', marginBottom:20, border:'1px solid #8ebfaa' }}>
-        <span style={{ color:'#1a6b4a', fontSize:16 }}>⊕</span>
-        <input value={filter} onChange={e=>setFilter(e.target.value)}
-          placeholder="Pesquisar por nome, Kimbundu ou nome científico..."
-          style={{ flex:1, border:'none', background:'transparent', fontSize:13, color:'#0f1a12', outline:'none', fontFamily:'Georgia, serif' }}
+        {/* Navegação inferior */}
+        <BottomNav
+          items={bottomNavItems}
+          activeId={activeId}
+          onNavigate={navigate}
         />
       </div>
-      <div style={{ display:'flex', flexWrap:'wrap', gap:12, justifyContent:'center' }}>
-        {filtered.map(p => (
-          <div key={p.id} style={{ width:'calc(50% - 6px)', minWidth:150 }}>
-            <PlantCard plant={p} onClick={() => setSelectedPlant(p)} />
-          </div>
-        ))}
-      </div>
-      {filtered.length === 0 && (
-        <div style={{ textAlign:'center', padding:40, color:'#9aa89c' }}>
-          <div style={{ fontSize:32, marginBottom:8 }}>✦</div>
-          <p style={{ fontSize:13 }}>Nenhuma planta encontrada</p>
-        </div>
-      )}
-    </Screen>
-  );
-}
-
-function TreatmentsScreen({ treatments }) {
-  return (
-    <Screen title="Tratamentos" subtitle="Saberes ancestrais preservados · Buanga">
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-        {treatments.map((t,i) => (
-          <div key={i} style={{
-            background:'#d4ecdf', border:'1.5px solid #a0c8b0', borderRadius:14,
-            padding:'16px 18px', marginBottom:10, cursor:'pointer',
-            transition:'all 0.15s',
-            width:'100%', maxWidth:400,
-            marginLeft:'auto', marginRight:'auto'
-          }}
-            onMouseEnter={e=>{ e.currentTarget.style.borderColor='#a0d8b8'; e.currentTarget.style.background='#fafcfa'; }}
-            onMouseLeave={e=>{ e.currentTarget.style.borderColor='#e8ede9'; e.currentTarget.style.background='#fff'; }}>
-            <div style={{ fontSize:15, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif', marginBottom:4 }}>{t.name}</div>
-            <div style={{ fontSize:12, color:'#6b9a74', marginBottom:8 }}>✦ {t.plant} · {t.elder}</div>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                {t.tags.map(tag => <Tag key={tag} label={tag} color='#1a6b4a'/>)}
-              </div>
-              <span style={{ fontSize:11, color:'#b0bab2' }}>{t.region}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </Screen>
-  );
-}
-
-function RegisterScreen() {
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState({ plant:'', elder:'', dosage:'', preparation:'', consent:false });
-  const steps = ['Planta', 'Ancião', 'Tratamento', 'Confirmação'];
-  const upd = (k,v) => setForm(f=>({...f,[k]:v}));
-
-  return (
-    <Screen title="Registar Saber" subtitle="Preserve o conhecimento ancestral das comunidades">
-      <div style={{ display:'flex', gap:0, marginBottom:28 }}>
-        {steps.map((s,i) => (
-          <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
-            <div style={{ width:28, height:28, borderRadius:'50%', background: i<=step ? '#1a9a60' : '#e8ede9', color: i<=step ? '#fff' : '#9aa89c', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, transition:'all 0.2s' }}>
-              {i<step ? '✓' : i+1}
-            </div>
-            <span style={{ fontSize:10, color: i<=step ? '#1a9a60' : '#9aa89c', fontWeight: i===step?700:400 }}>{s}</span>
-          </div>
-        ))}
-      </div>
-      {step===0 && (
-        <div>
-          <label style={{ fontSize:12, fontWeight:600, color:'#4a6b54', display:'block', marginBottom:8 }}>Nome da planta (português ou Kimbundu)</label>
-          <input value={form.plant} onChange={e=>upd('plant',e.target.value)} placeholder="Ex: Moringa / Mukenga" style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #d4e0d8', borderRadius:12, background:'#fafcfa', color:'#0f1a12', fontFamily:'Georgia, serif', outline:'none', marginBottom:12 }} />
-          <div style={{ display:'flex', gap:10 }}>
-            <button style={{ flex:1, padding:'12px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:12, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }} onClick={()=>{}}>◎ Identificar por câmara</button>
-          </div>
-        </div>
-      )}
-      {step===1 && (
-        <div>
-          <label style={{ fontSize:12, fontWeight:600, color:'#4a6b54', display:'block', marginBottom:8 }}>Nome do ancião detentor do saber</label>
-          <input value={form.elder} onChange={e=>upd('elder',e.target.value)} placeholder="Nome do ancião" style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #d4e0d8', borderRadius:12, background:'#fafcfa', color:'#0f1a12', fontFamily:'Georgia, serif', outline:'none', marginBottom:12 }} />
-          <div style={{ background:'#f4faf6', border:'1.5px dashed #a0c8b0', borderRadius:12, padding:'14px', cursor:'pointer', display:'flex', alignItems:'center', gap:10 }}>
-            <span style={{ fontSize:20 }}>◉</span>
-            <div>
-              <div style={{ fontSize:13, fontWeight:600, color:'#1a6b4a' }}>Gravar consentimento em áudio</div>
-              <div style={{ fontSize:11, color:'#6b9a74' }}>Protege o patrimônio cultural</div>
-            </div>
-          </div>
-          <div style={{ marginTop:12, display:'flex', alignItems:'center', gap:8 }}>
-            <input type="checkbox" id="consent" checked={form.consent} onChange={e=>upd('consent',e.target.checked)} style={{ width:16, height:16, accentColor:'#1a9a60' }} />
-            <label htmlFor="consent" style={{ fontSize:12, color:'#4a6b54' }}>O ancião autorizou o registo e uso público deste saber</label>
-          </div>
-        </div>
-      )}
-      {step===2 && (
-        <div>
-          <label style={{ fontSize:12, fontWeight:600, color:'#4a6b54', display:'block', marginBottom:8 }}>Posologia e preparação</label>
-          <textarea value={form.preparation} onChange={e=>upd('preparation',e.target.value)} placeholder="Descreva como preparar e usar o tratamento..." rows={4} style={{ width:'100%', padding:'12px 14px', fontSize:13, border:'1.5px solid #d4e0d8', borderRadius:12, background:'#fafcfa', color:'#0f1a12', fontFamily:'Georgia, serif', outline:'none', resize:'vertical', marginBottom:12 }} />
-          <div style={{ display:'flex', gap:10 }}>
-            <button style={{ flex:1, padding:'12px', background:'#e8f5ee', color:'#1a6b4a', border:'1.5px solid #a0d8b8', borderRadius:12, fontSize:12, fontWeight:600, cursor:'pointer' }}>✎ Foto da planta</button>
-            <button style={{ flex:1, padding:'12px', background:'#e8eef5', color:'#1a3a6b', border:'1.5px solid #a0b8d8', borderRadius:12, fontSize:12, fontWeight:600, cursor:'pointer' }}>⊕ GPS automático</button>
-          </div>
-        </div>
-      )}
-      {step===3 && (
-        <div style={{ textAlign:'center', padding:'20px 0' }}>
-          <div style={{ fontSize:48, marginBottom:12 }}>✦</div>
-          <h3 style={{ fontSize:18, fontWeight:700, color:'#1a6b4a', fontFamily:'Georgia, serif', marginBottom:8 }}>Registo pronto para guardar</h3>
-          <p style={{ fontSize:13, color:'#6b7c6e', lineHeight:1.7, maxWidth:260, margin:'0 auto 20px' }}>Este saber do ancião ficará preservado para as próximas gerações de angolanos.</p>
-          <div style={{ background:'#f4faf6', borderRadius:14, padding:'16px', textAlign:'left', marginBottom:20 }}>
-            <div style={{ fontSize:12, color:'#6b9a74', marginBottom:4 }}>Planta</div>
-            <div style={{ fontSize:14, fontWeight:600, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{form.plant || '—'}</div>
-            <div style={{ fontSize:12, color:'#6b9a74', marginTop:10, marginBottom:4 }}>Ancião</div>
-            <div style={{ fontSize:14, fontWeight:600, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{form.elder || '—'}</div>
-          </div>
-        </div>
-      )}
-      <div style={{ display:'flex', gap:10, marginTop:20 }}>
-        {step>0 && (
-          <button onClick={()=>setStep(s=>s-1)} style={{ flex:1, padding:'12px', background:'#f4f7f5', color:'#4a6b54', border:'none', borderRadius:12, fontSize:13, fontWeight:600, cursor:'pointer' }}>← Anterior</button>
-        )}
-        <button onClick={()=> step<3 ? setStep(s=>s+1) : alert('Saber registado com sucesso! Obrigado por preservar a nossa cultura.')}
-          style={{ flex:2, padding:'12px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:12, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'Georgia, serif' }}>
-          {step<3 ? 'Continuar →' : '✓ Guardar saber'}
-        </button>
-      </div>
-    </Screen>
-  );
-}
-
-function ReportsScreen() {
-  const reports = [
-    { name:'Tratamentos por Província', icon:'▦', count:'318 registos', date:'Hoje', color:'#1a6b4a' },
-    { name:'Plantas mais utilizadas',   icon:'✦', count:'142 plantas',  date:'Hoje', color:'#5a7a2d' },
-    { name:'Doenças recorrentes – Zango 0', icon:'◉', count:'27 casos', date:'Ontem', color:'#7a4a1e' },
-    { name:'Cobertura por Província',   icon:'⊕', count:'27 províncias',date:'Esta semana', color:'#1a4a7c' },
-  ];
-  return (
-    <Screen title="Relatórios" subtitle="Epidemiologia comunitária">
-      {reports.map((r,i) => (
-        <div key={i} style={{ display:'flex', alignItems:'center', gap:14, background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px 18px', marginBottom:10, cursor:'pointer', transition:'all 0.15s' }}
-          onMouseEnter={e=>e.currentTarget.style.borderColor=r.color+'60'}
-          onMouseLeave={e=>e.currentTarget.style.borderColor='#e8ede9'}>
-          <div style={{ width:40, height:40, borderRadius:12, background:r.color+'14', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, color:r.color }}>{r.icon}</div>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{r.name}</div>
-            <div style={{ fontSize:11, color:'#9aa89c', marginTop:2 }}>{r.count} · {r.date}</div>
-          </div>
-          <div style={{ display:'flex', gap:6 }}>
-            <button style={{ padding:'6px 10px', background:'#f4faf6', border:'1px solid #a0d8b8', borderRadius:8, fontSize:10, fontWeight:700, color:'#1a6b4a', cursor:'pointer' }}>PDF</button>
-            <button style={{ padding:'6px 10px', background:'#f0f4fa', border:'1px solid #a0b8d8', borderRadius:8, fontSize:10, fontWeight:700, color:'#1a3a6b', cursor:'pointer' }}>CSV</button>
-          </div>
-        </div>
-      ))}
-    </Screen>
-  );
-}
-
-function UsersScreen() {
-  const users = [
-    { name:'Admin Silva',   initials:'AS', role:'admin',    email:'admin@botanica.ao' },
-    { name:'Técnico Matos', initials:'TM', role:'tecnico',  email:'tmatos@botanica.ao' },
-    { name:'Maria João',    initials:'MJ', role:'paciente', email:'mjoao@botanica.ao' },
-    { name:'Anciã Luisa',   initials:'AL', role:'paciente', email:'aluisa@botanica.ao' },
-  ];
-  return (
-    <Screen title="Utilizadores" subtitle="Gestão de contas e perfis">
-      {users.map((u,i) => {
-        const r = ROLES[u.role];
-        return (
-          <div key={i} style={{ display:'flex', alignItems:'center', gap:14, background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'14px 18px', marginBottom:8 }}>
-            <div style={{ width:40, height:40, borderRadius:'50%', background: r.color+'20', color: r.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700 }}>{u.initials}</div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:14, fontWeight:600, color:'#0f1a12', fontFamily:'Georgia, serif' }}>{u.name}</div>
-              <div style={{ fontSize:11, color:'#9aa89c' }}>{u.email}</div>
-            </div>
-            <span style={{ fontSize:11, fontWeight:600, color:r.color, background:r.color+'14', borderRadius:20, padding:'3px 10px' }}>{r.label}</span>
-          </div>
-        );
-      })}
-      <button style={{ width:'100%', marginTop:8, padding:'13px', background:'#f4faf6', border:'1.5px dashed #a0d8b8', borderRadius:14, fontSize:13, fontWeight:600, color:'#1a6b4a', cursor:'pointer' }}>+ Adicionar utilizador</button>
-    </Screen>
-  );
-}
-
-function SettingsScreen({ lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast }) {
-  // Aplica o alto contraste imediatamente em toda a página
-  useEffect(() => {
-    if (highContrast) {
-      document.documentElement.style.setProperty('--bg', '#000');
-      document.documentElement.style.setProperty('--text', '#ff0');
-      document.documentElement.style.setProperty('--border', '#fff');
-      document.documentElement.style.setProperty('--btn-bg', '#333');
-      document.documentElement.style.filter = 'none'; // remove qualquer filtro antigo
-    } else {
-      document.documentElement.style.removeProperty('--bg');
-      document.documentElement.style.removeProperty('--text');
-      document.documentElement.style.removeProperty('--border');
-      document.documentElement.style.removeProperty('--btn-bg');
-      document.documentElement.style.filter = '';
-    }
-  }, [highContrast]);
-
-  const toggleHC = () => {
-    setHighContrast(prev => !prev);
-    alert('Alto contraste ' + (!highContrast ? 'ativado' : 'desativado')); // remova após teste
-  };
-
-  return (
-    <Screen title="Definições" subtitle="Acessibilidade e preferências · Mayenge">
-      <div style={{ background:'#d4ecdf', border:'1.5px solid #a0c8b0', borderRadius:14, overflow:'hidden', marginBottom:16 }}>
-        {[
-          { label:'Língua / Language', sub:'Português · Kimbundu', action: ()=>setLang(l=>l==='pt'?'ki':'pt') },
-          { label:'Alto contraste', sub: highContrast ? 'Ativado' : 'Desativado', action: toggleHC },
-          { label: 'Modo offline', sub: 'Em desenvolvimento – Acesso sem internet em breve', action: () => {} },
-        ].map((item,i,arr) => (
-          <div key={i} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 18px', borderBottom: i<arr.length-1 ? '1px solid #f0f4f1' : 'none', cursor:'pointer' }}
-            onMouseEnter={e=>e.currentTarget.style.background='#fafcfa'}
-            onMouseLeave={e=>e.currentTarget.style.background='transparent'}
-            onClick={item.action}>
-            <div>
-              <div style={{ fontSize:13, fontWeight:600, color:'#0f1a12' }}>{item.label}</div>
-              <div style={{ fontSize:11, color:'#9aa89c', marginTop:2 }}>{item.sub}</div>
-            </div>
-            <span style={{ color:'#c8d8cc', fontSize:14 }}>›</span>
-          </div>
-        ))}
-      </div>
-      <p style={{ fontSize:11, color:'#b0bab2', textAlign:'center', lineHeight:1.6 }}>
-        Botanica v1.0.0 · Instituto Superior Politécnico Katangoji<br/>
-        Engenharia Informática · 2026
-      </p>
-    </Screen>
-  );
-}
-
-/* ─── HELP BOT ──────────────────────────────────────────────────────────── */
-function HelpBot() {
-  const [open, setOpen] = useState(false);
-  const [topic, setTopic] = useState('welcome');
-
-  const topics = {
-    welcome: { title: 'Bem‑vindo à Comunidade Botânica Ispk', text: 'Esta aplicação preserva o saber medicinal angolano. Podes identificar plantas, fazer um autodiagnóstico com o Ndembo, e ver tratamentos tradicionais. Usa o menu superior esquerdo para navegar. Ouve com atenção:' },
-    diagnose: { title: 'Autodiagnóstico com Ndembo', text: 'Conversa com o curandeiro virtual. Ele vai perguntar sobre os teus sintomas e sugerir plantas medicinais da tua região. As sugestões não substituem um médico.' },
-    identify: { title: 'Identificar planta', text: 'Tira uma foto da planta e a IA identifica o seu nome popular, científico e usos medicinais.' },
-    plants: { title: 'Plantas Medicinais', text: 'Catálogo com todas as plantas registadas pelos anciãos angolanos. Pesquisa por nome português, kimbundu ou científico.' },
-    treatments: { title: 'Tratamentos tradicionais', text: 'Lista de preparos transmitidos por anciãos. Cada um inclui a planta, o nome do ancião e a região.' },
-    settings: { title: 'Definições', text: 'Podes trocar entre português e kimbundu, aumentar o tamanho da letra e ativar o modo alto contraste.' }
-  };
-
-  const speak = (text) => {
-    if (!window.speechSynthesis) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'pt-PT';
-    utterance.rate = 0.85;
-    window.speechSynthesis.speak(utterance);
-  };
-
-  return (
-    <>
-      <button onClick={() => setOpen(true)}
-        style={{ position:'fixed', bottom: 80, right:20, width:52, height:52, borderRadius:'50%', background:'#1a9a60', color:'#fff', fontSize:24, border:'none', boxShadow:'0 4px 16px rgba(26,154,96,0.45)', cursor:'pointer', zIndex:1000 }}>
-        🌱
-      </button>
-      {open && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:2000 }} onClick={() => setOpen(false)}>
-          <div style={{ background:'#fff', borderRadius:20, padding:'24px', maxWidth:400, width:'90%', maxHeight:'80vh', overflowY:'auto' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontSize:20, fontFamily:'Lora, Georgia, serif', marginBottom:12 }}>{topics[topic].title}</h2>
-            <p style={{ fontSize:14, lineHeight:1.7, marginBottom:20, color:'#1f2e22' }}>{topics[topic].text}</p>
-            <button onClick={() => speak(topics[topic].text)} style={{ marginBottom:12, padding:'8px 14px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:8, cursor:'pointer' }}>🔊 Ouvir explicação</button>
-            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-              {Object.keys(topics).map(key => (
-                <button key={key} onClick={() => setTopic(key)} style={{ padding:'6px 10px', background: topic===key ? '#1a9a60' : '#f0f4f1', color: topic===key ? '#fff' : '#0f1a12', border:'none', borderRadius:6, fontSize:11, cursor:'pointer' }}>
-                  {key==='welcome'?'Início':key==='diagnose'?'Autodiagnóstico':key==='identify'?'Identificar':key==='plants'?'Plantas':key==='treatments'?'Tratamentos':key==='settings'?'Definições':''}
-                </button>
-              ))}
-            </div>
-            <button onClick={() => setOpen(false)} style={{ marginTop:16, padding:'8px 14px', background:'#e8ede9', border:'none', borderRadius:8, cursor:'pointer', width:'100%' }}>Fechar</button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
 
-/* ─── BOTANICA UI (the whole visual shell) ──────────────────────────────── */
-function PlantRemedyCard({ remedy }) {
-  const [imageUrl, setImageUrl] = useState(null);
-  useEffect(() => {
-    let cancelled = false;
-    async function fetchImage() {
-      try {
-        const res = await fetch('/api/plant-image', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ plantName: remedy.plantName }) });
-        const data = await res.json();
-        if (!cancelled && data.imageUrl) setImageUrl(data.imageUrl);
-      } catch (err) { console.warn('Could not fetch plant image:', err); }
-    }
-    fetchImage();
-    return () => { cancelled = true; };
-  }, [remedy.plantName]);
-
-  return (
-    <div style={{ background:'#fff', border:'1.5px solid #e8ede9', borderRadius:14, padding:'16px', marginBottom:10, display:'flex', gap:16, alignItems:'flex-start' }}>
-      <div style={{ width:80, height:80, borderRadius:12, background:'#e6f7ee', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, overflow:'hidden' }}>
-        {imageUrl ? <img src={imageUrl} alt={remedy.plantName} style={{ width:'100%', height:'100%', objectFit:'cover' }} /> :
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='36' height='36'%3E%3Cpath fill='%230f8b4a' d='M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75l-.55 1.5C1.5 15.5 0 13 0 10c0-4 10-6 17-8z'/%3E%3C/svg%3E" alt="Planta" style={{ width:40, height:40 }} />}
-      </div>
-      <div style={{ flex:1 }}>
-        <h3 style={{ fontSize:20, fontWeight:700, color:'#0a1a0d', fontFamily:'Georgia, serif', marginBottom:4 }}>🌿 {remedy.plantName}</h3>
-        <p style={{ fontSize:16, color:'#3a4a3c', marginTop:4 }}><strong>Preparo:</strong> {remedy.preparation}</p>
-        <p style={{ fontSize:16, color:'#3a4a3c' }}><strong>Dose:</strong> {remedy.dosage}</p>
-        <p style={{ fontSize:16, color:'#3a4a3c' }}><strong>Cuidados:</strong> {remedy.precautions}</p>
-        <SpeakButton text={`${remedy.plantName}. Preparo: ${remedy.preparation}. Dose: ${remedy.dosage}. Cuidados: ${remedy.precautions}`} />
-      </div>
-    </div>
-  );
-}
-
-function BotanicaUI({ role, setRole, active, setActive, sideOpen, setSideOpen, goBack, lang, setLang, largeFont, setLargeFont, highContrast, setHighContrast, sideRef, isAuthenticated, onLogout, onNavigate, plants, treatments, dataLoading }) {
-  const menuByGroup = Object.entries(GROUPS).map(([groupId, groupLabel]) => ({ groupId, groupLabel, items: MENU.filter(m => m.group === groupId && m.roles.includes(role)) })).filter(g => g.items.length > 0);
-  const r = ROLES[role];
-
-  const renderScreen = () => {
-    if (dataLoading) {
-      return (
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'60px 20px', gap:16 }}>
-          <div style={{ width:48, height:48, borderRadius:'50%', border:'3px solid #a0d8b8', borderTopColor:'#1a9a60', animation:'spin 0.8s linear infinite' }} />
-          <p style={{ fontSize:14, color:'#6b9a74', fontFamily:'Georgia, serif' }}>A carregar dados...</p>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        </div>
-      );
-    }
-    if (!canAccess(role, active)) {
-      return <div style={{ textAlign:'center', padding:'48px 20px' }}><div style={{ fontSize:48 }}>🔒</div><h2 style={{ fontSize:18, fontWeight:700, color:'#0f1a12', fontFamily:'Georgia, serif' }}>Acesso restrito</h2><p style={{ fontSize:13, color:'#6b7c6e' }}>Esta secção não está disponível para o perfil de <strong>{r.label}</strong>.</p></div>;
-    }
-    switch(active) {
-      case 'home':       return <HomeScreen role={role} onNavigate={onNavigate} plants={plants}/>;
-      case 'diagnose':   return <DiagnoseScreen/>;
-      case 'plants':     return <PlantsScreen plants={plants}/>;
-      case 'treatments': return <TreatmentsScreen treatments={treatments}/>;
-      case 'identify':   return <IdentifyScreen/>;
-      case 'register':   return <RegisterScreen/>;
-      case 'reports':    return <ReportsScreen/>;
-      case 'users':      return <UsersScreen/>;
-      case 'settings':   return <SettingsScreen lang={lang} setLang={setLang} largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast} />;
-      default:           return <HomeScreen role={role} onNavigate={onNavigate} plants={plants}/>;
-    }
-  };
-
-  return (
-    <>
-     <style>{`
-  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'DM Sans', sans-serif; font-size: 16px; line-height: 1.6; background:#1a9a60; color:#0a1a0d; }
-  h1,h2,h3 { font-family:'Lora', Georgia, serif; }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes slideIn { from { transform:translateX(-100%); } to { transform:translateX(0); } }
-  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
-  ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:#a0c8b0; border-radius:4px; }
-  .high-contrast, .high-contrast * {
-    background-color: #000 !important;
-    color: #ff0 !important;
-    border-color: #fff !important;
-  }
-  .high-contrast button {
-    background-color: #333 !important;
-    color: #ff0 !important;
-    border: 1px solid #fff !important;
-  }
-  .high-contrast input, .high-contrast textarea {
-    background-color: #111 !important;
-    color: #ff0 !important;
-  }
-  .high-contrast .plant-card {
-    background-color: #1a1a1a !important;
-    border-color: #444 !important;
-  }
-  .large-font * { font-size: 1.12em !important; line-height: 1.7 !important; }
-`}</style>
-
-      <div style={{ width:'100%', maxWidth:480, margin:'0 auto', background:'#edf8f2', minHeight:'100vh', borderRadius:24, border:'2px solid #1a9a60', overflow:'hidden', position:'relative', boxShadow:'0 20px 60px rgba(26,154,96,0.30), 0 0 0 4px rgba(26,154,96,0.12)', display:'flex', flexDirection:'column', fontFamily:"'DM Sans', sans-serif" }} className={`${largeFont ? 'large-font' : ''} ${highContrast ? 'high-contrast' : ''}`}>
-
-        {sideOpen && <div style={{ position:'absolute', inset:0, background:'rgba(10,20,14,0.5)', zIndex:40, backdropFilter:'blur(2px)' }} onClick={()=>setSideOpen(false)}/>}
-
-        <div ref={sideRef} style={{ position:'absolute', top:0, left:0, bottom:0, width:260, background:'#c8e4d4', borderRight:'1px solid #8ebfaa', zIndex:50, transform: sideOpen ? 'translateX(0)' : 'translateX(-100%)', transition:'transform 0.28s cubic-bezier(0.16,1,0.3,1)', display:'flex', flexDirection:'column', overflowY:'auto' }}>
-          <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #f0f4f1' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-              <div style={{ width:36, height:36, borderRadius:10, background:'#0d5c3a', color:'#a0e8c0', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>✦</div>
-              <div><div style={{ fontSize:16, fontWeight:700, color:'#0a1a0d', fontFamily:'Lora, Georgia, serif' }}>Botanica</div><div style={{ fontSize:10, color:'#9aa89c' }}>Comunidade Ispk</div></div>
-            </div>
-            {isAuthenticated ? (
-              <>
-                <p style={{ fontSize:10, fontWeight:700, color:'#b0bab2', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Perfil ativo</p>
-                <div style={{ display:'flex', gap:4, marginBottom:10 }}>
-                  {Object.entries(ROLES).map(([id, rd]) => (
-                    <button key={id} onClick={() => { setRole(id); if(!canAccess(id,active)) setActive('home'); }} style={{ flex:1, padding:'7px 4px', borderRadius:10, border:'1.5px solid', fontSize:10, fontWeight:700, cursor:'pointer', borderColor: role===id ? rd.color : '#e8ede9', background: role===id ? rd.color : 'transparent', color: role===id ? '#fff' : '#9aa89c', transition:'all 0.15s' }}>
-                      {id==='admin'?'🛡️':id==='tecnico'?'🌿':'🫀'}<br/><span style={{ fontSize:9 }}>{id==='admin'?'Admin':id==='tecnico'?'Técnico':'Paciente'}</span>
-                    </button>
-                  ))}
-                </div>
-                <button onClick={onLogout} style={{ background:'#f4f7f5', border:'1px solid #d4e0d8', borderRadius:8, padding:'5px 10px', fontSize:10, cursor:'pointer', width:'100%' }}>🚪 Sair da conta</button>
-              </>
-            ) : (
-              <button onClick={() => setRole('admin')} style={{ marginTop:10, padding:'8px 12px', background:'#1a9a60', color:'#fff', border:'none', borderRadius:10, fontSize:12, fontWeight:600, cursor:'pointer', width:'100%' }}>Entrar como Admin/Técnico</button>
-            )}
-          </div>
-          <div style={{ flex:1, padding:'10px 0', overflowY:'auto' }}>
-            {menuByGroup.map(group => (
-              <div key={group.groupId}>
-                <p style={{ fontSize:10, fontWeight:700, color:'#b0bab2', letterSpacing:'0.08em', textTransform:'uppercase', padding:'10px 20px 5px' }}>{group.groupLabel}</p>
-                {group.items.map(item => {
-                  const isActive = active === item.id;
-                  return (
-                    <div key={item.id} onClick={() => onNavigate(item.id)} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 20px', cursor:'pointer', background: isActive ? '#e6f7ee' : 'transparent', borderLeft: isActive ? '3px solid #1a9a60' : '3px solid transparent', transition:'all 0.12s' }}>
-                      <span style={{ fontSize:18, color: isActive ? '#0f8b4a' : '#6b5d4f' }}>{item.icon}</span>
-                      <div style={{ flex:1 }}><div style={{ fontSize:14, fontWeight: isActive ? 600 : 400, color: isActive ? '#0f8b4a' : '#2a2a1d' }}>{lang === 'ki' ? item.labelK : item.label}</div></div>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-          <div style={{ padding:'14px 20px', borderTop:'1px solid #f0f4f1', fontSize:11, color:'#b0bab2', textAlign:'center' }}><div style={{ fontWeight:600, color:'#4a6b54', marginBottom:2 }}>Botanica v1.0</div>ISPK · Engenharia Informática · 2026</div>
-        </div>
-
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', background:'#c8e4d4', borderBottom:'1px solid #8ebfaa', position:'sticky', top:0, zIndex:30 }}>
-          {active !== 'home' && <button onClick={goBack} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #e8ede9', background:'#fafcfa', cursor:'pointer', fontSize:18, color:'#4a6b54', marginRight:8 }}>←</button>}
-          <button onClick={()=>setSideOpen(o=>!o)} style={{ width:38, height:38, borderRadius:10, border:'1.5px solid #e8ede9', background:'#fafcfa', cursor:'pointer', fontSize:18, color:'#4a6b54' }}>☰</button>
-          <div style={{ display:'flex', alignItems:'center', gap:8 }}><div style={{ width:8, height:8, borderRadius:'50%', background:'#1a9a60' }}/><span style={{ fontSize:14, fontWeight:700, color:'#0f1a12', fontFamily:'Lora, Georgia, serif' }}>Botanica</span></div>
-          <div style={{ width:38, height:38, borderRadius:10, background: r.color+'20', color: r.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700 }}>{role==='admin'?'A':role==='tecnico'?'T':'P'}</div>
-        </div>
-
-        <div style={{ flex:1, padding:'20px 16px 90px', overflowY:'auto', overflowX:'hidden', width:'100%', maxWidth:'100%', boxSizing:'border-box', background:'#edf8f2' }}>
-          {renderScreen()}
-        </div>
-
-        <div style={{ position:'absolute', bottom:0, left:0, right:0, background:'rgba(220,245,232,0.97)', backdropFilter:'blur(12px)', borderTop:'1.5px solid #a0d8b8', display:'grid', gridTemplateColumns:'repeat(5,1fr)', padding:'8px 0 10px', zIndex:20 }}>
-          {(() => {
-            const tabs = ['home', 'plants', 'diagnose', 'identify'];
-            if (role === 'paciente') tabs.push('settings');
-            else tabs.push('register');
-            return tabs;
-          })().map(id => {
-            const item = MENU.find(m => m.id === id);
-            if (!item) return null;
-            const isActive = active === id;
-            return (
-              <button key={id} onClick={() => onNavigate(id)} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer', padding:'4px 0' }}>
-                <span style={{ fontSize:24, color: isActive ? '#0f8b4a' : '#8b7d6b' }}>{item.icon}</span>
-                <span style={{ fontSize:11, color: isActive ? '#0f8b4a' : '#6b5d4f', fontWeight: isActive ? 700 : 500 }}>{lang==='ki' ? item.labelK.split(' ')[0] : item.label.split(' ')[0]}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      <HelpBot />
-    </>
-  );
-}
-
-/* ─── APP ROOT ──────────────────────────────────────────────────────────── */
-function BotanicaApp() {
-  const { isAuthenticated, currentRole, login, logout } = useAuth();
-  const [highContrast, setHighContrast] = useState(false);
-  const [role, setRole] = useState('paciente');
-  const [active, setActive] = useState('home');
-  const [sideOpen, setSideOpen] = useState(false);
-  const [lang, setLang] = useState('pt');
-  const [largeFont, setLargeFont] = useState(false);
-  const sideRef = useRef(null);
-
-  const { plants, treatments, loading: dataLoading } = useBotanicaData();
-
-  useEffect(() => { if (window.speechSynthesis) window.speechSynthesis.getVoices(); }, []);
-
-  const goBack = () => window.history.back();
-
-  useEffect(() => {
-    const handlePopState = (e) => { if (e.state && e.state.screen) { setActive(e.state.screen); setSideOpen(false); } };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  useEffect(() => { if (active === 'home') window.history.replaceState({ screen: active }, '', ''); }, [active]);
-
-  const navigate = (id) => {
-    if (!canAccess(role, id)) return;
-    if (id !== active) {
-      window.history.pushState({ screen: id }, '', `#${id}`);
-      setActive(id);
-      setSideOpen(false);
-    }
-  };
-
-  useEffect(() => { if (isAuthenticated) setRole(currentRole); else setRole('paciente'); }, [isAuthenticated, currentRole]);
-
-  useEffect(() => {
-    const handler = e => { if (sideRef.current && !sideRef.current.contains(e.target)) setSideOpen(false); };
-    if (sideOpen) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [sideOpen]);
-
-  const handleLogin = (r) => { login(r); setRole(r); setActive('home'); };
-  const handleLogout = () => { logout(); setRole('paciente'); setActive('home'); };
-
-  if (!isAuthenticated && (role === 'admin' || role === 'tecnico')) {
-    return (
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#f7faf8' }}>
-        <div style={{ maxWidth:400, width:'100%', padding:'2rem' }}>
-          <h2 style={{ fontFamily:'Lora, Georgia, serif', textAlign:'center', marginBottom:'2rem' }}>🌿 Comunidade Botânica Ispk</h2>
-          <LoginForm onLogin={handleLogin} />
-          <div style={{ textAlign:'center', marginTop:'1rem' }}>
-            <button onClick={() => { setRole('paciente'); setActive('home'); }} style={{ background:'none', border:'none', color:'#1a9a60', cursor:'pointer', fontSize:14 }}>Continuar como visitante (paciente)</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <BotanicaUI
-      goBack={goBack} role={role} setRole={setRole} active={active} setActive={setActive}
-      sideOpen={sideOpen} setSideOpen={setSideOpen} lang={lang} setLang={setLang}
-      largeFont={largeFont} setLargeFont={setLargeFont} highContrast={highContrast} setHighContrast={setHighContrast}
-      sideRef={sideRef} isAuthenticated={isAuthenticated} onLogout={handleLogout} onNavigate={navigate}
-      plants={plants} treatments={treatments} dataLoading={dataLoading}
-    />
-  );
-}
-
-export default function App() {
-  return (<AuthProvider><BotanicaApp /></AuthProvider>);
-}
+export default App;
