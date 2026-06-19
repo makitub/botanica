@@ -1,0 +1,7 @@
+/* Global font smoothing — the only rule that needs to be here.
+   Everything else lives in src/styles/theme.css so components
+   can own their own layout without fighting a global reset.    */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -1,0 +1,37 @@
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  animation: fadeIn 0.2s var(--ease);
+}
+
+.rowAssistant { justify-content: flex-start; }
+.rowUser { justify-content: flex-end; }
+
+.avatar {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.bubble {
+  max-width: 80%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.bubbleAssistant {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: 4px;
+  color: var(--color-text);
+}
+
+.bubbleUser {
+  background: var(--color-primary-dark);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}

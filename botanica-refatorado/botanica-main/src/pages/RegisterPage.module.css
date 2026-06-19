@@ -1,0 +1,7 @@
+.successBanner { background: #e1f3ea; border: 1px solid var(--color-safe); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); color: var(--color-safe); font-weight: 600; margin-bottom: var(--space-5); animation: fadeIn 0.3s var(--ease); }
+.fieldset { border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-4); }
+.legend { font-weight: 700; font-size: var(--text-body); padding: 0 var(--space-2); color: var(--color-primary-dark); }
+.selectWrap { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4); }
+.selectLabel { font-size: var(--text-caption); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); }
+.select { width: 100%; padding: 0.8rem 1rem; border-radius: var(--radius-md); border: 1.5px solid var(--color-border); background: var(--color-surface); font-size: var(--text-body); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235f5b56' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; }
+.select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-leaf-pale); }

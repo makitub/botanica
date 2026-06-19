@@ -1,0 +1,63 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 2rem;
+}
+
+.brandTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h3);
+  color: var(--color-primary-dark);
+}
+
+.brandSub {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.demo {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.demoLabel {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+
+.demoButtons {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.demoBtn {
+  padding: 0.5rem 1rem;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  transition: background var(--ease), border-color var(--ease);
+}
+.demoBtn:hover {
+  background: var(--color-leaf-pale);
+  border-color: var(--color-primary);
+}

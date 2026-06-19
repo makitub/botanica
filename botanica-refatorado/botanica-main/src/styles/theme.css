@@ -1,0 +1,189 @@
+/* ────────────────────────────────────────────────────────────────────────
+   Botânica — Design tokens
+   One palette, one type system, one rhythm. Every component reads from
+   these variables instead of inventing its own colours — that consistency
+   is what makes the app feel considered rather than assembled.
+   ──────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Angolan landscape palette */
+  --color-earth: #1c110a;
+  --color-forest-deep: #1b3a2d;
+  --color-leaf: #3a7352;
+  --color-leaf-pale: #d8e9d6;
+  --color-gold: #c69c6d;
+  --color-terracotta: #a44c3c;
+  --color-sky: #fbf9f6;
+  --color-cloud: #f0ebe3;
+  --color-clay: #b7a89b;
+
+  /* Semantic */
+  --color-danger: #b53a2e;
+  --color-warning: #e09e3a;
+  --color-safe: #2f855a;
+
+  /* Surfaces & text */
+  --color-bg: var(--color-sky);
+  --color-surface: #ffffff;
+  --color-surface-alt: var(--color-cloud);
+  --color-text: var(--color-earth);
+  --color-text-muted: #5f5b56;
+  --color-border: #e3ddd5;
+
+  /* Brand actions */
+  --color-primary: var(--color-leaf);
+  --color-primary-dark: var(--color-forest-deep);
+  --color-accent: var(--color-gold);
+
+  /* Elevation */
+  --shadow-sm: 0 2px 10px rgba(28, 17, 10, 0.05);
+  --shadow-md: 0 4px 20px rgba(28, 17, 10, 0.08);
+  --shadow-lg: 0 16px 48px rgba(28, 17, 10, 0.14);
+
+  /* Shape */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* Type */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --text-caption: 0.75rem;
+  --text-body: 0.9375rem;
+  --text-body-lg: 1.0625rem;
+  --text-h3: 1.25rem;
+  --text-h2: 1.75rem;
+  --text-h1: 2.25rem;
+
+  /* Motion — every transition in the app shares this feel */
+  --ease: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* App shell width — the “held object” feel of a single, calm screen */
+  --app-max-width: 480px;
+}
+
+/* Accessibility: larger type, set by SettingsPage */
+[data-font-scale='lg'] {
+  font-size: 1.0625rem;
+}
+[data-font-scale='xl'] {
+  font-size: 1.1875rem;
+}
+
+/* Accessibility: high contrast, set by SettingsPage */
+[data-contrast='high'] {
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f2f2f2;
+  --color-text: #000000;
+  --color-text-muted: #2a2a2a;
+  --color-border: #000000;
+  --color-primary: #0b5c33;
+  --color-primary-dark: #06371f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background: var(--color-bg);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: var(--color-primary-dark);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Visible, calm focus ring everywhere — never remove focus outlines */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Respect users who asked for less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

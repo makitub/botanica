@@ -1,0 +1,18 @@
+.statsRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); margin-bottom: var(--space-5); }
+.stat { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-2); text-align: center; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 2px; }
+.statVal { font-family: var(--font-display); font-size: var(--text-h2); font-weight: 700; color: var(--color-primary-dark); }
+.statLabel { font-size: var(--text-body); font-weight: 600; }
+.statSub { font-size: var(--text-caption); color: var(--color-text-muted); }
+.welcomeCard { position: relative; background: var(--color-primary-dark); color: #fff; border-radius: var(--radius-lg); padding: var(--space-5); margin-bottom: var(--space-5); overflow: hidden; }
+.quote { position: absolute; top: -10px; left: var(--space-4); font-family: var(--font-display); font-size: 6rem; opacity: 0.15; line-height: 1; pointer-events: none; }
+.welcomeText { font-size: var(--text-body-lg); line-height: 1.6; font-style: italic; position: relative; }
+.attrib { margin-top: var(--space-3); font-size: var(--text-caption); opacity: 0.7; text-align: right; }
+.sectionTitle { font-family: var(--font-display); font-size: var(--text-h3); margin-bottom: var(--space-3); }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-5); }
+.action { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-3); box-shadow: var(--shadow-sm); text-align: center; transition: transform var(--ease-spring), box-shadow var(--ease); }
+.action:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.action:active { transform: scale(0.97); }
+.actionIcon { font-size: 2rem; }
+.actionLabel { font-weight: 700; font-size: var(--text-body); color: var(--color-primary-dark); }
+.actionDesc { font-size: var(--text-caption); color: var(--color-text-muted); }
+.authNudge { background: var(--color-surface-alt); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); font-size: var(--text-body); color: var(--color-text-muted); line-height: 1.5; }
