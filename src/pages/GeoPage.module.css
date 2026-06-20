@@ -1,0 +1,8 @@
+.result { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: var(--space-4); animation: fadeIn 0.3s var(--ease); }
+.coordRow { display: flex; justify-content: space-between; align-items: center; padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-border); font-size: var(--text-body); }
+.coordRow:last-of-type { border-bottom: none; }
+.coordRow span { color: var(--color-text-muted); }
+.coordRow strong { font-family: var(--font-display); font-size: var(--text-body-lg); }
+.success { color: var(--color-safe); font-weight: 600; text-align: center; }
+.saveBtn, .retryBtn { margin-top: var(--space-1); }
+.denied { text-align: center; color: var(--color-text-muted); display: flex; flex-direction: column; gap: var(--space-3); align-items: center; }

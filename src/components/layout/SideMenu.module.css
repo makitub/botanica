@@ -1,0 +1,143 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 17, 10, 0);
+  z-index: 40;
+  pointer-events: none;
+  transition: background var(--ease);
+}
+.backdropVisible {
+  background: rgba(28, 17, 10, 0.4);
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: var(--color-surface);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-lg);
+}
+.drawerOpen {
+  transform: translateX(0);
+}
+
+.drawerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.brandIcon {
+  font-size: 1.8rem;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-body-lg);
+  color: var(--color-primary-dark);
+}
+
+.brandSub {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+.closeBtn {
+  background: var(--color-surface-alt);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  transition: background var(--ease);
+}
+.closeBtn:hover { background: var(--color-leaf-pale); }
+
+.menuBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3) 0;
+}
+
+.group {
+  margin-top: var(--space-3);
+}
+
+.groupLabel {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-clay);
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  padding: 0.65rem var(--space-4);
+  font-size: var(--text-body);
+  text-align: left;
+  transition: background var(--ease), border-color var(--ease);
+}
+.item:hover {
+  background: var(--color-surface-alt);
+}
+.itemActive {
+  background: var(--color-leaf-pale);
+  border-left-color: var(--color-primary);
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.itemIcon {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+.itemLabel {
+  flex: 1;
+}
+
+.highlight {
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.drawerFoot {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-caption);
+  color: var(--color-clay);
+  text-align: center;
+}

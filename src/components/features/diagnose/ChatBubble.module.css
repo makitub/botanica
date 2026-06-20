@@ -1,0 +1,58 @@
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  animation: fadeIn 0.2s var(--ease);
+}
+
+.rowAssistant { justify-content: flex-start; }
+.rowUser { justify-content: flex-end; }
+
+.avatar {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.bubble {
+  max-width: 80%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.bubbleAssistant {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: 4px;
+  color: var(--color-text);
+  position: relative;
+  padding-right: 44px;
+}
+
+.bubbleUser {
+  background: var(--color-primary-dark);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.speakBtn {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ease);
+}
+.speakBtn:hover {
+  background: var(--color-leaf-pale);
+}

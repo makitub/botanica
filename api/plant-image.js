@@ -58,7 +58,9 @@ Query:`;
         imageUrl = unsplashData.results[0].urls?.small || unsplashData.results[0].urls?.regular;
       }
     } else {
-      // Fallback: usa a API pública do Unsplash Source (sem key, mas menos controlo)
+      // Fallback when no UNSPLASH_ACCESS_KEY is set: source.unsplash.com is a
+      // legacy, unauthenticated endpoint and may be unreliable or retired —
+      // set UNSPLASH_ACCESS_KEY in production for a stable result.
       imageUrl = `https://source.unsplash.com/400x300/?${encodeURIComponent(searchQuery)}`;
     }
 

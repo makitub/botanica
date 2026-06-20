@@ -8,7 +8,6 @@
     "jspdf": "^4.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.15.0",
     "react-scripts": "5.0.1"
   },
   "scripts": {
@@ -16,11 +15,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.5.0",
-    "postcss": "^8.5.14",
-    "tailwindcss": "^4.2.4"
   },
   "browserslist": {
     "production": [

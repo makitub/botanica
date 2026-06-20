@@ -1,0 +1,21 @@
+.section { margin-bottom: var(--space-5); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); }
+.sectionTitle { font-family: var(--font-display); font-size: var(--text-h3); margin-bottom: var(--space-4); color: var(--color-primary-dark); }
+.toggleRow { display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) 0; cursor: pointer; }
+.toggleLabel { font-size: var(--text-body); color: var(--color-text); }
+.toggle { width: 48px; height: 28px; background: var(--color-border); border-radius: var(--radius-pill); position: relative; transition: background var(--ease); cursor: pointer; display: inline-block; flex-shrink: 0; }
+.toggleOn { background: var(--color-primary); }
+.toggleThumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: #fff; border-radius: 50%; transition: transform var(--ease-spring); box-shadow: var(--shadow-sm); }
+.toggleOn .toggleThumb { transform: translateX(20px); }
+.fontRow { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) 0 0; }
+.fontButtons { display: flex; gap: var(--space-2); }
+.fontBtn { padding: 0.4rem 0.9rem; background: var(--color-surface-alt); border: 1.5px solid var(--color-border); border-radius: var(--radius-pill); font-size: var(--text-body); transition: all var(--ease); }
+.fontBtnActive { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.sessionInfo { display: flex; flex-direction: column; gap: var(--space-2); }
+.sessionUser { font-weight: 600; font-size: var(--text-body-lg); }
+.sessionRole { font-size: var(--text-body); color: var(--color-text-muted); }
+.demoNote { font-size: var(--text-caption); color: var(--color-warning); font-weight: 600; }
+.logoutBtn { margin-top: var(--space-2); background: #fbe4e1; border: 1px solid #f5c6c0; color: var(--color-danger); border-radius: var(--radius-pill); padding: 0.5rem 1.2rem; font-weight: 600; font-size: var(--text-body); transition: background var(--ease); }
+.logoutBtn:hover { background: #f5c6c0; }
+.notLoggedIn { color: var(--color-text-muted); font-size: var(--text-body); }
+.aboutCard { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-body); }
+.aboutMuted { color: var(--color-text-muted); font-size: var(--text-caption); }

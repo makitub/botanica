@@ -1,0 +1,20 @@
+.searchWrap { margin-bottom: var(--space-4); position: relative; }
+.clearBtn {
+  position: absolute;
+  top: 14px;
+  right: var(--space-3);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ease), color var(--ease);
+}
+.clearBtn:hover { background: var(--color-leaf-pale); color: var(--color-primary-dark); }
+.count { display: block; font-size: var(--text-caption); color: var(--color-text-muted); margin-top: calc(-1 * var(--space-2)); margin-bottom: var(--space-3); }
+.grid { display: flex; flex-direction: column; gap: var(--space-3); }
