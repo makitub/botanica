@@ -10,7 +10,7 @@ export const theme = {
     forestDeep: '#1b3a2d',
     leaf: '#3a7352',
     leafPale: '#d8e9d6',
-    gold: '#c69c6d',
+    gold: '#b8860b',
     terracotta: '#a44c3c',
     sky: '#fbf9f6',
     cloud: '#f0ebe3',

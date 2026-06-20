@@ -4,7 +4,7 @@ import { ROLES } from '../../constants';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './Header.module.css';
 
-export default function Header({ onMenuClick, onLoginClick }) {
+export default function Header({ onMenuClick, onLoginClick, onHelpClick }) {
   const { isAuthenticated, role, user, logout } = useAuth();
   const roleInfo = role ? ROLES[role] : null;
 
@@ -16,20 +16,26 @@ export default function Header({ onMenuClick, onLoginClick }) {
 
       <span className={styles.brand}>🌿 Botânica</span>
 
-      {isAuthenticated ? (
-        <div className={styles.session}>
-          <span className={styles.avatar} style={{ background: roleInfo?.accent }} title={user?.email}>
-            {roleInfo?.initial}
-          </span>
-          <button className={styles.iconButton} onClick={logout} aria-label="Terminar sessão" title="Terminar sessão">
-            ⏻
-          </button>
-        </div>
-      ) : (
-        <button className={styles.loginButton} onClick={onLoginClick}>
-          Entrar
+      <div className={styles.right}>
+        <button className={[styles.iconButton, styles.helpButton].join(' ')} onClick={onHelpClick} aria-label="Ajuda — como usar a Botânica" title="Ajuda">
+          ?
         </button>
-      )}
+
+        {isAuthenticated ? (
+          <div className={styles.session}>
+            <span className={styles.avatar} style={{ background: roleInfo?.accent }} title={user?.email}>
+              {roleInfo?.initial}
+            </span>
+            <button className={styles.iconButton} onClick={logout} aria-label="Terminar sessão" title="Terminar sessão">
+              ⏻
+            </button>
+          </div>
+        ) : (
+          <button className={styles.loginButton} onClick={onLoginClick}>
+            Entrar
+          </button>
+        )}
+      </div>
     </header>
   );
 }

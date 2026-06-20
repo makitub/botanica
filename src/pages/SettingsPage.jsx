@@ -61,7 +61,7 @@ export default function SettingsPage() {
         <div className={styles.aboutCard}>
           <p>🌿 <strong>Botânica v2.0</strong></p>
           <p>Preservação do saber medicinal ancestral de Angola</p>
-          <p className={styles.aboutMuted}>Instituto Superior Politécnico Kalandula · ISPK</p>
+          <p className={styles.aboutMuted}>Instituto Superior Politécnico Katangoji · ISPK</p>
           <p className={styles.aboutMuted}>Comunidade Botânica · 2024</p>
         </div>
       </section>

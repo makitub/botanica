@@ -10,7 +10,7 @@
 
 .neutral { background: var(--color-surface-alt); color: var(--color-text-muted); }
 .primary { background: var(--color-leaf-pale); color: var(--color-primary-dark); }
-.gold { background: #f3e7d8; color: #7a5a2e; }
+.gold { background: var(--color-gold); color: #ffffff; }
 .danger { background: #fbe4e1; color: var(--color-danger); }
 .warning { background: #fdf0dd; color: #8a5d10; }
 .safe { background: #e1f3ea; color: var(--color-safe); }

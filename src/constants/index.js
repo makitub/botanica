@@ -151,9 +151,34 @@ export const HELP_TOPICS = {
   },
   settings: {
     title: 'Definições',
-    text: 'Podes trocar entre português e kimbundu, aumentar o tamanho da letra e ativar o modo alto contraste.',
+    text: 'Podes trocar entre português e kimbundu, aumentar o tamanho da letra, ativar o modo alto contraste, e escolher se as respostas do Ndembo são lidas em voz alta automaticamente.',
+  },
+  register: {
+    title: 'Registar Saber',
+    text: 'Para técnicos e administradores: documenta o conhecimento medicinal de um ancião — a planta, a preparação, e opcionalmente uma gravação de voz. Cada registo ajuda a preservar este saber para as próximas gerações.',
+  },
+  media: {
+    title: 'Multimédia',
+    text: 'Para técnicos e administradores: guarda fotografias e gravações de voz recolhidas no campo.',
+  },
+  geo: {
+    title: 'Geolocalização',
+    text: 'Para técnicos e administradores: regista as coordenadas GPS do local onde uma planta ou saber foi recolhido.',
+  },
+  reports: {
+    title: 'Relatórios',
+    text: 'Para administradores: resumo estatístico da comunidade — tratamentos, plantas mais usadas, e cobertura por província. Cada relatório pode ser descarregado em PDF.',
+  },
+  users: {
+    title: 'Utilizadores',
+    text: 'Para administradores: lista de contas registadas e os seus papéis (Administrador, Técnico, Paciente).',
   },
 };
+
+// Order in which topics appear in the full "Como usar a Botânica" guide.
+export const HELP_GUIDE_ORDER = [
+  'diagnose', 'plants', 'identify', 'treatments', 'register', 'media', 'geo', 'reports', 'users', 'settings',
+];
 
 export const INITIAL_BOT_MESSAGE = {
   role: 'assistant',

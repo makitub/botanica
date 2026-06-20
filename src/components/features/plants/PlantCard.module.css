@@ -22,6 +22,7 @@
   flex-shrink: 0;
   border-radius: 6px;
   align-self: stretch;
+  background: linear-gradient(180deg, var(--plant-light), var(--plant-dark));
 }
 
 .body {
@@ -88,6 +89,7 @@
   border-radius: var(--radius-pill);
   flex-shrink: 0;
   max-width: 48px;
+  background: linear-gradient(90deg, var(--plant-light), var(--plant-dark));
 }
 
 .treatments {

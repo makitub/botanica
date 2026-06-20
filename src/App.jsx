@@ -26,6 +26,7 @@ import BottomNav from './components/layout/BottomNav';
 // Shared UI
 import Modal from './components/ui/Modal';
 import LoginForm from './components/features/auth/LoginForm';
+import HelpModal from './components/features/help/HelpModal';
 import Spinner from './components/ui/Spinner';
 
 // Pages
@@ -69,6 +70,7 @@ function BotanicaApp() {
   const [activeId, setActiveId] = useState('home');
   const sideMenu = useDisclosure();
   const loginModal = useDisclosure();
+  const helpModal = useDisclosure();
 
   if (loading) {
     return (
@@ -109,6 +111,9 @@ function BotanicaApp() {
         <LoginForm onSuccess={loginModal.close} />
       </Modal>
 
+      {/* Help modal — contextual to the current page, plus the full guide */}
+      <HelpModal open={helpModal.isOpen} onClose={helpModal.close} activeId={activeId} />
+
       {/* App shell — "the object held in your hand" */}
       <div
         style={{
@@ -130,7 +135,7 @@ function BotanicaApp() {
           onClose={sideMenu.close}
         />
 
-        <Header onMenuClick={sideMenu.toggle} onLoginClick={loginModal.open} />
+        <Header onMenuClick={sideMenu.toggle} onLoginClick={loginModal.open} onHelpClick={helpModal.open} />
 
         <main
           style={{

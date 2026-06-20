@@ -91,6 +91,15 @@ rewrites no `vercel.json` — qualquer hosting estático funciona.
 
 - **Uma única paleta** (verde-floresta, dourado-acácia, terracota) definida
   em `src/styles/theme.css` — nenhum componente inventa a sua própria cor.
+- **Cores vivas e consistentes**: cada planta tem uma cor própria, mas em
+  vez de usar o hex original directamente (alguns eram demasiado pálidos
+  para se ver bem), `src/utils/color.js` extrai apenas o tom (*hue*) de
+  cada planta e gera um par vivo e consistente — um centro vibrante e uma
+  margem escura e sólida, como luz a passar por uma folha. O mesmo padrão
+  aparece no cartão da planta e no ecrã de detalhe.
+- **Ajuda contextual**: o botão "?" no cabeçalho mostra primeiro uma
+  explicação do ecrã onde estás, e por baixo o guia completo da
+  aplicação — acessível a partir de qualquer página.
 - **Bilingue**: português e Kimbundu, alternável em Definições.
 - **Acessibilidade**: alto contraste, três tamanhos de letra, leitura em voz
   alta das respostas do Ndembo (manual por mensagem ou automática), e

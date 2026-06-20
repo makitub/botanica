@@ -31,8 +31,29 @@ export default function PlantsPage() {
     <>
       <PageShell icon="✦" title="Plantas Medicinais" subtitle={`${PLANTS.length} plantas catalogadas pelos anciãos angolanos`}>
         <div className={styles.searchWrap}>
-          <TextField placeholder="Nome, kimbundu, uso, região…" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Pesquisar plantas" />
-          {query && <span className={styles.count} aria-live="polite">{results.length} {results.length === 1 ? 'resultado' : 'resultados'}</span>}
+          <TextField
+            placeholder="Nome, kimbundu, uso, região…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Pesquisar plantas"
+            style={query ? { paddingRight: '2.75rem' } : undefined}
+          />
+          {query && (
+            <button
+              type="button"
+              className={styles.clearBtn}
+              onClick={() => setQuery('')}
+              aria-label="Limpar pesquisa"
+              title="Limpar pesquisa"
+            >
+              ✕
+            </button>
+          )}
+          {query && (
+            <span className={styles.count} aria-live="polite">
+              {results.length} {results.length === 1 ? 'resultado' : 'resultados'}
+            </span>
+          )}
         </div>
 
         {results.length > 0 ? (

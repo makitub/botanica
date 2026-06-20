@@ -2,6 +2,7 @@
 import React from 'react';
 import Modal from '../../ui/Modal';
 import Badge from '../../ui/Badge';
+import { plantGradient } from '../../../utils/color';
 import styles from './PlantDetail.module.css';
 
 function Row({ label, value }) {
@@ -15,12 +16,18 @@ function Row({ label, value }) {
 }
 
 export default function PlantDetail({ plant, onClose }) {
+  const gradient = plant ? plantGradient(plant.color) : null;
+
   return (
     <Modal open={Boolean(plant)} onClose={onClose} title="">
       {plant && (
         <>
-          <div className={styles.hero} style={{ borderTopColor: plant.color }}>
-            <div className={styles.swatch} style={{ background: plant.color }} />
+          <div
+            className={styles.hero}
+            style={{ borderTopColor: gradient.dark, '--plant-light': gradient.light, '--plant-dark': gradient.dark }}
+          >
+            {/* Vivid centre fading to a solid, dark edge — alive, like light through a leaf */}
+            <div className={styles.swatch} />
             <div>
               <h2 className={styles.name}>{plant.name}</h2>
               <p className={styles.sci}>{plant.sci}</p>

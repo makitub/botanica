@@ -1,13 +1,21 @@
 // src/components/features/plants/PlantCard.jsx
 import React from 'react';
 import Badge from '../../ui/Badge';
+import { plantGradient } from '../../../utils/color';
 import styles from './PlantCard.module.css';
 
 export default function PlantCard({ plant, onClick }) {
+  const { light, dark } = plantGradient(plant.color);
+
   return (
-    <button className={styles.card} onClick={() => onClick?.(plant)} aria-label={`Ver ${plant.name}`}>
-      {/* Colour swatch that reflects each plant's unique identity */}
-      <span className={styles.swatch} style={{ background: plant.color }} aria-hidden="true" />
+    <button
+      className={styles.card}
+      style={{ '--plant-light': light, '--plant-dark': dark }}
+      onClick={() => onClick?.(plant)}
+      aria-label={`Ver ${plant.name}`}
+    >
+      {/* Living swatch: vivid centre fading to a deep, solid edge — unique per plant */}
+      <span className={styles.swatch} aria-hidden="true" />
 
       <div className={styles.body}>
         <div className={styles.names}>
@@ -24,7 +32,7 @@ export default function PlantCard({ plant, onClick }) {
 
         <div className={styles.footer}>
           <span className={styles.confidence}>
-            <span className={styles.confidenceBar} style={{ width: `${plant.confidence}%`, background: plant.color }} aria-hidden="true" />
+            <span className={styles.confidenceBar} style={{ width: `${plant.confidence}%` }} aria-hidden="true" />
             {plant.confidence}% confiança
           </span>
           <span className={styles.treatments}>{plant.treatments} tratamentos</span>
