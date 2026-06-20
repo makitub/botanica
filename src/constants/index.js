@@ -62,10 +62,10 @@ export const MENU_GROUPS = {
 export const BOTTOM_NAV_IDS = ['home', 'diagnose', 'plants', 'identify', 'treatments'];
 
 export const ANGOLA_PROVINCES = [
-  'Bengo', 'Benguela', 'Bié', 'Cabinda', 'Cuando Cubango',
-  'Cuanza Norte', 'Cuanza Sul', 'Cunene', 'Huambo', 'Huíla',
-  'Luanda', 'Lunda Norte', 'Lunda Sul', 'Malanje', 'Moxico',
-  'Namibe', 'Uíge', 'Zaire',
+  'Cabinda', 'Zaire', 'Uíge', 'Bengo', 'Luanda', 'Icolo e Bengo',
+  'Cuanza Norte', 'Malanje', 'Lunda Norte', 'Lunda Sul', 'Cuanza Sul',
+  'Bié', 'Moxico', 'Moxico Leste', 'Benguela', 'Huambo', 'Huíla',
+  'Namibe', 'Cunene', 'Cubango', 'Cuando',
 ];
 
 export const PLANTS = [
@@ -84,7 +84,7 @@ export const PLANTS = [
   { id: 13, name: 'Hortelã', sci: 'Mentha spicata', use: 'Digestivo, Náusea', kimbundu: 'Ortelã', region: 'Lunda Norte', confidence: 89, treatments: 9, color: '#3cb371' },
   { id: 14, name: 'Alecrim', sci: 'Rosmarinus officinalis', use: 'Memória, Circulação', kimbundu: 'Alecrim', region: 'Namibe', confidence: 86, treatments: 6, color: '#6b8e23' },
   { id: 15, name: 'Babosa', sci: 'Aloe vera', use: 'Queimaduras, Pele', kimbundu: 'Babosa', region: 'Cunene', confidence: 97, treatments: 25, color: '#228b22' },
-  { id: 16, name: 'Nim', sci: 'Azadirachta indica', use: 'Antiparasitário, Pele', kimbundu: 'Nim', region: 'Cuando Cubango', confidence: 83, treatments: 4, color: '#556b2f' },
+  { id: 16, name: 'Nim', sci: 'Azadirachta indica', use: 'Antiparasitário, Pele', kimbundu: 'Nim', region: 'Cuando', confidence: 83, treatments: 4, color: '#556b2f' },
   { id: 17, name: 'Jambolão', sci: 'Syzygium cumini', use: 'Diabetes, Inflamação', kimbundu: 'Jambolão', region: 'Zaire', confidence: 80, treatments: 3, color: '#8b0000' },
   { id: 18, name: 'Cajueiro', sci: 'Anacardium occidentale', use: 'Anti-inflamatório, Cicatrizante', kimbundu: 'Caju', region: 'Bengo', confidence: 91, treatments: 11, color: '#cd853f' },
   { id: 19, name: 'Embaúba', sci: 'Cecropia pachystachya', use: 'Pressão alta, Diurético', kimbundu: 'Embaúba', region: 'Cabinda', confidence: 78, treatments: 4, color: '#8fbc8f' },

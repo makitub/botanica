@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { INITIAL_BOT_MESSAGE } from '../constants';
 import { chatWithNdembo, parseTriage, stripTriageBlock } from '../services/aiService';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useTextToSpeech } from '../hooks/useTextToSpeech';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { useAccessibility } from '../contexts/AccessibilityContext';
+import { exportDiagnosisPDF } from '../utils/pdfExport';
 import PageShell from '../components/layout/PageShell';
 import ChatBubble from '../components/features/diagnose/ChatBubble';
 import TriageCard from '../components/features/diagnose/TriageCard';
@@ -15,8 +19,15 @@ export default function DiagnosePage() {
   const [loading, setLoading] = useState(false);
   const [triage, setTriage] = useState(null);
   const { province, status: geoStatus, locate } = useGeolocation();
+  const { autoSpeak } = useAccessibility();
+  const { speak } = useTextToSpeech();
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
+
+  const handleVoiceResult = (transcript) => {
+    setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+  };
+  const speechRecognition = useSpeechRecognition({ onResult: handleVoiceResult });
 
   useEffect(() => { locate(); }, [locate]);
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, triage]);
@@ -34,15 +45,18 @@ export default function DiagnosePage() {
       const data = await chatWithNdembo(history, province || 'Desconhecida');
       const reply = data.reply || '';
       const triagedData = parseTriage(reply);
+      let visibleReply = reply;
       if (triagedData) {
         setTriage(triagedData);
-        const visibleReply = stripTriageBlock(reply);
-        if (visibleReply) setMessages((prev) => [...prev, { role: 'assistant', content: visibleReply }]);
-      } else {
-        setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+        visibleReply = stripTriageBlock(reply);
+      }
+      if (visibleReply) {
+        setMessages((prev) => [...prev, { role: 'assistant', content: visibleReply }]);
+        if (autoSpeak) speak(visibleReply);
       }
     } catch (err) {
-      setMessages((prev) => [...prev, { role: 'assistant', content: `Desculpa, ocorreu um erro: ${err.message}` }]);
+      const errorMsg = `Desculpa, ocorreu um erro: ${err.message}`;
+      setMessages((prev) => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setLoading(false);
       textareaRef.current?.focus();
@@ -54,6 +68,10 @@ export default function DiagnosePage() {
   };
 
   const reset = () => { setMessages([INITIAL_BOT_MESSAGE]); setTriage(null); setInput(''); };
+
+  const handleExportPDF = () => {
+    exportDiagnosisPDF({ messages, triage, province });
+  };
 
   return (
     <PageShell
@@ -77,6 +95,17 @@ export default function DiagnosePage() {
 
       {!triage && (
         <div className={styles.inputBar}>
+          {speechRecognition.isSupported && (
+            <button
+              type="button"
+              className={[styles.micBtn, speechRecognition.listening ? styles.micBtnActive : ''].join(' ')}
+              onClick={() => (speechRecognition.listening ? speechRecognition.stop() : speechRecognition.start())}
+              aria-label={speechRecognition.listening ? 'Parar gravação de voz' : 'Falar em vez de escrever'}
+              title={speechRecognition.listening ? 'Parar gravação' : 'Falar em vez de escrever'}
+            >
+              {speechRecognition.listening ? '⏹' : '🎙️'}
+            </button>
+          )}
           <textarea
             ref={textareaRef}
             className={styles.textarea}
@@ -89,6 +118,13 @@ export default function DiagnosePage() {
           />
           <Button onClick={send} disabled={!input.trim() || loading} loading={loading} aria-label="Enviar">➤</Button>
         </div>
+      )}
+      {speechRecognition.error && <p className={styles.voiceError}>{speechRecognition.error}</p>}
+
+      {messages.length > 1 && (
+        <Button variant="ghost" fullWidth onClick={handleExportPDF} className={styles.exportBtn}>
+          📄 Exportar esta conversa em PDF
+        </Button>
       )}
 
       {triage && (

@@ -92,10 +92,24 @@ rewrites no `vercel.json` — qualquer hosting estático funciona.
 - **Uma única paleta** (verde-floresta, dourado-acácia, terracota) definida
   em `src/styles/theme.css` — nenhum componente inventa a sua própria cor.
 - **Bilingue**: português e Kimbundu, alternável em Definições.
-- **Acessibilidade**: alto contraste e três tamanhos de letra, persistidos
-  entre sessões.
+- **Acessibilidade**: alto contraste, três tamanhos de letra, leitura em voz
+  alta das respostas do Ndembo (manual por mensagem ou automática), e
+  entrada por voz no autodiagnóstico — tudo persistido entre sessões.
+  Pensado para chegar a pessoas de todas as idades e níveis de literacia
+  nas 21 províncias de Angola.
+- **Exportação em PDF**: qualquer conversa com o Ndembo pode ser
+  descarregada como PDF, para mostrar a um enfermeiro, médico ou familiar.
 - **Consciente da largura de banda**: a foto real de uma planta (via
   `api/plant-image.js`) só é pedida se o utilizador tocar explicitamente em
   "ver foto real" — nunca automaticamente numa lista.
 - **Nunca um ecrã vazio**: toda a lista sem resultados mostra um
   `EmptyState` com uma sugestão útil, em vez de uma área branca.
+
+### Notas sobre voz
+
+A leitura em voz alta (`SpeechSynthesis`) e a entrada por voz
+(`SpeechRecognition`) usam APIs nativas do browser — sem dependências
+externas, sem custo, e funcionam offline depois de carregada a página.
+A entrada por voz tem suporte limitado em Safari e Firefox; nesses
+browsers o botão de microfone simplesmente não aparece, em vez de mostrar
+um botão que falha silenciosamente.

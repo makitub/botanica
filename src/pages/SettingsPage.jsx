@@ -18,7 +18,7 @@ function Toggle({ label, checked, onChange }) {
 
 export default function SettingsPage() {
   const { language, toggleLanguage } = useLanguage();
-  const { fontScale, highContrast, setFontScale, toggleHighContrast } = useAccessibility();
+  const { fontScale, highContrast, autoSpeak, setFontScale, toggleHighContrast, toggleAutoSpeak } = useAccessibility();
   const { isAuthenticated, user, role, logout, isDemoMode } = useAuth();
 
   return (
@@ -31,6 +31,7 @@ export default function SettingsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>♿ Acessibilidade</h2>
         <Toggle label="Alto contraste" checked={highContrast} onChange={toggleHighContrast} />
+        <Toggle label="🔊 Ler respostas do Ndembo em voz alta" checked={autoSpeak} onChange={toggleAutoSpeak} />
         <div className={styles.fontRow}>
           <p className={styles.toggleLabel}>Tamanho do texto</p>
           <div className={styles.fontButtons}>

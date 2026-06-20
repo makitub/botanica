@@ -11,3 +11,9 @@
 .resetBtn { background: var(--color-surface-alt); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 0.35rem 0.85rem; font-size: 1.1rem; transition: background var(--ease); }
 .resetBtn:hover { background: var(--color-leaf-pale); }
 .newChatBtn { margin-top: var(--space-3); }
+.micBtn { flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; background: var(--color-surface-alt); border: 1px solid var(--color-border); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: background var(--ease), transform var(--ease); }
+.micBtn:hover { background: var(--color-leaf-pale); }
+.micBtnActive { background: var(--color-danger); border-color: var(--color-danger); animation: micPulse 1s ease infinite; }
+@keyframes micPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.voiceError { font-size: var(--text-caption); color: var(--color-danger); margin-top: var(--space-2); text-align: center; }
+.exportBtn { margin-top: var(--space-3); }
