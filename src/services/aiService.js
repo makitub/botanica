@@ -44,9 +44,9 @@ export function identifyPlant(imageBase64, imageMime) {
   return postJSON('/api/identify-plant', { imageBase64, imageMime });
 }
 
-/** Looks up a representative photo for a plant by name (opt-in, used sparingly to save data). */
-export function fetchPlantImage(plantName) {
-  return postJSON('/api/plant-image', { plantName });
+/** Looks up a real photo for a plant on Wikipedia, by scientific name — far more reliable than searching by common name. */
+export function fetchPlantImage(scientificName) {
+  return postJSON('/api/plant-image', { scientificName });
 }
 
 /**

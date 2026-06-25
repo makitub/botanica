@@ -139,7 +139,7 @@ export const HELP_TOPICS = {
   },
   identify: {
     title: 'Identificar planta',
-    text: 'Tira uma foto da planta e a IA identifica o seu nome popular, científico e usos medicinais.',
+    text: 'Tira uma foto de uma planta, flor, fruto ou herva e a IA identifica o nome popular, científico e usos medicinais.',
   },
   plants: {
     title: 'Plantas Medicinais',

@@ -27,6 +27,8 @@ function TagSection({ label, tags, tone }) {
   );
 }
 
+const TYPE_LABELS = { planta: '🌿 Planta', flor: '🌸 Flor', fruto: '🍈 Fruto', herva: '🌾 Herva' };
+
 export default function IdentifyPage() {
   const [preview, setPreview] = useState(null);
   const [imageBase64, setImageBase64] = useState(null);
@@ -73,7 +75,7 @@ export default function IdentifyPage() {
   const clear = () => { setPreview(null); setImageBase64(null); setResult(null); setError(''); };
 
   return (
-    <PageShell icon="◎" title="Identificar Planta" subtitle="Tira ou envia uma foto e a IA identifica a planta e os seus usos medicinais">
+    <PageShell icon="◎" title="Identificar Planta" subtitle="Tira ou envia uma foto de uma planta, flor, fruto ou herva — a IA identifica e explica os usos medicinais">
       <Disclaimer />
 
       {!preview && (
@@ -85,22 +87,22 @@ export default function IdentifyPage() {
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
-          aria-label="Clica ou arrasta uma foto de planta"
+          aria-label="Clica ou arrasta uma foto"
         >
           <input ref={inputRef} type="file" accept="image/*" capture="environment" className="visually-hidden" onChange={(e) => handleFile(e.target.files[0])} />
           <span className={styles.dropIcon}>📸</span>
           <p className={styles.dropTitle}>Clica ou arrasta uma foto</p>
-          <p className={styles.dropHint}>JPG, PNG, WebP · máx. 5 MB</p>
+          <p className={styles.dropHint}>Planta, flor, fruto ou herva · JPG, PNG, WebP · máx. 5 MB</p>
         </div>
       )}
 
       {preview && !result && (
         <div className={styles.previewWrap}>
           <div className={styles.previewImg}>
-            <img src={preview} alt="Planta a identificar" className={styles.img} />
+            <img src={preview} alt="A identificar" className={styles.img} />
             <button className={styles.clearBtn} onClick={clear} aria-label="Remover imagem">✕</button>
           </div>
-          {!loading && <Button fullWidth onClick={analyze}>🔍 Identificar planta</Button>}
+          {!loading && <Button fullWidth onClick={analyze}>🔍 Identificar</Button>}
           {loading && <Spinner label="A analisar com IA…" />}
         </div>
       )}
@@ -117,8 +119,9 @@ export default function IdentifyPage() {
           <div className={styles.resultHeader}>
             <div className={styles.resultImg}><img src={preview} alt={result.nome_popular} /></div>
             <div className={styles.resultTitle}>
-              <h2 className={styles.plantName}>{result.nome_popular || 'Planta identificada'}</h2>
+              <h2 className={styles.plantName}>{result.nome_popular || 'Identificado'}</h2>
               {result.nome_cientifico && <p className={styles.plantSci}>{result.nome_cientifico}</p>}
+              {TYPE_LABELS[result.tipo] && <span className={styles.typeBadge}>{TYPE_LABELS[result.tipo]}</span>}
             </div>
           </div>
           <InfoSection label="Características" text={result.caracteristicas} />
