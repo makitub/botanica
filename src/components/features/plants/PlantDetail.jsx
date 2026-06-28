@@ -18,7 +18,7 @@ function Row({ label, value }) {
 
 export default function PlantDetail({ plant, onClose }) {
   const gradient = plant ? plantGradient(plant.color) : null;
-  const { photo } = usePlantPhoto(plant?.sci);
+  const { photo, status } = usePlantPhoto(plant?.sci);
 
   return (
     <Modal open={Boolean(plant)} onClose={onClose} title="">
@@ -41,7 +41,7 @@ export default function PlantDetail({ plant, onClose }) {
             </div>
           ) : (
             <div
-              className={styles.hero}
+              className={[styles.hero, status === 'loading' ? styles.heroLoading : ''].join(' ')}
               style={{ borderTopColor: gradient.dark, '--plant-light': gradient.light, '--plant-dark': gradient.dark }}
             >
               {/* Vivid centre fading to a solid, dark edge — alive, like light through a leaf */}

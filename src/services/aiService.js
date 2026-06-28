@@ -44,11 +44,6 @@ export function identifyPlant(imageBase64, imageMime) {
   return postJSON('/api/identify-plant', { imageBase64, imageMime });
 }
 
-/** Looks up a real photo for a plant on Wikipedia, by scientific name — far more reliable than searching by common name. */
-export function fetchPlantImage(scientificName) {
-  return postJSON('/api/plant-image', { scientificName });
-}
-
 /**
  * Ndembo's structured recommendation arrives embedded in a chat reply as a
  * fenced ```json block. This extracts and parses it, returning null if the

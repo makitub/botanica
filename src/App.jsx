@@ -40,6 +40,7 @@ import MediaPage from './pages/MediaPage';
 import GeoPage from './pages/GeoPage';
 import ReportsPage from './pages/ReportsPage';
 import UsersPage from './pages/UsersPage';
+import ModerationPage from './pages/ModerationPage';
 import SettingsPage from './pages/SettingsPage';
 
 // Navigation constants
@@ -61,6 +62,7 @@ const PAGE_MAP = {
   geo: GeoPage,
   reports: ReportsPage,
   users: UsersPage,
+  moderation: ModerationPage,
   settings: SettingsPage,
 };
 

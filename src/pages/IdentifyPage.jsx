@@ -27,7 +27,7 @@ function TagSection({ label, tags, tone }) {
   );
 }
 
-const TYPE_LABELS = { planta: '🌿 Planta', flor: '🌸 Flor', fruto: '🍈 Fruto', herva: '🌾 Herva' };
+const TYPE_LABELS = { planta: '🌿 Planta', flor: '🌸 Flor', fruto: '🍈 Fruto', erva: '🌾 Erva' };
 
 export default function IdentifyPage() {
   const [preview, setPreview] = useState(null);
@@ -75,7 +75,7 @@ export default function IdentifyPage() {
   const clear = () => { setPreview(null); setImageBase64(null); setResult(null); setError(''); };
 
   return (
-    <PageShell icon="◎" title="Identificar Planta" subtitle="Tira ou envia uma foto de uma planta, flor, fruto ou herva — a IA identifica e explica os usos medicinais">
+    <PageShell icon="◎" title="Identificar Planta" subtitle="Tira ou envia uma foto de uma planta, flor, fruto ou erva — a IA identifica e explica os usos medicinais">
       <Disclaimer />
 
       {!preview && (
@@ -92,7 +92,7 @@ export default function IdentifyPage() {
           <input ref={inputRef} type="file" accept="image/*" capture="environment" className="visually-hidden" onChange={(e) => handleFile(e.target.files[0])} />
           <span className={styles.dropIcon}>📸</span>
           <p className={styles.dropTitle}>Clica ou arrasta uma foto</p>
-          <p className={styles.dropHint}>Planta, flor, fruto ou herva · JPG, PNG, WebP · máx. 5 MB</p>
+          <p className={styles.dropHint}>Planta, flor, fruto ou erva · JPG, PNG, WebP · máx. 5 MB</p>
         </div>
       )}
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ANGOLA_PROVINCES } from '../constants';
 import { sendRegistrationNotification } from '../services/emailService';
+import { submitKnowledge } from '../services/knowledgeService';
+import { useAuth } from '../contexts/AuthContext';
 import PageShell from '../components/layout/PageShell';
 import TextField from '../components/ui/TextField';
 import Button from '../components/ui/Button';
@@ -10,10 +12,12 @@ import styles from './RegisterPage.module.css';
 const EMPTY = { plantName: '', kimbundu: '', province: '', elderName: '', elderAge: '', use: '', preparation: '', notes: '' };
 
 export default function RegisterPage() {
+  const { user } = useAuth();
   const [form, setForm] = useState(EMPTY);
   const [audio, setAudio] = useState(null);
   const [status, setStatus] = useState('idle'); // idle | sending | success | error
   const [error, setError] = useState('');
+  const [savedToDb, setSavedToDb] = useState(false);
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -21,22 +25,36 @@ export default function RegisterPage() {
     e.preventDefault();
     setStatus('sending');
     setError('');
-    try {
-      await sendRegistrationNotification(form);
+
+    // Two independent, best-effort paths: persist to the database (the
+    // durable record, pending admin approval) and notify by email (a
+    // heads-up, not the source of truth). Either succeeding counts as a
+    // successful submission — only fail if both did.
+    const dbOk = await submitKnowledge(form, user?.id).then(() => true).catch(() => false);
+    const emailOk = await sendRegistrationNotification(form).then(() => true).catch(() => false);
+
+    setSavedToDb(dbOk);
+
+    if (dbOk || emailOk) {
       setStatus('success');
       setForm(EMPTY);
       setAudio(null);
-      setTimeout(() => setStatus('idle'), 4000);
-    } catch (err) {
+      setTimeout(() => setStatus('idle'), 5000);
+    } else {
       setStatus('error');
-      setError(err.message);
+      setError('Não foi possível guardar nem notificar este registo. Verifica a tua ligação e tenta novamente.');
     }
   };
 
   return (
     <PageShell icon="✎" title="Registar Saber" subtitle="Documenta o conhecimento dos anciãos angolanos">
       {status === 'success' && (
-        <div className={styles.successBanner} role="status">✅ Registo enviado com sucesso! Obrigado por preservares o saber ancestral.</div>
+        <div className={styles.successBanner} role="status">
+          ✅ Registo {savedToDb ? 'guardado' : 'enviado por email'}! Obrigado por preservares o saber ancestral.
+          {savedToDb && (
+            <span className={styles.successNote}> Vai aparecer publicamente depois de revisto por um administrador.</span>
+          )}
+        </div>
       )}
       {status === 'error' && (
         <div className={styles.errorBanner} role="alert">⚠️ {error}</div>

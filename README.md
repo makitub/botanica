@@ -108,6 +108,13 @@ rewrites no `vercel.json` — qualquer hosting estático funciona.
   nas 21 províncias de Angola.
 - **Exportação em PDF**: qualquer conversa com o Ndembo pode ser
   descarregada como PDF, para mostrar a um enfermeiro, médico ou familiar.
+- **Saber da comunidade, com moderação**: submissões em "Registar Saber"
+  ficam guardadas em `knowledge_submissions` no Supabase com estado
+  `pending`, e só aparecem na página de Tratamentos depois de um admin
+  aprovar em "Moderação". O catálogo curado (`constants/index.js`)
+  continua estático e instantâneo — só a parte genuinamente nova e
+  crescente (contribuições do campo) depende da base de dados, e a sua
+  ausência nunca bloqueia a página.
 - **Consciente da largura de banda**: a foto real de uma planta (via
   `api/plant-image.js`) só é pedida se o utilizador tocar explicitamente em
   "ver foto real" — nunca automaticamente numa lista.

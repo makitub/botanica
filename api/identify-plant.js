@@ -22,10 +22,10 @@ export default async function handler(req, res) {
     const mime = imageMime || "image/jpeg";
     const imageUrl = `data:${mime};base64,${imageBase64}`;
 
-    const prompt = `Identifica o que aparece nesta imagem — pode ser uma planta, flor, fruto ou herva com potencial uso medicinal tradicional em Angola. Olha com atenção: se for um fruto, identifica-o como fruto; se for uma flor, identifica-a como flor; não assumas que é sempre uma folha ou planta inteira. Responde apenas com o seguinte objeto JSON, sem nenhum texto adicional:
+    const prompt = `Identifica o que aparece nesta imagem — pode ser uma planta, flor, fruto ou erva com potencial uso medicinal tradicional em Angola. Olha com atenção: se for um fruto, identifica-o como fruto; se for uma flor, identifica-a como flor; não assumas que é sempre uma folha ou planta inteira. Responde apenas com o seguinte objeto JSON, sem nenhum texto adicional:
 
 {
-  "tipo": "planta | flor | fruto | herva",
+  "tipo": "planta | flor | fruto | erva",
   "nome_popular": "Nome popular (em português ou kimbundu se souberes)",
   "nome_cientifico": "Nome científico",
   "caracteristicas": "Descrição breve do que se vê na imagem — cor, forma, textura",
