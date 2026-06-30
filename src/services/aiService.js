@@ -44,11 +44,6 @@ export function identifyPlant(imageBase64, imageMime) {
   return postJSON('/api/identify-plant', { imageBase64, imageMime });
 }
 
-/** Looks up a representative photo for a plant by name (opt-in, used sparingly to save data). */
-export function fetchPlantImage(plantName) {
-  return postJSON('/api/plant-image', { plantName });
-}
-
 /**
  * Ndembo's structured recommendation arrives embedded in a chat reply as a
  * fenced ```json block. This extracts and parses it, returning null if the

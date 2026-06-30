@@ -39,7 +39,7 @@ export const ROLES = {
 // `requiresAuth: true` means a visitor is asked to log in before entering.
 export const MENU_ITEMS = [
   { id: 'home', path: '/', label: 'Início', labelK: 'Yibu', icon: '⌂', roles: [], requiresAuth: false, group: 'main' },
-  { id: 'diagnose', path: '/diagnose', label: 'Autodiagnóstico', labelK: 'Diangula Mwini', icon: '♡', roles: [], requiresAuth: false, group: 'main', highlight: true },
+  { id: 'diagnose', path: '/diagnose', label: 'Autodiagnóstico', labelK: 'Diangula Mwini', icon: '♡', roles: [], requiresAuth: false, group: 'main' },
   { id: 'plants', path: '/plants', label: 'Plantas Medicinais', labelK: 'Miti ya Buanga', icon: '✦', roles: [], requiresAuth: false, group: 'main' },
   { id: 'identify', path: '/identify', label: 'Identificar Planta', labelK: 'Zibula Muti', icon: '◎', roles: [], requiresAuth: false, group: 'main' },
   { id: 'treatments', path: '/treatments', label: 'Tratamentos', labelK: 'Buanga', icon: '❋', roles: [], requiresAuth: false, group: 'main' },
@@ -48,6 +48,7 @@ export const MENU_ITEMS = [
   { id: 'geo', path: '/geo', label: 'Geolocalização', labelK: 'Esala', icon: '⌖', roles: ['admin', 'tecnico'], requiresAuth: true, group: 'field' },
   { id: 'reports', path: '/reports', label: 'Relatórios', labelK: 'Mavovo', icon: '▦', roles: ['admin'], requiresAuth: true, group: 'admin' },
   { id: 'users', path: '/users', label: 'Utilizadores', labelK: 'Antu', icon: '◈', roles: ['admin'], requiresAuth: true, group: 'admin' },
+  { id: 'moderation', path: '/moderation', label: 'Moderação', labelK: 'Sungila', icon: '✓', roles: ['admin'], requiresAuth: true, group: 'admin' },
   { id: 'settings', path: '/settings', label: 'Definições', labelK: 'Mayenge', icon: '⚙', roles: [], requiresAuth: false, group: 'system' },
 ];
 
@@ -139,7 +140,7 @@ export const HELP_TOPICS = {
   },
   identify: {
     title: 'Identificar planta',
-    text: 'Tira uma foto da planta e a IA identifica o seu nome popular, científico e usos medicinais.',
+    text: 'Tira uma foto de uma planta, flor, fruto ou erva e a IA identifica o nome popular, científico e usos medicinais.',
   },
   plants: {
     title: 'Plantas Medicinais',
@@ -173,11 +174,15 @@ export const HELP_TOPICS = {
     title: 'Utilizadores',
     text: 'Para administradores: lista de contas registadas e os seus papéis (Administrador, Técnico, Paciente).',
   },
+  moderation: {
+    title: 'Moderação',
+    text: 'Para administradores: revê os registos de saber submetidos pelos técnicos antes de aparecerem publicamente na página de Tratamentos. Aprova ou rejeita cada um.',
+  },
 };
 
 // Order in which topics appear in the full "Como usar a Botânica" guide.
 export const HELP_GUIDE_ORDER = [
-  'diagnose', 'plants', 'identify', 'treatments', 'register', 'media', 'geo', 'reports', 'users', 'settings',
+  'diagnose', 'plants', 'identify', 'treatments', 'register', 'media', 'geo', 'reports', 'users', 'moderation', 'settings',
 ];
 
 export const INITIAL_BOT_MESSAGE = {

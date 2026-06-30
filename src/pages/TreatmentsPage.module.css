@@ -1,5 +1,6 @@
 .list { display: flex; flex-direction: column; gap: var(--space-3); }
 .card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: var(--space-3); animation: fadeIn 0.25s var(--ease); }
+.cardCommunity { border-left: 3px solid var(--color-gold); }
 .cardHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
 .name { font-family: var(--font-display); font-size: var(--text-h3); font-weight: 700; color: var(--color-primary-dark); flex: 1; }
 .meta { display: flex; flex-direction: column; gap: var(--space-1); font-size: var(--text-body); color: var(--color-text-muted); }

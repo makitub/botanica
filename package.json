@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.108.2",
     "groq-sdk": "^1.1.2",
     "jspdf": "^4.2.1",
