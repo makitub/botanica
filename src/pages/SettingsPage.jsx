@@ -19,7 +19,7 @@ function Toggle({ label, checked, onChange }) {
 export default function SettingsPage() {
   const { language, toggleLanguage } = useLanguage();
   const { fontScale, highContrast, autoSpeak, setFontScale, toggleHighContrast, toggleAutoSpeak } = useAccessibility();
-  const { isAuthenticated, user, role, logout, isDemoMode } = useAuth();
+  const { isAuthenticated, user, role, isAdmin, isTecnico, logout } = useAuth();
 
   return (
     <PageShell icon="⚙" title="Definições" subtitle="Personaliza a tua experiência">
@@ -48,7 +48,8 @@ export default function SettingsPage() {
           <div className={styles.sessionInfo}>
             <p className={styles.sessionUser}>{user?.email}</p>
             <p className={styles.sessionRole}>Função: <strong>{role}</strong></p>
-            {isDemoMode && <p className={styles.demoNote}>⚡ Modo demonstração activo</p>}
+            {isAdmin   && <p className={styles.roleTag}>🛡️ Administrador</p>}
+            {isTecnico && <p className={styles.roleTag}>🌾 Técnico de Campo</p>}
             <button className={styles.logoutBtn} onClick={logout}>Terminar sessão</button>
           </div>
         ) : (
@@ -62,7 +63,7 @@ export default function SettingsPage() {
           <p>🌿 <strong>Botânica v2.0</strong></p>
           <p>Preservação do saber medicinal ancestral de Angola</p>
           <p className={styles.aboutMuted}>Instituto Superior Politécnico Katangoji · ISPK</p>
-          <p className={styles.aboutMuted}>Comunidade Botânica · 2026</p>
+          <p className={styles.aboutMuted}>Comunidade Botânica · 2024</p>
         </div>
       </section>
     </PageShell>
