@@ -61,3 +61,34 @@
   background: var(--color-leaf-pale);
   border-color: var(--color-primary);
 }
+
+.switchLink {
+  background: none;
+  border: none;
+  font-size: var(--text-caption);
+  color: var(--color-primary);
+  text-align: center;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: var(--space-1) 0;
+}
+.switchLink:hover {
+  color: var(--color-primary-dark);
+}
+
+.info {
+  font-size: var(--text-caption);
+  color: var(--color-primary-dark);
+  background: var(--color-leaf-pale);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+  padding: var(--space-3);
+  text-align: center;
+}
+
+.hint {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
